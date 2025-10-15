@@ -31,7 +31,7 @@
               :title="record.disabled ? '不可删除' : '删除'"
               @click="onDeleteLocation(record)"
           >
-            删除
+            解绑
           </a-link>
         </a-space>
       </template>
@@ -50,7 +50,7 @@
               :title="record.disabled ? '不可删除' : '删除'"
               @click="onDeleteDocument(record)"
           >
-            删除
+          解绑
           </a-link>
         </a-space>
       </template>

@@ -1,20 +1,9 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="考试计划管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      :row-selection="rowSelection"
-      @refresh="search"
-      @select="test"
-    >
-    <template #examType="{ record }">
+    <GiTable title="考试计划管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" :row-selection="rowSelection" @refresh="search" @select="test">
+      <template #examType="{ record }">
         <a-tag :color="getExamTypeColor(record.examType)" bordered>{{
           getExamTypeText(record.examType)
         }}</a-tag>
@@ -22,21 +11,15 @@
       <template #imageUrl="{ record }">
         <a-image width="100" height="100" :src="record.imageUrl">
           <template #loader>
-            <img
-              width="200"
+            <img width="200"
               src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb051163646151a4a5083b.png~tplv-uwbnlip3yd-webp.webp"
-              style="filter: blur(5px)"
-            />
+              style="filter: blur(5px)" />
           </template>
         </a-image>
       </template>
 
       <template #toolbar-right>
-        <a-button
-          v-permission="['exam:examPlan:add']"
-          type="primary"
-          @click="onAdd"
-        >
+        <a-button v-permission="['exam:examPlan:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           新增
         </a-button>
@@ -52,37 +35,17 @@
 
       <template #toolbar-left>
         <div class="search-container">
-          <a-input
-            v-model="queryForm.examPlanName"
-            placeholder="搜索计划名称"
-            allow-clear
-            class="search-input"
-          />
-          <a-input
-            v-model="queryForm.projectName"
-            placeholder="搜索项目名称"
-            allow-clear
-            class="search-input ml-2"
-          />
-          <a-year-picker
+          <a-input v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear class="search-input" />
+          <a-input v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear class="search-input ml-2" />
+          <!-- <a-year-picker
             v-model="queryForm.planYear"
             placeholder="选择年份"
             class="search-input ml-2"
             style="margin-left: 8px;"
-          />
-          <a-input
-            v-model="queryForm.locationName"
-            placeholder="搜索考试地点"
-            allow-clear
-            class="search-input ml-2"
-          />
-          <a-select
-            v-model="queryForm.status"
-            placeholder="计划状态"
-            allow-clear
-            class="search-input ml-2"
-            style="margin-left: 8px;"
-          >
+          /> -->
+          <!-- <a-input v-model="queryForm.locationName" placeholder="搜索考试地点" allow-clear class="search-input ml-2" /> -->
+          <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2"
+            style="margin-left: 8px;">
             <a-option value="1">待主任审批</a-option>
             <a-option value="2">待市监局审批</a-option>
             <a-option value="3">已生效</a-option>
@@ -113,65 +76,64 @@
           {{ getStatusText(record.status) }}
         </a-tag>
       </template>
+      <template #examRoom="{ record }">
+        <a-space>
+          <a-link title="查看考场" style="text-align: center"
+            @click="showExamRoom(record)">
+            查看考场
+          </a-link>
+        </a-space>
+      </template>
       <template #invigilate="{ record }">
         <a-space>
-          <a-link
-            v-permission="['exam:examPlan:option']"
-            title="选择监考"
-            style="text-align: center"
-            @click="onOptionInvigilate(record)"
-          >
+          <a-link v-permission="['exam:examPlan:option']" title="选择监考" style="text-align: center"
+            @click="onOptionInvigilate(record)">
             选择监考
           </a-link>
         </a-space>
       </template>
-
       <template #action="{ record }">
         <a-space>
           <div v-show="record.status == 1">
-            <a-link
-              v-permission="['exam:examPlan:zxzrreview']"
-              title="审核"
-              @click="onExamineA(record)">
+            <a-link v-permission="['exam:examPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
               审核
             </a-link>
           </div>
           <div v-show="record.status == 2">
-            <a-link
-              v-permission="['exam:examPlan:sjjdgljreview']"
-              title="审核"
-              @click="onExamineA(record)"
-              >审核</a-link
-            >
+            <a-link v-permission="['exam:examPlan:sjjdgljreview']" title="审核" @click="onExamineA(record)">审核</a-link>
           </div>
-          <a-link
-            v-permission="['exam:examPlan:detail']"
-            title="详情"
-            @click="onDetail(record)"
-            >详情</a-link
-          >
-          <a-link
-            v-permission="['exam:examPlan:delete']"
-            v-if="record.status == 1 || record.status == 4"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
+          <a-link v-permission="['exam:examPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+          <a-link v-permission="['exam:examPlan:delete']" v-if="record.status == 1 || record.status == 4"
+            status="danger" :disabled="record.disabled" :title="record.disabled ? '不可删除' : '删除'"
+            @click="onDelete(record)">
             删除
           </a-link>
         </a-space>
       </template>
     </GiTable>
 
-    <ExamPlanAddModal
-      ref="ExamPlanAddModalRef"
-      @save-success="search"
-      @update-reviewer="updateReviewer"
+    <!-- 查看考场弹窗 -->
+  <a-modal
+    v-model:visible="visible"
+    title="计划考场信息"
+    width="800px"
+    :footer="null"
+  >
+    <a-table
+      :dataSource="locationList"
+      :columns="locationColumns"
+      :pagination="false"
+      rowKey="locationId"
+      bordered
+      expandable="{ expandedRowRender }"
     />
+  </a-modal>
+
+    <ExamPlanAddModal ref="ExamPlanAddModalRef" @save-success="search" @update-reviewer="updateReviewer" />
     <ExamPlanDetailDrawer ref="ExamPlanDetailDrawerRef" />
     <ExamPlanOptionModal ref="ExamPlanOptionModalRef" />
-    <ExamPlanImportModal ref="ExamPlanImportModalRef" />
+    <ExamPlanLocaltionAndRoomModel ref="ExamPlanLocaltionAndRoomModelRef" />
+    <ExamPlanImportModal ref="ExamPlanImportModalRef" @import-success="search"/>
   </div>
 </template>
 
@@ -193,7 +155,7 @@ import { useDownload, useTable } from "@/hooks";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import type { ProjectResp } from "@/apis/exam/project";
-
+import ExamPlanLocaltionAndRoomModel from "./ExamPlanLocaltionAndRoomModel.vue";
 defineOptions({ name: "ExamPlan" });
 
 const queryForm = reactive<ExamPlanQuery>({
@@ -219,13 +181,20 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   { title: "计划名称", dataIndex: "examPlanName", slotName: "examPlanName" },
   { title: "考试项目", dataIndex: "projectName", slotName: "examProjectId" },
+  {
+    title: "计划考场",
+    dataIndex: "examRoom",
+    slotName: "examRoom",
+    width: 100,
+    align: "center",
+    show:true,
+  },  
   // { title: "计划年份", dataIndex: "planYear", slotName: "planYear" },
   // { title: "考试开始时间", dataIndex: "startTime", slotName: "startTime" },
   // { title: "考试结束时间", dataIndex: "endTime", slotName: "endTime" },
-  { title: "考试地点", dataIndex: "locationName", slotName: "locationId" },
-  { title: "考试类型", dataIndex: "examType", slotName: "examType" },
-  {
-    title: "最大容纳考生人数",
+  //{ title: "考试地点", dataIndex: "locationName", slotName: "locationId" },
+    {
+    title: "容纳考试人数",
     dataIndex: "maxCandidates",
     slotName: "maxCandidates",
   },
@@ -258,7 +227,7 @@ const columns = ref<TableInstanceColumns[]>([
 
 const ExamPlanImportModalRef =
   ref<InstanceType<typeof ExamPlanImportModal>>();
-    
+
 const onImport = () => {
   ExamPlanImportModalRef.value?.onOpen();
 };
@@ -353,6 +322,17 @@ const ExamPlanOptionModalRef = ref<InstanceType<typeof ExamPlanOptionModal>>();
 // 选择监考
 const onOptionInvigilate = (record: ExamPlanResp) => {
   ExamPlanOptionModalRef.value?.onOption(record);
+};
+
+const visible = ref(false)
+
+const locationList = ref<any[]>([])
+
+
+const ExamPlanLocaltionAndRoomModelRef = ref<InstanceType<typeof ExamPlanLocaltionAndRoomModel>>();
+// 查看考场信息
+const showExamRoom = async (record: ExamPlanResp) => {  
+  ExamPlanLocaltionAndRoomModelRef.value?.onOption(record)
 };
 
 const updateReviewer = (record) => {

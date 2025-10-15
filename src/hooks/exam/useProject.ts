@@ -28,10 +28,10 @@ export function useProject(options?: { onSuccess?: () => void }) {
   /**
    * 获取项目考场下拉框包含label(locationName)、value(id)
    */
-  const getProjectClassRoomSelect = async (locationId: string,examType:string) => {
+  const getProjectClassRoomSelect = async (projectId: string) => {
     try {
       loading.value = true
-      const res = await getClassRoomSelect(locationId,examType)
+      const res = await getClassRoomSelect(projectId)
       classRoomSelectList.value = res.data
       options?.onSuccess && options.onSuccess()
     } finally {

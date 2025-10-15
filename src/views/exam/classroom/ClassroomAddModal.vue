@@ -37,7 +37,6 @@ const [form, resetForm] = useResetReactive({
   classroomName: '', // 考场名称
   maxCandidates: null, // 最大容纳人数
   examLocation: '', // 考试地点
-  examType: undefined, // 考试类型
 })
 
 // 监听模态框显示状态，加载考试地点数据
@@ -68,20 +67,6 @@ const columns: ColumnItem[] = reactive([
     props: {
       placeholder: '请输入最大容纳人数',
     },
-  },
-  {
-    label: '考试类型',
-    field: 'examType',
-    type: 'select',
-    span: 24,
-    required: true,
-    props: {
-      options: [
-        { label: '理论考试', value: '0' },
-        { label: '实操考试', value: '1' },
-      ],
-      placeholder: '请选择考试类型'
-    }
   },
   {
     label: '考试地点',
@@ -144,7 +129,6 @@ const onUpdate = async (id: string) => {
   dataId.value = id
   const { data } = await getClassroom(id)
   data.examLocationId = Number(data.examLocationId)
-  data.examType = String(data.examType)
   Object.assign(form, data)
   console.log(form)
   visible.value = true

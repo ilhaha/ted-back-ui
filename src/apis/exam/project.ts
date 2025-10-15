@@ -148,8 +148,8 @@ export function getLocationSelect(projectId: string) {
 }
 
 /** @desc 获取地址包含考场的下拉框信息 */
-export function getClassRoomSelect(projectId: string,examType: string) {
-  return http.get(`${PROJECT_CLASSROOM_URL}/${projectId}/${examType}`)
+export function getClassRoomSelect(projectId: string) {
+  return http.get(`${PROJECT_CLASSROOM_URL}/${projectId}`)
 }
 
 /** @desc 查询项目详情 */

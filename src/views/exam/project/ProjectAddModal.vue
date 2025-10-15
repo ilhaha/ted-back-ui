@@ -1,14 +1,6 @@
 <template>
-  <a-modal
-      v-model:visible="visible"
-      :title="title"
-      :mask-closable="false"
-      :esc-to-close="false"
-      :width="width >= 600 ? 600 : '100%'"
-      draggable
-      @before-ok="save"
-      @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="currentColumns" />
     <template #footer>
       <a-button v-if="isAudit" type="primary" @click="onAuditConfirm">确认审核</a-button>
@@ -19,13 +11,13 @@
 <script setup lang="ts">
 import { Message } from '@arco-design/web-vue'
 import { useWindowSize } from '@vueuse/core'
-import {getProject, addProject, updateProject, examine} from '@/apis/exam/project'
+import { getProject, addProject, updateProject, examine } from '@/apis/exam/project'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useResetReactive } from '@/hooks'
-import {upload} from '@/apis/common/carousel'
-import {ref} from "vue";
+import { upload } from '@/apis/common/carousel'
+import { ref } from "vue";
 import { selectOptions } from '@/apis/exam/category'
-import type {LabelValueState} from "@/types/global";
+import type { LabelValueState } from "@/types/global";
 import { number } from 'echarts'
 
 const emit = defineEmits<{
@@ -52,28 +44,29 @@ const [form, resetForm] = useResetReactive({
   auditStatus: undefined,
   projectStatus: undefined,
   categoryId: undefined,
+  porjectType: undefined,
 })
 
 // 上传图片
 const handleUpload = (options: RequestOption) => {
   const controller = new AbortController()
-  ;(async function requestWrap() {
-    const { onProgress, onError, onSuccess, fileItem, name = 'file' } = options
-    onProgress(20)
-    const formData = new FormData()
-    formData.append(name as string, fileItem.file as Blob)
-    formData.append('type', 'pic')
-    try {
-      const res = await upload(formData, {
-        signal: controller.signal
-      })
-      Message.success('上传成功')
-      form.imageUrl = res.data.url
-      onSuccess(res.data.thUrl)
-    } catch (error) {
-      onError(error)
-    }
-  })()
+    ; (async function requestWrap() {
+      const { onProgress, onError, onSuccess, fileItem, name = 'file' } = options
+      onProgress(20)
+      const formData = new FormData()
+      formData.append(name as string, fileItem.file as Blob)
+      formData.append('type', 'pic')
+      try {
+        const res = await upload(formData, {
+          signal: controller.signal
+        })
+        Message.success('上传成功')
+        form.imageUrl = res.data.url
+        onSuccess(res.data.thUrl)
+      } catch (error) {
+        onError(error)
+      }
+    })()
   return {
     abort() {
       controller.abort()
@@ -122,14 +115,14 @@ const columns: ColumnItem[] = reactive([
     field: 'projectName',
     required: true,
     span: 24,
-  },{
+  }, {
     label: '项目代码',
     prop: 'projectCode',
     field: 'projectCode',
     type: 'input',
     required: true,
     span: 24,
-  },  
+  },
   {
     label: '考试时长（分钟）',
     prop: 'examDuration',
@@ -149,7 +142,20 @@ const columns: ColumnItem[] = reactive([
       allowSearch: true,
       options: categorySelect,
     }
-  },{
+  }, {
+    label: '项目类型',
+    field: 'projectType',
+    type: 'select',
+    span: 24,
+    required: true,
+    props: {
+      options: [
+        { label: '理论考试', value: '0' },
+        { label: '实操考试', value: '1' },
+      ],
+      placeholder: '请选择考试类型'
+    }
+  }, {
     label: '项目状态',
     field: 'projectStatus',
     type: 'select',
@@ -159,7 +165,7 @@ const columns: ColumnItem[] = reactive([
       options: [
         { label: '上架', value: '1' },
         { label: '停用', value: '3' },
-        { label: '正常发布中', value: '2', disabled: true},
+        { label: '正常发布中', value: '2', disabled: true },
       ],
       placeholder: '请选择项目状态'
     }
@@ -237,6 +243,7 @@ const onUpdate = async (id: string) => {
   const { data } = await getProject(id)
   data.projectStatus = String(data.projectStatus)
   data.categoryId = Number(data.categoryId)
+  data.projectType = String(data.projectType)
   Object.assign(form, data)
   visible.value = true
 }

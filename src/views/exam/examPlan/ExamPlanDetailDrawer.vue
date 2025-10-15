@@ -9,7 +9,7 @@
       <a-descriptions-item label="考试开始时间">{{ dataDetail?.startTime }}</a-descriptions-item>
       <a-descriptions-item label="考试结束时间">{{ dataDetail?.endTime }}</a-descriptions-item>
       <a-descriptions-item label="考试时长 （分钟）">{{ dataDetail?.examDuration }}</a-descriptions-item>
-      <a-descriptions-item label="考试地点">{{ dataDetail?.locationName }}</a-descriptions-item>
+      <!-- <a-descriptions-item label="考试地点">{{ dataDetail?.locationName }}</a-descriptions-item> -->
       <a-descriptions-item label="最大容纳考生人数">{{ dataDetail?.maxCandidates }}</a-descriptions-item>
       <a-descriptions-item label="实际考生人数">{{ dataDetail?.actualCandidates }}</a-descriptions-item>
       <a-descriptions-item label="计划状态">{{ dataDetail?.status }}</a-descriptions-item>

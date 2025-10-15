@@ -88,10 +88,14 @@ export function getExamPlan(id: string) {
   return data
 }
 
+/** @desc 校验导入考试计划导入Excel文件是否正确 */
+export function importExcel(file: any) {
+  return http.post(`${BASE_URL}/import/excel`, file)
+}
+
+
 export function getExamClassroom(id: string) {
   const res = http.get<[]>(`${BASE_URL}/classroom/${id}`)
-  console.log(res)
-
   return res
 }
 

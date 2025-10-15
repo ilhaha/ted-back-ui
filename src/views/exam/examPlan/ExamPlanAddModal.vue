@@ -51,7 +51,7 @@ const { locationSelectList, getProjectLocationSelect, classRoomSelectList, getPr
 
 const [form, resetForm] = useResetReactive({
   examProjectId: '',
-  locationId: '',
+  // locationId: '',
   maxCandidates: 0,
   // dateRange: '',
   imageUrl: '',
@@ -89,29 +89,29 @@ const handleUpload = (options: RequestOption) => {
     },
   }
 }
-watch(
-  () => form.locationId,
-  (val) => {
-    const examTypeField = columns.find(item => item.field === 'examType')
-    examTypeField!.show = !!val 
-    if (!val) {
-      form.examType = null
-      form.classroomId = []
-      columns.find(item => item.field === 'classroomId')!.show = false
-    }
-  }
-)
+// watch(
+//   () => form.locationId,
+//   (val) => {
+//     const examTypeField = columns.find(item => item.field === 'examType')
+//     examTypeField!.show = !!val 
+//     if (!val) {
+//       form.examType = null
+//       form.classroomId = []
+//       columns.find(item => item.field === 'classroomId')!.show = false
+//     }
+//   }
+// )
 
-watch(
-  () => form.examType,
-  (val) => {
-    const classroomField = columns.find(item => item.field === 'classroomId')
-    classroomField!.show = !!val // 选了考试类型 → 显示地点考场
-    if (!val) {
-      form.classroomId = []
-    }
-  }
-)
+// watch(
+//   () => form.examType,
+//   (val) => {
+//     const classroomField = columns.find(item => item.field === 'classroomId')
+//     classroomField!.show = !!val // 选了考试类型 → 显示地点考场
+//     if (!val) {
+//       form.classroomId = []
+//     }
+//   }
+// )
 
 // 监听新增 删除串口是否打开
 watch(() => visible.value, async (newProvinceId) => {
@@ -121,26 +121,24 @@ watch(() => visible.value, async (newProvinceId) => {
 
 watch(() => form.examProjectId, async (newProvinceId) => {
   if (newProvinceId !== '') {
-    await getProjectLocationSelect(newProvinceId)
     const response = await bindingDocumentListApi(form.examProjectId)
     projectBindingDocList.value = response.data.map((doc: any) => ({
       value: doc.id,
       label: doc.typeName,
     }))
     // 重置地点和考场选择
-    form.locationId = ''
+    // form.locationId = ''
     form.classroomId = []
   }
 }, { immediate: false })
 
 watch(
-  () => [form.locationId, form.examType],
-  async ([newLocationId, newExamType]) => {
-    // 只有当两个字段都有有效值时才执行
-    if (newLocationId && newExamType) {
-      await getProjectClassRoomSelect(newLocationId, newExamType)
-      // 重置考场选择
+  () => [form.examProjectId],
+  async ([newexamProjectId]) => {
+    if (newexamProjectId) {
+      await getProjectClassRoomSelect(newexamProjectId)
       form.classroomId = []
+      columns.find(item => item.field === 'classroomId')!.show = true
     }
   },
   { immediate: false }
@@ -214,38 +212,23 @@ const columns: ColumnItem[] = reactive([
       disabled: true,
     },
   },
-  {
-    label: '考试地点',
-    prop: 'locationId',
-    type: 'select',
-    field: 'locationId',
-    required: true,
-    span: 22,
-    props: {
-      options: locationSelectList,
-      allowSearch: true,
-    },
-  },
-  {
-    label: '考试类型',
-    field: 'examType',
-    type: 'select',
-    span: 22,
-    required: true,
-    show: false,
-    props: {
-      options: [
-        { label: '理论考试', value: '0' },
-        { label: '实操考试', value: '1' },
-      ],
-      placeholder: '请选择考试类型'
-    }
-  },
+  // {
+  //   label: '考试地点',
+  //   prop: 'locationId',
+  //   type: 'select',
+  //   field: 'locationId',
+  //   required: true,
+  //   span: 22,
+  //   props: {
+  //     options: locationSelectList,
+  //     allowSearch: true,
+  //   },
+  // },
 {
-  label: '地点考场',
+  label: '考试考场',
   prop: 'classroomId',
   field: 'classroomId',
-  type: 'select',
+  type: 'cascader',
   required: true,
   show: false,
   span: 22,
@@ -254,7 +237,6 @@ const columns: ColumnItem[] = reactive([
     allowSearch: true,
     placeholder: '请选择地点考场（可多选）',
     multiple: true, 
-    // maxTagCount: 3,
     virtualListProps: {
       height: 200,
       threshold: 30
@@ -417,7 +399,7 @@ const onUpdate = async (id: string) => {
   // 加载关联的项目数据
   await getDeptProjectsList()
   await getProjectLocationSelect(data.examProjectId)
-  await getProjectClassRoomSelect(data.locationId)
+  await getProjectClassRoomSelect(data.examProjectId)
 
   const res = await getExamClassroom(id)
   form.classroomId = res.data

@@ -113,11 +113,6 @@ const columns = ref<TableInstanceColumns[]>([
     dataIndex: "maxCandidates",
     slotName: "maxCandidates",
   },
-  {
-    title: "考试类型",
-    dataIndex: "examType",
-    slotName: "examType",
-  },
 
   {
     title: "操作",

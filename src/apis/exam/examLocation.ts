@@ -47,6 +47,16 @@ export interface ExamLocationQuery {
   operationalStatus: string
   sort: Array<string>
 }
+
+export interface PlanLocationAndRoomVO {
+  locationId: string
+  locationName: string
+  fullAddress: string
+  classrommId: string
+  classroomName: string
+  maxCandidates: number
+}
+
 export interface ExamLocationPageQuery extends ExamLocationQuery, PageQuery {}
 
 /** @desc 查询考试地点列表 */
@@ -54,7 +64,6 @@ export function listExamLocation(query: ExamLocationPageQuery) {
   const data = http.get<PageRes<ExamLocationResp[]>>(`${BASE_URL}`, query)
   data.then((res) => {
     const items = res.data.list
-    console.log(items.operationalStatus)
     items.forEach((item) => {
       switch (item.operationalStatus) {
         case 0: item.operationalStatus = '运营'; break
@@ -69,6 +78,12 @@ export function listExamLocation(query: ExamLocationPageQuery) {
   })
   return data
 }
+
+/** @desc 根据计划id获取计划对应的考试地点和考场信息 */
+export function getPlanLocationAndRoomByPlanId(planId: string) {
+  return http.get<PlanLocationAndRoomVO[]>(`${BASE_URL}/room/${planId}`)
+}
+
 
 /** @desc 查询考试地点详情 */
 export function getExamLocation(id: string) {
