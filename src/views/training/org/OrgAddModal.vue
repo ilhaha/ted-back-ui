@@ -1,14 +1,6 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns" />
   </a-modal>
 </template>
@@ -20,7 +12,7 @@ import { addOrg, getOrg, updateOrg } from '@/apis/training/org'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useResetReactive } from '@/hooks'
 import { selectOptions } from '@/apis/exam/category'
-import type {LabelValueState} from "@/types/global";
+import type { LabelValueState } from "@/types/global";
 import { upload } from '@/apis/common/carousel'
 
 const emit = defineEmits<{
@@ -64,30 +56,43 @@ const columns: ColumnItem[] = reactive([
     span: 24,
     rules: [{ required: true, message: '请输入机构名称' }],
   },
-{
-  label: '机构八大类归属',
-  field: 'categoryIds',
-  type: 'select',
-  required: true,
-  span: 24,
-  props: {
-    allowSearch: true,
-    multiple: true, // 支持多选
-    options: categorySelect,
-    fieldNames: { label: 'label', value: 'value' }
+  {
+    label: '机构八大类归属',
+    field: 'categoryIds',
+    type: 'select',
+    required: true,
+    span: 24,
+    props: {
+      allowSearch: true,
+      multiple: true, // 支持多选
+      options: categorySelect,
+      fieldNames: { label: 'label', value: 'value' }
+    },
+    rules: [
+      { required: true, message: '请选择机构八大类归属' },
+      { type: 'array', min: 1, message: '至少选择一个类目' }
+    ],
   },
+  {
+  label: '统一社会信用代码',
+  field: 'socialCode',
+  type: 'input',
+  span: 24,
   rules: [
-    { required: true, message: '请选择机构八大类归属' },
-    { type: 'array', min: 1, message: '至少选择一个类目' }
+    { required: true, message: '请输入统一社会信用代码' },
+    {
+      validator: (value, callback) => {
+        // 修正后的正则表达式
+        const reg = /^[0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10}$/;;
+        if (!reg.test(value)) {
+          callback('请输入有效的18位统一社会信用代码');
+        } else {
+          callback();
+        }
+      }
+    }
   ],
 },
-  {
-    label: '社会统一代码',
-    field: 'socialCode',
-    type: 'input',
-    span: 24,
-    rules: [{ required: true, message: '请输入社会统一代码' }],
-  },
   {
     label: '地点',
     field: 'location',
@@ -136,6 +141,7 @@ const columns: ColumnItem[] = reactive([
     field: 'businessLicense',
     type: 'upload',
     span: 24,
+    rules: [{ required: true, message: '请上传营业执照' }],
     props: {
       max: 1,
       limit: 1,
@@ -203,7 +209,7 @@ const save = async () => {
 const onAdd = async () => {
   reset()
   dataId.value = ''
-   const res = await selectOptions()
+  const res = await selectOptions()
   categorySelect.value = res.data || []
   visible.value = true
 }
@@ -212,6 +218,8 @@ const onAdd = async () => {
 const onUpdate = async (id: string) => {
   reset()
   dataId.value = id
+  const res = await selectOptions()
+  categorySelect.value = res.data || []
   const { data } = await getOrg(id)
   Object.assign(form, data)
   visible.value = true

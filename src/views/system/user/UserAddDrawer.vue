@@ -187,7 +187,7 @@ const save = async () => {
         Message.error('用户名已存在')
         return false;
       }
-      console.log(form)
+      form.roleIds = [String(form.roleIds)]
       await addUser(form)
       Message.success('新增成功')
     }    

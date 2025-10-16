@@ -97,3 +97,8 @@ export function getBindableUsers() {
 export function bindUserToOrg(orgId: string, userId: string) {
   return http.post(`${BASE_URL}/bind-user`, { orgId, userId })
 }
+
+/**@desc 绑定机构用户 */
+export function unbindOrgAccount(orgId: string) {
+  return http.post(`${BASE_URL}/unbind-user/${orgId}`)
+}
