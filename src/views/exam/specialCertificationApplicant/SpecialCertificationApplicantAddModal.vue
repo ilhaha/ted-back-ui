@@ -13,16 +13,17 @@
       <a-form-item field="status" label="审核结果" :rules="[{ required: true, message: '请选择审核结果' }]">
         <a-radio-group v-model="form.status">
           <a-radio :value="1">审核通过</a-radio>
-          <a-radio :value="2">审核不通过</a-radio>
+          <a-radio :value="2">退回补正</a-radio>
+          <a-radio :value="3">虚假资料</a-radio>
         </a-radio-group>
       </a-form-item>
       <a-form-item 
-        v-if="form.status === 2" 
-        field="reason" 
-        label="不通过原因" 
-        :rules="[{ required: true, message: '请填写不通过原因' }]"
+        v-if="form.status === 2 || form.status === 3"
+        field="remark"
+        :label="form.status === 2 ? '退回原因' : '虚假资料原因'"
+        :rules="[{ required: true, message: form.status === 2 ? '请填写退回原因' : '请填写虚假资料原因' }]"
       >
-        <a-input v-model="form.reason" placeholder="请输入不通过原因" allow-clear />
+        <a-input v-model="form.remark" :placeholder="form.status === 2 ? '请输入退回原因' : '请输入虚假资料原因'" allow-clear />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -53,7 +54,7 @@ const formRef = ref()
 
 const [form, resetForm] = useResetReactive({
   status: undefined,
-  reason: undefined
+  remark: undefined
 })
 
 // 重置
@@ -62,7 +63,7 @@ const reset = () => {
   resetForm()
   isAudit.value = false
   form.status = undefined
-  form.reason = undefined
+  form.remark = undefined
 }
 
 // 保存
@@ -70,8 +71,15 @@ const save = async () => {
   try {
     const isInvalid = await formRef.value?.validate()
     if (isInvalid) return false
+
+    // 构造请求参数
+    const req = {
+      ...form,
+      remark: form.remark 
+    }
+
     if (isAudit.value) {
-      const res = await updateSpecialCertificationApplicant(form, dataId.value)
+      const res = await updateSpecialCertificationApplicant(req, dataId.value)
       if (res.data.success) {
         Message.success('审核成功')
         emit('save-success')

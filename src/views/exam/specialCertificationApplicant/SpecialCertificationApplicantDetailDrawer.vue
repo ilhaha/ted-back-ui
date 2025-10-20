@@ -6,6 +6,10 @@
       <a-descriptions-item label="考生名称" :span="1">
         {{ dataDetail?.candidatesName }}
       </a-descriptions-item>
+      
+      <a-descriptions-item label="考生机构班级ID" :span="1">
+        {{ dataDetail?.batchId ?? '个人申请' }}
+      </a-descriptions-item>
   
       <a-descriptions-item label="申请表" :span="1">
         <a-image
@@ -24,6 +28,10 @@
         <a-tag :color="getStatusColor(dataDetail?.status)">
           {{ getStatusText(dataDetail?.status) }}
         </a-tag>
+      </a-descriptions-item>
+
+      <a-descriptions-item label="审核意见" :span="1">
+        {{ dataDetail?.remark || '-' }}
       </a-descriptions-item>
 
       <a-descriptions-item label="创建人" :span="1">

@@ -29,7 +29,8 @@ export interface SpecialCertificationApplicantDetailResp {
   updateTime: string
   isDeleted: string
   status: number
-  reason: string
+  remark: string
+  batchId: string
   createUserString: string
   updateUserString: string
   planName: string
