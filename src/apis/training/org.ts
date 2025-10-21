@@ -68,9 +68,9 @@ export function updateOrg(data: any, id: string) {
   return http.put(`${BASE_URL}/${id}`, data)
 }
 
-/** @desc 删除机构信息 */
+/** @desc 删除机构及关联用户信息 */
 export function deleteOrg(id: string) {
-  return http.del(`${BASE_URL}/${id}`)
+  return http.del(`${BASE_URL}/remove/${id}`)
 }
 
 /** @desc 导出机构信息 */
