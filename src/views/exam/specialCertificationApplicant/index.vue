@@ -82,7 +82,7 @@
             @click="onDetail(record)"
             >详情</a-link
           >
-          <a-link
+          <!-- <a-link
             v-permission="['exam:specialCertificationApplicant:delete']"
             status="danger"
             :disabled="record.disabled"
@@ -90,9 +90,9 @@
             @click="onDelete(record)"
           >
             删除
-          </a-link>
+          </a-link> -->
           <a-link
-            v-if="record.status === 0"
+            v-if="record.status === 0 || record.status === 4"
             v-permission="['exam:specialCertificationApplicant:audit']"
             status="success"
             title="审核"
@@ -125,8 +125,9 @@
         <a-form-item label="审核结果">
           <a-radio-group v-model="batchAuditStatus">
             <a-radio :value="1">审核通过</a-radio>
-            <a-radio :value="2">审核不通过</a-radio>
+            <a-radio :value="2">待补正</a-radio>
             <a-radio :value="3">虚假信息</a-radio>
+            <a-radio :value="4">补正审核</a-radio>
           </a-radio-group>
         </a-form-item>
         <a-form-item v-if="batchAuditStatus === 2" label="不通过原因">
@@ -206,6 +207,8 @@ const getStatusColor = (status: number) => {
       return "red";
     case 3:
       return "red";
+    case 4:
+      return "orange";
 
     default:
       return "default";
@@ -219,9 +222,11 @@ const getStatusText = (status: number) => {
     case 1:
       return "审核通过";
     case 2:
-      return "审核不通过";
+      return "待补正";
     case 3:
       return "虚假信息";
+    case 4:
+      return "补正审核";
     default:
       return "未知状态";
   }
