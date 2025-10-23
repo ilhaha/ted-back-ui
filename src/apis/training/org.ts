@@ -48,6 +48,12 @@ export interface OrgQuery {
 }
 export interface OrgPageQuery extends OrgQuery, PageQuery {}
 
+
+/** @desc 获取所有的机构作为选择器返回 */
+export function getOrgSelect() {
+  return http.get(`${BASE_URL}/select`)
+}
+
 /** @desc 查询机构信息列表 */
 export function listOrg(query: OrgPageQuery) {
   return http.get<PageRes<OrgResp[]>>(`${BASE_URL}`, query)
