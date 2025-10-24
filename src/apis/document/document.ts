@@ -16,6 +16,7 @@ export interface DocumentResp {
   createUserString: string
   updateUserString: string
   disabled: boolean
+  candidateId: string
 }
 export interface DocumentDetailResp {
   id: string
@@ -79,4 +80,8 @@ export function deleteDocument(id: string) {
 /** @desc 导出资料核心存储 */
 export function exportDocument(query: DocumentQuery) {
   return http.download(`${BASE_URL}/export`, query)
+}
+/** @desc 审核资料 */
+export function reviewDocument(data: { id: string; typeId: string; candidateId: string; status: number; auditRemark: string  }) {
+  return http.post(`${BASE_URL}/audit`, data)
 }

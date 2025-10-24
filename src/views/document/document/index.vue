@@ -29,22 +29,30 @@
         <span v-else>-</span>
       </template>
       <template #toolbar-left>
-	    <!-- <a-input-search v-model="queryForm.docPath" placeholder="请输入存储路径(如/img/身份证正面.jpg)" allow-clear @search="search" /> -->
-	    <!-- <a-input-search v-model="queryForm.typeId" placeholder="请输入关联资料类型ID" allow-clear @search="search" /> -->
-	    <!-- <a-input-search v-model="queryForm.createUser" placeholder="请输入创建人ID" allow-clear @search="search" /> -->
-        <GiForm :style="''" v-model="queryForm" search :columns="searchForm" size="medium" @search="search" @reset="reset" />
+        <!-- <a-input-search v-model="queryForm.docPath" placeholder="请输入存储路径(如/img/身份证正面.jpg)" allow-clear @search="search" /> -->
+        <!-- <a-input-search v-model="queryForm.typeId" placeholder="请输入关联资料类型ID" allow-clear @search="search" /> -->
+        <!-- <a-input-search v-model="queryForm.createUser" placeholder="请输入创建人ID" allow-clear @search="search" /> -->
+        <GiForm
+          :style="''"
+          v-model="queryForm"
+          search
+          :columns="searchForm"
+          size="medium"
+          @search="search"
+          @reset="reset"
+        />
       </template>
 
-<!--      <template #toolbar-right>-->
-<!--        &lt;!&ndash; <a-button v-permission="['document:document:add']" type="primary" @click="onAdd">-->
-<!--          <template #icon><icon-plus /></template>-->
-<!--          <template #default>新增</template>-->
-<!--        </a-button> &ndash;&gt;-->
-<!--        &lt;!&ndash; <a-button v-permission="['document:document:export']" @click="onExport">-->
-<!--          <template #icon><icon-download /></template>-->
-<!--          <template #default>导出</template>-->
-<!--        </a-button> &ndash;&gt;-->
-<!--      </template>-->
+      <!--      <template #toolbar-right>-->
+      <!--        &lt;!&ndash; <a-button v-permission="['document:document:add']" type="primary" @click="onAdd">-->
+      <!--          <template #icon><icon-plus /></template>-->
+      <!--          <template #default>新增</template>-->
+      <!--        </a-button> &ndash;&gt;-->
+      <!--        &lt;!&ndash; <a-button v-permission="['document:document:export']" @click="onExport">-->
+      <!--          <template #icon><icon-download /></template>-->
+      <!--          <template #default>导出</template>-->
+      <!--        </a-button> &ndash;&gt;-->
+      <!--      </template>-->
       <template #status="{ record }">
         <template>
           <a-space size="large">
@@ -58,184 +66,214 @@
             </a-dropdown>
           </a-space>
         </template>
-        <a-tag
-          :color="getStatusColor(record.status)"
-        >{{ getStatusText(record.status) }}</a-tag>
+        <a-tag :color="getStatusColor(record.status)">{{
+          getStatusText(record.status)
+        }}</a-tag>
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['document:document:detail']" title="审核" @click="onExamine(record)">审核</a-link>
-<!--          <a-link v-permission="['document:document:update']" title="修改" @click="onUpdate(record)">修改</a-link>-->
-<!--          <a-link-->
-<!--            v-permission="['document:document:delete']"-->
-<!--            status="danger"-->
-<!--            :disabled="record.disabled"-->
-<!--            :title="record.disabled ? '不可删除' : '删除'"-->
-<!--            @click="onDelete(record)"-->
-<!--          >-->
-<!--            删除-->
-<!--          </a-link>-->
+          <a-link
+            v-permission="['document:document:detail']"
+            title="审核"
+            @click="onExamine(record)"
+            >审核</a-link
+          >
+          <!--          <a-link v-permission="['document:document:update']" title="修改" @click="onUpdate(record)">修改</a-link>-->
+          <!--          <a-link-->
+          <!--            v-permission="['document:document:delete']"-->
+          <!--            status="danger"-->
+          <!--            :disabled="record.disabled"-->
+          <!--            :title="record.disabled ? '不可删除' : '删除'"-->
+          <!--            @click="onDelete(record)"-->
+          <!--          >-->
+          <!--            删除-->
+          <!--          </a-link>-->
         </a-space>
       </template>
     </GiTable>
 
-    <DocumentAddModal ref="DocumentAddModalRef" @save-success="search" @审核成功="search" />
+    <DocumentAddModal
+      ref="DocumentAddModalRef"
+      @save-success="search"
+      @审核成功="search"
+    />
     <DocumentDetailDrawer ref="DocumentDetailDrawerRef" />
   </div>
 </template>
 
 <script setup lang="ts">
-import DocumentAddModal from './DocumentAddModal.vue'
-import DocumentDetailDrawer from './DocumentDetailDrawer.vue'
-import { type DocumentResp, type DocumentQuery, deleteDocument, exportDocument, listDocument } from '@/apis/document/document'
-import type { TableInstanceColumns } from '@/components/GiTable/type'
-import { useDownload, useTable } from '@/hooks'
-import { isMobile } from '@/utils'
-import has from '@/utils/has'
-import type {ColumnItem} from "@/components/GiForm";
-import {useDocument} from "@/hooks/document/useDocument";
+import DocumentAddModal from "./DocumentAddModal.vue";
+import DocumentDetailDrawer from "./DocumentDetailDrawer.vue";
+import {
+  type DocumentResp,
+  type DocumentQuery,
+  deleteDocument,
+  exportDocument,
+  listDocument,
+} from "@/apis/document/document";
+import type { TableInstanceColumns } from "@/components/GiTable/type";
+import { useDownload, useTable } from "@/hooks";
+import { isMobile } from "@/utils";
+import has from "@/utils/has";
+import type { ColumnItem } from "@/components/GiForm";
+import { useDocument } from "@/hooks/document/useDocument";
 
-defineOptions({ name: 'Document' })
+defineOptions({ name: "Document" });
 
-const{typeNameList,getTypeNameList}=useDocument()
+const { typeNameList, getTypeNameList } = useDocument();
 
 const queryForm = reactive<DocumentQuery>({
   docPath: undefined,
   typeId: undefined,
   createUser: undefined,
-  sort: ['id,desc'],
-})
+  sort: ["id,desc"],
+});
 // 默认加载下拉框内容
-getTypeNameList()
+getTypeNameList();
 
 const getStatusText = (status: number) => {
   switch (status) {
     case 0:
-      return '待审核'
+      return "待审核";
     case 1:
-      return '已生效'
+      return "已生效";
     case 2:
-      return '未通过'
+      return "待补正";
+    case 3:
+      return "补正审核";
     default:
-      return ''
+      return "";
   }
-}
-const getStatusColor=(status:number)=>{
+};
+const getStatusColor = (status: number) => {
   switch (status) {
     case 0:
-      return 'darkorange'
+      return "red";
     case 1:
-      return 'green'
+      return "green";
     case 2:
-      return 'red'
+      return "orange";
+    case 3:
+      return "orange";
+    default:
+      return "default";
   }
-}
+};
 const statusList = ref([
-  { label: '待审核', value: 0 },
-  { label: '已生效', value: 1 },
-  { label: '未通过', value: 2 },
-])
+  { label: "待审核", value: 0 },
+  { label: "已生效", value: 1 },
+  { label: "待补正", value: 2 },
+  { label: "补正审核", value: 3 },
+]);
 const {
   tableData: dataList,
   loading,
   pagination,
   search,
   handleDelete,
-} = useTable((page) => listDocument({ ...queryForm, ...page }), { immediate: true })
+} = useTable((page) => listDocument({ ...queryForm, ...page }), {
+  immediate: true,
+});
 const columns = ref<TableInstanceColumns[]>([
-  { title: '用户名称', dataIndex: 'nickName', slotName: 'nickName' },
-  { title: '资料种类', dataIndex: 'typeName', slotName: 'typeName' },
-  { title: '审核状态', dataIndex: 'status', slotName: 'status' },
+  { title: "用户名称", dataIndex: "nickName", slotName: "nickName" },
+  { title: "资料种类", dataIndex: "typeName", slotName: "typeName" },
+  { title: "审核状态", dataIndex: "status", slotName: "status" },
+  { title: "审核备注", dataIndex: "auditRemark", slotName: "auditRemark" },
   {
-    title: '资料图片',
-    dataIndex: 'docPath',
-    slotName: 'previewImage',
+    title: "资料图片",
+    dataIndex: "docPath",
+    slotName: "previewImage",
     width: 150,
-    align: 'center',
+    align: "center",
   },
   {
-    title: '操作',
-    dataIndex: 'action',
-    slotName: 'action',
+    title: "操作",
+    dataIndex: "action",
+    slotName: "action",
     width: 200,
-    align: 'center',
-    fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['document:document:examine', 'document:document:detail', 'document:document:update', 'document:document:delete'])
-  }
+    align: "center",
+    fixed: !isMobile() ? "right" : undefined,
+    show: has.hasPermOr([
+      "document:document:examine",
+      "document:document:detail",
+      "document:document:update",
+      "document:document:delete",
+    ]),
+  },
 ]);
 
 // 重置
 const reset = () => {
-  queryForm.typeId = undefined
-  queryForm.status = undefined
-  search()
-}
+  queryForm.typeId = undefined;
+  queryForm.status = undefined;
+  search();
+};
 
 const searchForm: ColumnItem[] = reactive([
   {
-    type: 'select',
-    field: 'typeId',
+    type: "select",
+    field: "typeId",
     formItemProps: {
       hideLabel: true,
     },
     props: {
       options: typeNameList,
-      placeholder: '搜索资料种类',
+      placeholder: "搜索资料种类",
       showWordLimit: false,
-
     },
   },
   {
-    type: 'select',
-    field: 'status',
+    type: "select",
+    field: "status",
     formItemProps: {
       hideLabel: true,
     },
     props: {
       options: statusList,
-      placeholder: '搜索运营状态',
+      placeholder: "搜索运营状态",
     },
   },
-])
+]);
 
 // 删除
 const onDelete = (record: DocumentResp) => {
   return handleDelete(() => deleteDocument(record.id), {
     content: `是否确定删除该条数据？`,
-    showModal: true
-  })
-}
+    showModal: true,
+  });
+};
 
 // 导出
 const onExport = () => {
-  useDownload(() => exportDocument(queryForm))
-}
+  useDownload(() => exportDocument(queryForm));
+};
 
-const DocumentAddModalRef = ref<InstanceType<typeof DocumentAddModal>>()
+const DocumentAddModalRef = ref<InstanceType<typeof DocumentAddModal>>();
 // 新增
 const onAdd = () => {
-  DocumentAddModalRef.value?.onAdd()
-}
+  DocumentAddModalRef.value?.onAdd();
+};
 //审核
-const onExamine = (record: DocumentResp) => {
-  DocumentAddModalRef.value?.onExamine(record.id)
-}
+const onExamine = async (record: DocumentResp) => {
+  DocumentAddModalRef.value?.onExamine(record.id,record.typeId, record.candidateId ); 
+};
 // 修改
 const onUpdate = (record: DocumentResp) => {
-  DocumentAddModalRef.value?.onUpdate(record.id)
-}
+  DocumentAddModalRef.value?.onUpdate(record.id);
+};
 
-const DocumentDetailDrawerRef = ref<InstanceType<typeof DocumentDetailDrawer>>()
+const DocumentDetailDrawerRef =
+  ref<InstanceType<typeof DocumentDetailDrawer>>();
 // 详情
 const onDetail = (record: DocumentResp) => {
-  DocumentDetailDrawerRef.value?.onOpen(record.id)
-}
+  DocumentDetailDrawerRef.value?.onOpen(record.id);
+};
 
 const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement
-  img.src = '/images/ce853a5576cd3913a87d709a354cdef.png' // 你的默认图片路径
-  img.onerror = null // 防止默认图片也加载失败时无限循环
-}
+  const img = e.target as HTMLImageElement;
+  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // 你的默认图片路径
+  img.onerror = null; // 防止默认图片也加载失败时无限循环
+};
 </script>
 
 
