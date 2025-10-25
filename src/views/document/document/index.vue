@@ -187,6 +187,19 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
   },
   {
+    title: "创建时间",
+    dataIndex: "createTime",
+    slotName: "createTime",
+    width: 180,
+    align: "center",
+  },
+  {
+    title: "更新时间",
+    dataIndex: "updateTime",
+    slotName: "updateTime",
+    width: 180,
+  },
+  {
     title: "操作",
     dataIndex: "action",
     slotName: "action",
