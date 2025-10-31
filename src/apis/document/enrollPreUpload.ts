@@ -43,6 +43,11 @@ export interface EnrollPreUploadQuery {
 }
 export interface EnrollPreUploadPageQuery extends EnrollPreUploadQuery, PageQuery {}
 
+/** @desc 审核 */
+export function review(data: any) {
+  return http.post(`${BASE_URL}/review`, data)
+}
+
 /** @desc 查询机构报考-考生扫码上传文件列表 */
 export function listEnrollPreUpload(query: EnrollPreUploadPageQuery) {
   return http.get<PageRes<EnrollPreUploadResp[]>>(`${BASE_URL}`, query)

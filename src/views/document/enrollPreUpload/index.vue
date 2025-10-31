@@ -2,20 +2,41 @@
   <div class="gi_table_page">
     <GiTable title="机构报考审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection">
+      :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection"
+      @select="select" @select-all="selectAll">
       <template #toolbar-left>
+        <a-select v-model="queryForm.status" placeholder="请选择审核状态" allow-clear style="width: 200px" @change="search">
+          <a-option :value="0">未审核</a-option>
+          <a-option :value="1">审核通过</a-option>
+          <a-option :value="2">退回补正</a-option>
+          <a-option :value="3">虚假资料</a-option>
+        </a-select>
         <a-input-search v-model="queryForm.candidatesName" placeholder="请输入考生姓名" allow-clear @search="search" />
         <a-input-search v-model="queryForm.planName" placeholder="请输入考试计划名称" allow-clear @search="search" />
         <a-select v-model="queryForm.orgId" placeholder="请选择所属机构" allow-clear style="width: 200px"
           :options="orgListoptions" @change="search" />
+        <a-button type="primary" @click="search">
+          <template #icon><icon-search /></template>
+          搜索
+        </a-button>
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
+
           <template #default>重置</template>
+        </a-button>
+      </template>
+      <template #toolbar-right>
+        <a-button type="primary" v-permission="['document:enrollPreUpload:update']" @click="batchReview"
+          :disabled="!selectedKeys.length">
+          批量审核
         </a-button>
       </template>
       <template #qualificationFileUrl="{ record }">
         <a-link v-permission="['document:enrollPreUpload:detail']" title="详情"
           @click="getPreviewUrl(record.qualificationFileUrl)">预览</a-link>
+      </template>
+      <template #docList="{ record }">
+        <a-link v-permission="['document:enrollPreUpload:detail']" title="详情" @click="getDocList(record.id)">查看</a-link>
       </template>
       <template #status="{ record }">
         <a-tag :color="getStatusColor(record.status)">
@@ -24,13 +45,13 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['document:enrollPreUpload:update']" title="审核" @click="openReview(record)">审核</a-link>
+          <a-link v-permission="['document:enrollPreUpload:update']" title="审核" @click="openReview(record)" v-if="record.status == 0">审核</a-link>
         </a-space>
       </template>
     </GiTable>
 
     <a-modal v-model:visible="reviewVisible" title="机构报考审核" :mask-closable="false" :esc-to-close="false"
-      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="conformReview" @close="reset">
+      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="conformReview" @close="resetForm">
       <a-form ref="formRef" :model="form" layout="vertical">
         <a-form-item field="status" label="审核结果" :rules="[{ required: true, message: '请选择审核结果' }]">
           <a-radio-group v-model="form.status">
@@ -46,13 +67,19 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <a-modal v-model:visible="showDocListVisible" title="考生提交的资料" :mask-closable="false" :esc-to-close="false"
+      :width="700" draggable :footer="null">
+      <DocumentPre ref="DocumentPreRef" />
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 
-import { type EnrollPreUploadResp, type EnrollPreUploadQuery, deleteEnrollPreUpload, exportEnrollPreUpload, listEnrollPreUpload } from '@/apis/document/enrollPreUpload'
+import { type EnrollPreUploadResp, type EnrollPreUploadQuery, review, deleteEnrollPreUpload, exportEnrollPreUpload, listEnrollPreUpload } from '@/apis/document/enrollPreUpload'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
+import DocumentPre from '@/views/document/documentPre/index.vue'
 import { useDownload, useTable } from '@/hooks'
 import { getOrgSelect } from "@/apis/training/org";
 import { isMobile } from '@/utils'
@@ -69,19 +96,18 @@ const { width } = useWindowSize()
 const queryForm = reactive<EnrollPreUploadQuery>({
   candidatesName: undefined,
   planName: undefined,
+  status: undefined,
   sort: ['id,desc']
 })
 
 const [form, resetForm] = useResetReactive({
   status: 1,
   remark: undefined,
-  enrollFileReviewList: undefined
+  reviewIds: undefined
 })
-const rowSelection = reactive({
-  type: "checkbox",
-  showCheckedAll: true,
-  onlyCurrent: false,
-});
+
+
+
 
 
 const {
@@ -89,14 +115,27 @@ const {
   loading,
   pagination,
   search,
-  handleDelete
+  selectedKeys,
+  select,
+  selectAll,
 } = useTable((page) => listEnrollPreUpload({ ...queryForm, ...page }), { immediate: true })
 
+
+const rowSelection = reactive({
+  type: 'checkbox',
+  showCheckedAll: true,
+  onlyCurrent: false,
+  selectedRowKeys: selectedKeys,
+  onChange: (keys: string[]) => {
+    selectedKeys.value = keys
+  }
+})
 const columns = ref<TableInstanceColumns[]>([
   { title: '考生姓名', dataIndex: 'nickname', slotName: 'nickname' },
   { title: '考试计划', dataIndex: 'examPlanName', slotName: 'examPlanName' },
   { title: '所属机构', dataIndex: 'orgName', slotName: 'orgName' },
   { title: '报名资格申请表', dataIndex: 'qualificationFileUrl', slotName: 'qualificationFileUrl' },
+  { title: '考生所提交资料', dataIndex: 'docList', slotName: 'docList' },
   { title: '状态', dataIndex: 'status', slotName: 'status' },
   { title: '退回原因', dataIndex: 'remark', slotName: 'remark' },
   { title: '申请时间', dataIndex: 'createTime', slotName: 'createTime' },
@@ -112,32 +151,54 @@ const columns = ref<TableInstanceColumns[]>([
 ]);
 const reviewVisible = ref(false);
 
-const reviewEnrollPreUploadList = ref<any[]>([]);
+const showDocListVisible = ref(false);
+
+const reviewIds = ref<any[]>([]);
 
 const formRef = ref()
+
+const batchReview = () => {
+  if (selectedKeys.value.length === 0) {
+    Message.warning("请选择需要审核的记录");
+    return;
+  }
+  // 先清空
+  reviewIds.value = [];
+  for (const row of dataList.value) {
+    if (selectedKeys.value.includes(row.id)) {
+      if (row.status !== 0) {
+        Message.warning("选中的记录中包含非未审核状态的数据，请重新选择");
+        return;
+      }
+      reviewIds.value.push(row.id);
+    }
+  }
+  // 打开批量审核弹窗
+  reviewVisible.value = true;
+};
 
 // 确认审核
 const conformReview = async () => {
   const isInvalid = await formRef.value?.validate()
   if (isInvalid) return false
   // 构造请求参数
-  form.enrollFileReviewList = reviewEnrollPreUploadList.value
+  form.reviewIds = reviewIds.value
+  const res = await review(form)
+  if (res.data) {
+    Message.success('审核成功');
+    reviewVisible.value = false;
+    reviewIds.value = [];
+    selectedKeys.value = []
+    resetForm();
+    search();
+  }
 
-  Message.success('审核成功');
-  reviewVisible.value = false;
-  reviewEnrollPreUploadList.value = [];
-  resetForm();
-  search();
 };
+
 // 打开审核弹窗
 const openReview = (record: EnrollPreUploadResp) => {
-  reviewEnrollPreUploadList.value.push({
-    id: record.id,
-    planId: record.planId,
-    candidateId: record.candidatesId
-  });
+  reviewIds.value.push(record.id);
   reviewVisible.value = true;
-  console.log(reviewEnrollPreUploadList.value);
 }
 
 // 重置
@@ -147,6 +208,12 @@ const reset = () => {
   queryForm.qualificationFileUrl = undefined
   search()
 }
+const DocumentPreRef = ref<InstanceType<typeof DocumentPre>>()
+
+const getDocList = (id: string) => {
+  DocumentPreRef.value?.onOpen(id)
+  showDocListVisible.value = true;
+};
 const getPreviewUrl = (url: string) => {
   if (!url) {
     Message.warning('暂无文件可预览');
