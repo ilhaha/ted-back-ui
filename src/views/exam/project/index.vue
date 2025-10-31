@@ -128,18 +128,19 @@ const {
 });
 const columns = ref<TableInstanceColumns[]>([
   // { title: "项目展示图", dataIndex: "imageUrl", slotName: "imageUrl" },
-  { title: "项目名称", dataIndex: "projectName", slotName: "projectName" },
-  { title: "所属八大类", dataIndex: "categoryName", slotName: "categoryName" },
-  { title: "项目代码", dataIndex: "projectCode", slotName: "projectCode" },
-  { title: "考试时长（分钟）", dataIndex: "examDuration", slotName: "examDuration" },
-  { title: "项目状态", dataIndex: "projectStatus", slotName: "projectStatus" },
-  { title: "项目类型", dataIndex: "projectType", slotName: "projectType" },
+  { title: "项目名称", dataIndex: "projectName", slotName: "projectName",align:"center" },
+  { title: "所属八大类", dataIndex: "categoryName", slotName: "categoryName",align:"center"  },
+  { title: "项目代码", dataIndex: "projectCode", slotName: "projectCode" ,align:"center" },
+  { title: "考试时长（分钟）", dataIndex: "examDuration", slotName: "examDuration" ,align:"center"  },
+  { title: "项目状态", dataIndex: "projectStatus", slotName: "projectStatus",align:"center"  },
+  { title: "项目类型", dataIndex: "projectType", slotName: "projectType",align:"center"  },
+  { title: "项目收费标准（元）", dataIndex: "examFee", slotName: "examFee" ,align:"center" },
   {
     title: "创建人",
     dataIndex: "createUserString",
-    slotName: "createUserString",
+    slotName: "createUserString",align:"center"
   },
-  { title: "创建时间", dataIndex: "createTime", slotName: "createTime" },
+  { title: "创建时间", dataIndex: "createTime", slotName: "createTime" ,align:"center" },
   //{ title: "部门名称", dataIndex: "deptName", slotName: "deptName" },
   {
     title: "操作",

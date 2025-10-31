@@ -169,6 +169,14 @@ const columns: ColumnItem[] = reactive([
       ],
       placeholder: '请选择项目状态'
     }
+  },
+    {
+    label: '收费标准（元）',
+    prop: 'examFee',
+    field: 'examFee',
+    type: 'input-number',
+    required: true,
+    span: 24,
   }
 ])
 
