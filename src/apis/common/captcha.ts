@@ -5,6 +5,14 @@ export type * from './type'
 
 const BASE_URL = '/captcha'
 
+
+
+
+/** @desc 作业人员获取短信验证码进行报名 */
+export function getApplySmsCaptcha(phone: string, captchaReq: T.BehaviorCaptchaReq) {
+  return http.get<boolean>(`${BASE_URL}/apply/sms?phone=${phone}&captchaVerification=${encodeURIComponent(captchaReq.captchaVerification || '')}`)
+}
+
 /** @desc 获取图片验证码 */
 export function getImageCaptcha() {
   return http.get<T.ImageCaptchaResp>(`${BASE_URL}/image`)
@@ -28,4 +36,10 @@ export function getBehaviorCaptcha(req: any) {
 /** @desc 校验行为验证码 */
 export function checkBehaviorCaptcha(req: any) {
   return http.post<T.CheckBehaviorCaptchaResp>(`${BASE_URL}/behavior`, req)
+}
+
+
+/** @desc 验证作业人员获取短信验证码进行报名短信验证码 */
+export function getApplySmsCaptchaStatus(phone: string, captcha: string) {
+  return http.get<boolean>(`${BASE_URL}/apply/getSmsCaptchaStatus`, { phone, captcha })
 }

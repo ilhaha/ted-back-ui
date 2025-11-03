@@ -21,6 +21,11 @@ export interface personFileQuery {
 }
 export interface personFilePageQuery extends personFileQuery, PageQuery {}
 
+/** @desc 扫码上传文件 */
+export function applyUpload(data: FormData) {
+  return http.post(`/upload/apply/file`, data)
+}
+
 export function listPersonFile(query: personFilePageQuery) {
   return http.get<PageRes<personFileResp[]>>(`/file/personFile`, query)
 
