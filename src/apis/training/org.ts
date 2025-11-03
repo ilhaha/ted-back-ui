@@ -49,6 +49,12 @@ export interface OrgQuery {
 export interface OrgPageQuery extends OrgQuery, PageQuery {}
 
 
+
+/** @desc 获取机构对应的项目-班级-考生级联选择 */
+export function getSelectOrgProjectClass(type:number) {
+  return http.get<any[]>(`${BASE_URL}/select/org/project/class/${type}`)
+}
+
 /** @desc 获取所有的机构作为选择器返回 */
 export function getOrgSelect() {
   return http.get(`${BASE_URL}/select`)

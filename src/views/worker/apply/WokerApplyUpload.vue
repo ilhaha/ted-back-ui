@@ -153,6 +153,7 @@ import { ref, onMounted, reactive, computed, h } from 'vue'
 import { Modal, Message, Input } from '@arco-design/web-vue'
 import { applyUpload } from '@/apis/file/personFile'
 import { workerSumbitUpload } from '@/apis/worker/workerApply'
+import { encryptByRsa } from '@/utils/encrypt'
 
 const showDialog = ref(false)
 const props = defineProps<{
@@ -193,7 +194,7 @@ const form = ref({
     classId: props.classId,
     qualificationName: ''
 })
-
+const temporary = ref('')
 // 提交上传
 const submitUpload = async (phone: string, idLast6: string) => {
     if (!checkIdCardLast6(form.value.idCardNumber, idLast6)) {
@@ -208,9 +209,20 @@ const submitUpload = async (phone: string, idLast6: string) => {
         typeId,
         urls: files.map(f => f.url)
     }))
-    const res = await workerSumbitUpload(form.value)
-    if (res.data) {
-        Message.success("提交成功")
+    temporary.value = form.value.idCardNumber
+    form.value.idCardNumber = encryptByRsa((form.value.idCardNumber) || '')
+    form.value.phone = encryptByRsa((form.value.phone) || '')
+    try {
+        const res = await workerSumbitUpload(form.value)
+        if (res.data) {
+            temporary.value = ''
+            Message.success("提交成功")
+            emit('switchPhoneVerify', false)
+        }
+    } catch (error) {
+
+    } finally {
+        form.value.idCardNumber = temporary.value
     }
 }
 

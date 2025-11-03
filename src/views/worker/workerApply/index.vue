@@ -1,83 +1,115 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="作业人员报名管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable title="作业人员报名管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
+      @select-all="selectAll">
       <template #toolbar-left>
-	    <a-input-search v-model="queryForm.classId" placeholder="请输入报考项目ID" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.candidateName" placeholder="请输入作业人员姓名" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.gender" placeholder="请输入作业人员性别" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.phone" placeholder="请输入作业人员手机号" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.qualificationName" placeholder="请输入报名资格申请表名称" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.idCardNumber" placeholder="请输入身份证号" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.idCardPhotoFront" placeholder="请输入身份证正面存储地址" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.idCardPhotoBack" placeholder="请输入身份证反面存储地址" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.facePhoto" placeholder="请输入一寸免冠照存储地址" allow-clear @search="search" />
-        <a-select
-          v-model="queryForm.status"
-          :options="status_enum"
-          placeholder="请选择审核状态:0待审核,1已生效,2未通过"
-          allow-clear
-          style="width: 150px"
-          @change="search"
-        />
+        <a-cascader v-model="queryForm.classId" :options="orgCategoryClassOptions" placeholder="请选择班级" allow-clear
+          @change="search" />
+        <a-select v-model="queryForm.status" placeholder="审核状态" allow-clear class="search-input ml-2" @change="search">
+          <a-option value="0">未审核</a-option>
+          <a-option value="1">审核通过</a-option>
+          <a-option value="2">审核未通过</a-option>
+          <a-option value="3">虚假材料</a-option>
+        </a-select>
+        <a-input-search v-model="queryForm.candidateName" placeholder="请输入作业人员姓名" allow-clear @search="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
         </a-button>
       </template>
       <template #toolbar-right>
-        <a-button v-permission="['worker:workerApply:add']" type="primary" @click="onAdd">
+        <a-button v-permission="['worker:workerApply:review']" type="primary" @click="batchReview"
+          :disabled="!selectedKeys.length">
           <template #icon><icon-plus /></template>
-          <template #default>新增</template>
+          <template #default>批量审核</template>
         </a-button>
-        <a-button v-permission="['worker:workerApply:export']" @click="onExport">
-          <template #icon><icon-download /></template>
-          <template #default>导出</template>
-        </a-button>
+      </template>
+      <template #projectName="{ record }">
+        {{ record.categoryName + " / " + record.projectName }}
+      </template>
+      <template #idCardPhotoFront="{ record }">
+        <a-space v-if="record.idCardPhotoFront">
+          <a-image width="80" height="60" :src="record.idCardPhotoFront" :preview-props="{ zoomRate: 1.5 }"
+            class="preview-image" fit="cover" @error="handleImageError" />
+          <a-image width="80" height="60" :src="record.idCardPhotoBack" :preview-props="{ zoomRate: 1.5 }"
+            class="preview-image" fit="cover" @error="handleImageError" />
+        </a-space>
+        <span v-else>-</span>
+      </template>
+      <template #facePhoto="{ record }">
+        <a-space v-if="record.facePhoto">
+          <a-image width="80" height="60" :src="record.facePhoto" :preview-props="{ zoomRate: 1.5 }"
+            class="preview-image" fit="cover" @error="handleImageError" />
+        </a-space>
+        <span v-else>-</span>
+      </template>
+      <template #qualificationPath="{ record }">
+        <a-link v-permission="['document:workerApply:list']" title="详情"
+          @click="getPreviewUrl(record.qualificationPath)">预览</a-link>
+      </template>
+      <template #docList="{ record }">
+        <a-link v-permission="['document:workerApply:list']" title="详情" @click="getDocList(record.id)">查看</a-link>
+      </template>
+      <template #status="{ record }">
+        <a-tag :color="getStatusColor(record.status)">
+          {{ getStatusText(record.status) }}
+        </a-tag>
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['worker:workerApply:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-          <a-link v-permission="['worker:workerApply:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-          <a-link
-            v-permission="['worker:workerApply:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
-            删除
-          </a-link>
+          <a-link v-permission="['worker:workerApply:review']" title="审核" @click="openReview(record)"
+            v-if="record.status == 0">审核</a-link>
         </a-space>
       </template>
     </GiTable>
+    <a-modal v-model:visible="showDocListVisible" title="作业人员提交的资料" :mask-closable="false" :esc-to-close="false"
+      :width="900" draggable :footer="null">
+      <WorkerApplyDocument ref="WorkerApplyDocumentRef" />
+    </a-modal>
 
-    <WorkerApplyAddModal ref="WorkerApplyAddModalRef" @save-success="search" />
-    <WorkerApplyDetailDrawer ref="WorkerApplyDetailDrawerRef" />
+    <a-modal v-model:visible="reviewVisible" title="作业人员报考审核" :mask-closable="false" :esc-to-close="false"
+      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="conformReview" @close="resetForm">
+      <a-form ref="formRef" :model="form" layout="vertical">
+        <a-form-item field="status" label="审核结果" :rules="[{ required: true, message: '请选择审核结果' }]">
+          <a-radio-group v-model="form.status">
+            <a-radio :value="1">审核通过</a-radio>
+            <a-radio :value="2">退回补正</a-radio>
+            <a-radio :value="3">虚假资料</a-radio>
+          </a-radio-group>
+        </a-form-item>
+        <a-form-item v-if="form.status === 2 || form.status === 3" field="remark"
+          :label="form.status === 2 ? '退回原因' : '虚假资料原因'"
+          :rules="[{ required: true, message: form.status === 2 ? '请填写退回原因' : '请填写虚假资料原因' }]">
+          <a-input v-model="form.remark" :placeholder="form.status === 2 ? '请输入退回原因' : '请输入虚假资料原因'" allow-clear />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import WorkerApplyAddModal from './WorkerApplyAddModal.vue'
-import WorkerApplyDetailDrawer from './WorkerApplyDetailDrawer.vue'
-import { type WorkerApplyResp, type WorkerApplyQuery, deleteWorkerApply, exportWorkerApply, listWorkerApply } from '@/apis/worker/workerApply'
+import WorkerApplyDocument from '../workerApplyDocument/index.vue'
+import { type WorkerApplyResp, type WorkerApplyQuery, review, listWorkerApply } from '@/apis/worker/workerApply'
+import { getSelectOrgProjectClass } from '@/apis/training/org'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
+import { Message } from '@arco-design/web-vue'
+import { useResetReactive } from '@/hooks'
+import { useWindowSize } from '@vueuse/core'
+
 
 defineOptions({ name: 'WorkerApply' })
+const { width } = useWindowSize()
+const [form, resetForm] = useResetReactive({
+  status: 1,
+  remark: undefined,
+  reviewIds: undefined
+})
 
 
 const queryForm = reactive<WorkerApplyQuery>({
@@ -99,23 +131,23 @@ const {
   loading,
   pagination,
   search,
-  handleDelete
+  select,
+  selectAll,
+  selectedKeys
 } = useTable((page) => listWorkerApply({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
-  { title: '主键ID', dataIndex: 'id', slotName: 'id' },
-  { title: '报考项目ID', dataIndex: 'classId', slotName: 'classId' },
-  { title: '作业人员姓名', dataIndex: 'candidateName', slotName: 'candidateName' },
-  { title: '作业人员性别', dataIndex: 'gender', slotName: 'gender' },
-  { title: '作业人员手机号', dataIndex: 'phone', slotName: 'phone' },
-  { title: '报名资格申请表路径', dataIndex: 'qualificationPath', slotName: 'qualificationPath' },
-  { title: '报名资格申请表名称', dataIndex: 'qualificationName', slotName: 'qualificationName' },
-  { title: '身份证号', dataIndex: 'idCardNumber', slotName: 'idCardNumber' },
-  { title: '身份证正面存储地址', dataIndex: 'idCardPhotoFront', slotName: 'idCardPhotoFront' },
-  { title: '身份证反面存储地址', dataIndex: 'idCardPhotoBack', slotName: 'idCardPhotoBack' },
-  { title: '一寸免冠照存储地址', dataIndex: 'facePhoto', slotName: 'facePhoto' },
-  { title: '审核状态:0待审核,1已生效,2未通过', dataIndex: 'status', slotName: 'status' },
-  { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
-  { title: '删除标记(0未删,1已删)', dataIndex: 'isDeleted', slotName: 'isDeleted' },
+  { title: '姓名', dataIndex: 'candidateName', slotName: 'candidateName', },
+  { title: '性别', dataIndex: 'gender', slotName: 'gender', width: 80 },
+  { title: '联系方式', dataIndex: 'phone', slotName: 'phone', width: 120 },
+  { title: '报考项目', dataIndex: 'projectName', slotName: 'projectName' },
+  { title: '预加入班级', dataIndex: 'className', slotName: 'className' },
+  { title: '身份证号', dataIndex: 'idCardNumber', slotName: 'idCardNumber', },
+  { title: '身份证信息', dataIndex: 'idCardPhotoFront', slotName: 'idCardPhotoFront', width: 200 },
+  { title: '一寸免冠照', dataIndex: 'facePhoto', slotName: 'facePhoto', width: 120 },
+  { title: '资格申请表', dataIndex: 'qualificationPath', slotName: 'qualificationPath' },
+  { title: '报考资料', dataIndex: 'docList', slotName: 'docList' },
+  { title: '审核意见', dataIndex: 'remark', slotName: 'remark' },
+  { title: '状态', dataIndex: 'status', slotName: 'status' },
   {
     title: '操作',
     dataIndex: 'action',
@@ -123,54 +155,152 @@ const columns = ref<TableInstanceColumns[]>([
     width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['worker:workerApply:detail', 'worker:workerApply:update', 'worker:workerApply:delete'])
+    show: has.hasPermOr(['worker:workerApply:detail', 'worker:workerApply:update', 'worker:workerApply:delete', 'worker:workerApply:review'])
   }
 ]);
+
+const rowSelection = reactive({
+  type: 'checkbox',
+  showCheckedAll: true,
+  onlyCurrent: false,
+  selectedRowKeys: selectedKeys,
+  onChange: (keys: string[]) => {
+    selectedKeys.value = keys
+  }
+})
+
+const showDocListVisible = ref(false);
+
+const reviewVisible = ref(false);
+
+const reviewIds = ref<any[]>([]);
+
+const formRef = ref()
+
+const orgCategoryClassOptions = ref<any[]>([])
+
+// 批量审核
+const batchReview = () => {
+  if (selectedKeys.value.length === 0) {
+    Message.warning("请选择需要审核的记录");
+    return;
+  }
+  // 先清空
+  reviewIds.value = [];
+  for (const row of dataList.value) {
+    if (selectedKeys.value.includes(row.id)) {
+      if (row.status !== 0) {
+        Message.warning("选中的记录中包含非未审核状态的数据，请重新选择");
+        return;
+      }
+      reviewIds.value.push(row.id);
+    }
+  }
+  // 打开批量审核弹窗
+  reviewVisible.value = true;
+};
+
+// 确认审核
+const conformReview = async () => {
+  const isInvalid = await formRef.value?.validate()
+  if (isInvalid) return false
+  //构造请求参数
+  form.reviewIds = reviewIds.value
+  const res = await review(form)
+  if (res.data) {
+    Message.success('审核成功');
+    reviewVisible.value = false;
+    reviewIds.value = [];
+    selectedKeys.value = []
+    resetForm();
+    search();
+  }
+
+};
+
+// 打开审核弹窗
+const openReview = (record: WorkerApplyResp) => {
+  reviewIds.value.push(record.id);
+  reviewVisible.value = true;
+}
+
 
 // 重置
 const reset = () => {
   queryForm.classId = undefined
   queryForm.candidateName = undefined
-  queryForm.gender = undefined
-  queryForm.phone = undefined
-  queryForm.qualificationName = undefined
-  queryForm.idCardNumber = undefined
-  queryForm.idCardPhotoFront = undefined
-  queryForm.idCardPhotoBack = undefined
-  queryForm.facePhoto = undefined
   queryForm.status = undefined
   search()
 }
 
-// 删除
-const onDelete = (record: WorkerApplyResp) => {
-  return handleDelete(() => deleteWorkerApply(record.id), {
-    content: `是否确定删除该条数据？`,
-    showModal: true
-  })
+
+const WorkerApplyDocumentRef = ref<InstanceType<typeof WorkerApplyDocument>>()
+
+const getDocList = (id: string) => {
+  WorkerApplyDocumentRef.value?.onOpen(id)
+  showDocListVisible.value = true;
+};
+const getPreviewUrl = (url: string) => {
+  if (!url) {
+    Message.warning('暂无文件可预览');
+    return;
+  }
+
+  // 提取文件扩展名
+  const ext = url.split('.').pop()?.toLowerCase();
+
+  if (ext === 'pdf') {
+    //  PDF 直接在浏览器中预览
+    window.open(url, '_blank');
+  } else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
+    //  Office 文件使用微软在线预览
+    const previewUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
+    window.open(previewUrl, '_blank');
+  } else {
+    Message.warning('暂不支持此文件类型预览');
+  }
+};
+
+const handleImageError = (e: Event) => {
+  const img = e.target as HTMLImageElement;
+  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // 你的默认图片路径
+  img.onerror = null; // 防止默认图片也加载失败时无限循环
+};
+
+const getStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return '未审核'
+    case 1:
+      return '审核通过'
+    case 2:
+      return '审核不通过'
+    case 3:
+      return '虚假材料'
+    default:
+      return ''
+  }
 }
 
-// 导出
-const onExport = () => {
-  useDownload(() => exportWorkerApply(queryForm))
+const getStatusColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return 'blue'      // 未持有显示红色
+    case 1:
+      return 'green'    // 持有未到期显示绿色
+    case 2:
+      return 'orange'   // 持有已到期显示橙色
+    case 3:
+      return 'red'     // 即将到期显示蓝色
+    default:
+      return 'gray'
+  }
 }
 
-const WorkerApplyAddModalRef = ref<InstanceType<typeof WorkerApplyAddModal>>()
-// 新增
-const onAdd = () => {
-  WorkerApplyAddModalRef.value?.onAdd()
-}
-
-// 修改
-const onUpdate = (record: WorkerApplyResp) => {
-  WorkerApplyAddModalRef.value?.onUpdate(record.id)
-}
-
-const WorkerApplyDetailDrawerRef = ref<InstanceType<typeof WorkerApplyDetailDrawer>>()
-// 详情
-const onDetail = (record: WorkerApplyResp) => {
-  WorkerApplyDetailDrawerRef.value?.onOpen(record.id)
-}
+onMounted(async () => {
+  const res = await getSelectOrgProjectClass(0)
+  orgCategoryClassOptions.value = res.data
+})
 </script>
 
 <style scoped lang="scss"></style>

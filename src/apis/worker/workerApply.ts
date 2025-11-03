@@ -36,6 +36,11 @@ export interface WorkerApplyQuery {
 }
 export interface WorkerApplyPageQuery extends WorkerApplyQuery, PageQuery {}
 
+/** @desc 审核作业人员报名 */
+export function review(data: any) {
+  return http.post(`${BASE_URL}/review`, data)
+}
+
 /** @desc 作业人员提交报名 */
 export function workerSumbitUpload(data: any) {
   return http.post(`${BASE_URL}/submit`, data)
