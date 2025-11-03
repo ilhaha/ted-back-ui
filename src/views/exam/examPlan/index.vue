@@ -108,6 +108,7 @@
             @click="onDelete(record)">
             删除
           </a-link>
+             <a-link v-permission="['exam:examPlan:detail']" title="确认时间地点" @click="onUpdate(record)">确认时间地点</a-link>
         </a-space>
       </template>
     </GiTable>
@@ -312,8 +313,13 @@ const onExamineA = (record: ExamPlanResp) => {
 const onDetail = (record: ExamPlanResp) => {
   ExamPlanDetailDrawerRef.value?.onOpen(record.id);
 };
-// todo上传
 
+// 修改
+const onUpdate = (record: CandidateCertificateResp) => {
+  ExamPlanAddModalRef.value?.onUpdate(record.id)
+}
+
+// todo上传
 const test = (selectedRows: ProjectResp[]) => {
   console.log("已选择的行", selectedRows);
 };
