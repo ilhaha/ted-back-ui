@@ -152,7 +152,7 @@
 import { ref, onMounted, reactive, computed, h } from 'vue'
 import { Modal, Message, Input } from '@arco-design/web-vue'
 import { applyUpload } from '@/apis/file/personFile'
-import { workerSumbitUpload } from '@/apis/worker/workerApply'
+import { workerSumbitUpload, workerRestSumbitUpload } from '@/apis/worker/workerApply'
 import { encryptByRsa } from '@/utils/encrypt'
 
 const showDialog = ref(false)
@@ -196,11 +196,13 @@ const form = ref({
 })
 const temporary = ref('')
 // 提交上传
-const submitUpload = async (phone: string, idLast6: string) => {
+const submitUpload = async (phone: string, idLast6: string, isRestUpload: boolean) => {
     if (!checkIdCardLast6(form.value.idCardNumber, idLast6)) {
         Message.error("上传的身份证与填写的身份证后六位不匹配，请选择操作方式。");
         parentIdLast6.value = idLast6;
-        showDialog.value = true;
+        if (!isRestUpload) {
+            showDialog.value = true;
+        }
         emit('switchPhoneVerify', false)
         return;
     }
@@ -213,14 +215,18 @@ const submitUpload = async (phone: string, idLast6: string) => {
     form.value.idCardNumber = encryptByRsa((form.value.idCardNumber) || '')
     form.value.phone = encryptByRsa((form.value.phone) || '')
     try {
-        const res = await workerSumbitUpload(form.value)
+        const res = isRestUpload ? await workerRestSumbitUpload(form.value) : await workerSumbitUpload(form.value)
         if (res.data) {
-            temporary.value = ''
             Message.success("提交成功")
             emit('switchPhoneVerify', false)
+            emit('submitAfter', temporary.value.slice(-6))
+            temporary.value = ''
         }
     } catch (error) {
-
+        if (error.message == '您已提交过报名，请勿重复提交！') {
+            emit('submitAfter', temporary.value.slice(-6))
+            emit('switchPhoneVerify', false)
+        }
     } finally {
         form.value.idCardNumber = temporary.value
     }

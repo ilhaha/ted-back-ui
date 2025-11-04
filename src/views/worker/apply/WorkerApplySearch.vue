@@ -25,29 +25,35 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
     (e: 'verifiedResult', payload: any): void
+    (e: 'switchPhoneVerify', payload: boolean): void
 }>()
 
 const showDialog = ref(true)
 const idLast6 = ref('')
-
+const isUploadedFlag = ref(false)
 const verifyAndGet = async () => {
     if (loading.value) return
     try {
         const res = await verify({ idLast6: idLast6.value, classId: props.classId })
         const projectNeedUploadDocs = res.data.projectNeedUploadDocs;
-        // if (projectNeedUploadDocs) {
-        //     Message.warning(`您还未提交过【 ${projectNeedUploadDocs[0].projectName} 】的报名材料，请先提交`)
-        // }
-        emit('verifiedResult', { projectNeedUploadDocs, idLast6: idLast6.value })
+        const workerUploadedDocs = res.data.workerUploadedDocs
+        if (isUploadedFlag.value) {
+            Message.warning("您已提交过报名，不可重复提交！")
+            emit('switchPhoneVerify', false)
+        }
+        emit('verifiedResult', { projectNeedUploadDocs, idLast6: idLast6.value, workerUploadedDocs })
         showDialog.value = false
     } catch (e) {
+        console.log(e);
+        
     } finally {
         loading.value = false
     }
 }
 
-const setIdLast6 = (val: string) => {
+const setIdLast6 = (val: string, isUploaded: boolean) => {
     idLast6.value = val
+    isUploadedFlag.value = isUploaded
     verifyAndGet()
 }
 

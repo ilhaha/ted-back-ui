@@ -41,6 +41,11 @@ export function review(data: any) {
   return http.post(`${BASE_URL}/review`, data)
 }
 
+/** @desc 作业人员重新提交报名 */
+export function workerRestSumbitUpload(data: any) {
+  return http.post(`${BASE_URL}/rest/submit`, data)
+}
+
 /** @desc 作业人员提交报名 */
 export function workerSumbitUpload(data: any) {
   return http.post(`${BASE_URL}/submit`, data)

@@ -5,7 +5,8 @@
         </div>
 
         <div class="scroll-container">
-            <WorkerApplySearch ref="workerApplySearchRef" :classId='classId' @verifiedResult=handVerifiedResult />
+            <WorkerApplySearch ref="workerApplySearchRef" :classId='classId' @verifiedResult=handVerifiedResult
+                @switchPhoneVerify="handSwitchPhoneVerify" />
 
             <div class="info-card" v-if="projectNeedUploadDocs.length > 0">
                 <div class="info-header">
@@ -13,6 +14,7 @@
                 </div>
                 <div class="info-content">
                     <p class="exam-info">
+                        <span v-if="candidateName">{{ candidateName }}<br></span>
                         {{ projectNeedUploadDocs[0].categoryName || '' }} /
                         {{ projectNeedUploadDocs[0].projectName || '' }}
                         <span class="project-code">[{{ projectNeedUploadDocs[0].projectCode || '' }}]</span>
@@ -20,15 +22,23 @@
                 </div>
             </div>
 
-            <WokerApplyUpload ref="wokerApplyUploadRef" :projectNeedUploadDocs="projectNeedUploadDocs"
+            <WokerApplyNeedUpload ref="WokerApplyNeedUploadRef" :projectNeedUploadDocs="projectNeedUploadDocs"
                 :classId="classId" @isAllUploaded="handIsAllUploaded" @switchPhoneVerify="handSwitchPhoneVerify"
-                @updateIdCardLast6="hanldUpdateIdCardLast6" v-if="projectNeedUploadDocs.length > 0" />
+                @updateIdCardLast6="hanldUpdateIdCardLast6" @submitAfter="handSubmitAfter"
+                v-if="projectNeedUploadDocs.length > 0 && !workerUploadedDocs" />
+
+            <WokerApplyUploaded ref="WokerApplyUploadedRef" :workerUploadedDocs="workerUploadedDocs"
+                v-if="workerUploadedDocs" />
         </div>
     </div>
     <div class="footer">
         <a-button type="primary" size="large" class="confirm-btn" :disabled="isAllUploaded"
-            @click="openPhoneVerifiedModel">
-            确认上传
+            @click="openPhoneVerifiedModel" v-if="projectNeedUploadDocs.length > 0 && !workerUploadedDocs">
+            确认提交
+        </a-button>
+        <a-button type="primary" size="large" class="confirm-btn" @click="restUpload"
+            v-if="workerUploadedDocs && workerUploadedDocs.status == 2">
+            重新提交
         </a-button>
     </div>
 
@@ -65,17 +75,19 @@
 
 <script setup lang="ts">
 import WorkerApplySearch from './WorkerApplySearch.vue';
-import WokerApplyUpload from './WokerApplyUpload.vue';
+import WokerApplyNeedUpload from './WokerApplyNeedUpload.vue';
+import WokerApplyUploaded from './WokerApplyUploaded.vue';
 import { ref, onMounted, reactive, computed, h, inject } from 'vue'
 import { type BehaviorCaptchaReq, getApplySmsCaptchaStatus, getApplySmsCaptcha } from '@/apis'
 import * as Regexp from '@/utils/regexp'
 import { useRoute } from 'vue-router'
-import { Message } from '@arco-design/web-vue'
+import { Message, Modal } from '@arco-design/web-vue'
 import { encryptByRsa } from '@/utils/encrypt'
 const route = useRoute()
 const title = ref('作业人员报考资料补全');
 const classId = ref('')
 const projectNeedUploadDocs = ref<any[]>([])
+const workerUploadedDocs = ref<any>()
 const isAllUploaded = ref(true)
 const phoneVerifiedModel = ref(false)
 const loading = ref(false)
@@ -92,7 +104,8 @@ const captchaMode = ref('pop')
 const captchaBtnName = ref('获取验证码')
 const phoneVerifiedRef = ref(null)
 const idLast6 = ref('')
-
+const isRestUpload = ref(false)
+const candidateName = ref('')
 // 手机号验证数据
 const phoneVerifiedForm = reactive({
     phone: '',
@@ -115,6 +128,19 @@ const resetForm = () => {
     })
 }
 
+// 重新提交
+const restUpload = () => {
+    Modal.confirm({
+        title: '确认重新上传？',
+        content: '重新上传将清空已提交的材料，是否继续？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk() {
+            isRestUpload.value = true
+            workerUploadedDocs.value = undefined
+        },
+    })
+}
 // 获取验证码
 const getCaptcha = async (captchaReq: BehaviorCaptchaReq) => {
     try {
@@ -135,7 +161,6 @@ const getCaptcha = async (captchaReq: BehaviorCaptchaReq) => {
         }, 1000)
     } catch (e) {
         resetCaptcha()
-        Message.error(e)
     } finally {
         captchaLoading.value = false
     }
@@ -166,8 +191,9 @@ const cancelPhoneVerified = () => {
     phoneVerifiedModel.value = false
 }
 
-const wokerApplyUploadRef = ref<InstanceType<typeof WokerApplyUpload>>()
+const WokerApplyNeedUploadRef = ref<InstanceType<typeof WokerApplyNeedUpload>>()
 const workerApplySearchRef = ref<InstanceType<typeof WorkerApplySearch>>()
+const WokerApplyUploadedRef = ref<InstanceType<typeof WokerApplyUploaded>>()
 
 // 提交表单确认上传
 const phoneVerifiedSubmit = async ({ values, errors }) => {
@@ -184,7 +210,7 @@ const phoneVerifiedSubmit = async ({ values, errors }) => {
             Message.error('验证码错误')
             return
         }
-        wokerApplyUploadRef.value?.submitUpload(phoneVerifiedForm.phone, idLast6.value)
+        WokerApplyNeedUploadRef.value?.submitUpload(phoneVerifiedForm.phone, idLast6.value, isRestUpload.value)
     } finally {
         loading.value = false
     }
@@ -193,10 +219,13 @@ const openPhoneVerifiedModel = () => {
     phoneVerifiedModel.value = true
 }
 
+const handSubmitAfter = (res: any) => {
+    workerApplySearchRef.value?.setIdLast6(res, false)
+}
 
 const hanldUpdateIdCardLast6 = (res: any) => {
     idLast6.value = res
-    workerApplySearchRef.value?.setIdLast6(res)
+    workerApplySearchRef.value?.setIdLast6(res, true)
 }
 
 const handSwitchPhoneVerify = (res: any) => {
@@ -209,7 +238,9 @@ const handIsAllUploaded = (res: any) => {
 
 const handVerifiedResult = (res: any) => {
     projectNeedUploadDocs.value = res.projectNeedUploadDocs
-    idLast6.value = res.idLast6 
+    workerUploadedDocs.value = res.workerUploadedDocs
+    candidateName.value = res.workerUploadedDocs ? res.workerUploadedDocs.candidateName : ''
+    idLast6.value = res.idLast6
 }
 
 
