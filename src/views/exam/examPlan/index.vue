@@ -108,7 +108,10 @@
             @click="onDelete(record)">
             删除
           </a-link>
-             <a-link v-permission="['exam:examPlan:detail']" title="确认时间地点" @click="onUpdate(record)">确认时间地点</a-link>
+             <div v-if="record.isFinalConfirmed == 0">
+                    <a-link v-permission="['exam:examPlan:detail']" title="确认时间地点" 
+             @click="onUpdate(record)">确认时间地点</a-link>
+              </div>
         </a-space>
       </template>
     </GiTable>

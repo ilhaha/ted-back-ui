@@ -24,6 +24,7 @@ export interface ExamPlanResp {
   createUserString: string
   updateUserString: string
   disabled: boolean
+  isFinalConfirmed: String
 }
 export interface ExamPlanDetailResp {
   id: string
