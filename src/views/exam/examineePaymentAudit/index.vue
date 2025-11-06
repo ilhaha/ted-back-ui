@@ -38,6 +38,20 @@
           <template #default>重置</template>
         </a-button>
       </template>
+      <template #auditNoticeUrl="{ record }">
+        <a-link
+          @click="getPreviewUrl(record.auditNoticeUrl)"
+          v-if="record.auditNoticeUrl"
+          >{{record.noticeNo}}</a-link
+        >
+      </template>
+      <template #paymentProofUrl="{ record }">
+        <a-link
+          @click="getPreviewUrl(record.paymentProofUrl)"
+          v-if="record.paymentProofUrl"
+          >预览</a-link
+        >
+      </template>
       <template #toolbar-right>
         <a-button
           v-permission="['exam:examineePaymentAudit:add']"
@@ -58,26 +72,21 @@
       <template #action="{ record }">
         <a-space>
           <a-link
-            v-permission="['exam:examineePaymentAudit:detail']"
-            title="详情"
-            @click="onDetail(record)"
-            >详情</a-link
+            v-permission="['document:document:detail']"
+            title="审核"
+            @click="onExamine(record)"
+            >审核</a-link
           >
-          <a-link
-            v-permission="['exam:examineePaymentAudit:update']"
-            title="修改"
-            @click="onUpdate(record)"
-            >修改</a-link
-          >
-          <a-link
-            v-permission="['exam:examineePaymentAudit:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
-            删除
-          </a-link>
+          <!--          <a-link v-permission="['document:document:update']" title="修改" @click="onUpdate(record)">修改</a-link>-->
+          <!--          <a-link-->
+          <!--            v-permission="['document:document:delete']"-->
+          <!--            status="danger"-->
+          <!--            :disabled="record.disabled"-->
+          <!--            :title="record.disabled ? '不可删除' : '删除'"-->
+          <!--            @click="onDelete(record)"-->
+          <!--          >-->
+          <!--            删除-->
+          <!--          </a-link>-->
         </a-space>
       </template>
       <template #auditStatus="{ record }">
@@ -106,11 +115,14 @@
     <ExamineePaymentAuditDetailDrawer
       ref="ExamineePaymentAuditDetailDrawerRef"
     />
+    <PaymentModal ref="PaymentModalRef" @save-success="search" />
   </div>
 </template>
 
+
 <script setup lang="ts">
 import ExamineePaymentAuditAddModal from "./ExamineePaymentAuditAddModal.vue";
+import PaymentModal from "./PanymentModal.vue";
 import ExamineePaymentAuditDetailDrawer from "./ExamineePaymentAuditDetailDrawer.vue";
 import {
   type ExamineePaymentAuditResp,
@@ -142,7 +154,15 @@ const getStatusText = (auditStatus: number) => {
     case 2:
       return "审核通过";
     case 3:
-      return "审核驳回补正";
+      return "待补正";
+    case 4:
+      return "补正审核";
+    case 5:
+      return "退款审核";
+    case 6:
+      return "已退款";
+    case 7:
+      return "缴费审核通过，但驳回退款";
     default:
       return "";
   }
@@ -152,11 +172,19 @@ const getStatusColor = (auditStatus: number) => {
     case 0:
       return "red";
     case 1:
-      return "orange";
+      return "red";
     case 2:
       return "green";
     case 3:
+      return "orange";
+    case 4:
       return "red";
+    case 5:
+      return "red";
+    case 6:
+      return "orange";
+    case 7:
+      return "green";
     default:
       return "default";
   }
@@ -186,7 +214,7 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "paymentAmount",
   },
   {
-    title: "缴费通知单URL",
+    title: "缴费通知单",
     dataIndex: "auditNoticeUrl",
     slotName: "auditNoticeUrl",
   },
@@ -224,7 +252,6 @@ const reset = () => {
   queryForm.auditStatus = undefined;
   search();
 };
-
 // 删除
 const onDelete = (record: ExamineePaymentAuditResp) => {
   return handleDelete(() => deleteExamineePaymentAudit(record.id), {
@@ -250,11 +277,42 @@ const onUpdate = (record: ExamineePaymentAuditResp) => {
   ExamineePaymentAuditAddModalRef.value?.onUpdate(record.id);
 };
 
+const PaymentModalRef = ref<InstanceType<typeof PaymentModal>>();
+//审核
+const onExamine = async (record: ExamineePaymentAuditResp) => {
+  PaymentModalRef.value?.onExamine(
+    record.id,
+    record.examineeId,
+    record.examPlanId
+  );
+};
+
 const ExamineePaymentAuditDetailDrawerRef =
   ref<InstanceType<typeof ExamineePaymentAuditDetailDrawer>>();
 // 详情
 const onDetail = (record: ExamineePaymentAuditResp) => {
   ExamineePaymentAuditDetailDrawerRef.value?.onOpen(record.id);
+};
+
+const getPreviewUrl = (url: string) => {
+  if (!url) {
+    Message.warning("暂无文件可预览");
+    return;
+  }
+  // 提取文件扩展名
+  const ext = url.split(".").pop()?.toLowerCase();
+  if (ext === "pdf") {
+    //  PDF 直接在浏览器中预览
+    window.open(url, "_blank");
+  } else if (["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext)) {
+    //  Office 文件使用微软在线预览
+    const previewUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(
+      url
+    )}`;
+    window.open(previewUrl, "_blank");
+  } else {
+    Message.warning("暂不支持此文件类型预览");
+  }
 };
 </script>
 

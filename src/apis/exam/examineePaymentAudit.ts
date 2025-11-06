@@ -23,12 +23,14 @@ export interface ExamineePaymentAuditResp {
   createUserString: string
   updateUserString: string
   disabled: boolean
+  noticeNo:string
 }
 export interface ExamineePaymentAuditDetailResp {
   id: string
   examPlanId: string
   examineeId: string
   enrollId: string
+  noticeNo:string
   paymentAmount: string
   paymentTime: string
   paymentProofUrl: string
@@ -82,3 +84,9 @@ export function deleteExamineePaymentAudit(id: string) {
 export function exportExamineePaymentAudit(query: ExamineePaymentAuditQuery) {
   return http.download(`${BASE_URL}/export`, query)
 }
+
+/** @desc 考生缴费审核 */
+export function reviewPayment(query: ExamineePaymentAuditQuery) {
+  return http.post(`${BASE_URL}/reviewPayment`, query)
+}
+

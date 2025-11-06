@@ -19,7 +19,6 @@ import { useWindowSize } from '@vueuse/core'
 import { getExamineePaymentAudit, addExamineePaymentAudit, updateExamineePaymentAudit } from '@/apis/exam/examineePaymentAudit'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useResetReactive } from '@/hooks'
-import { useDict } from '@/hooks/app'
 
 const emit = defineEmits<{
   (e: 'save-success'): void
