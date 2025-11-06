@@ -57,6 +57,11 @@
           {{ getStatusText(record.status) }}
         </a-tag>
       </template>
+      <template #applyType="{ record }">
+        <a-tag :color="getApplyTypeColor(record.applyType)">
+          {{ getApplyTypeText(record.applyType) }}
+        </a-tag>
+      </template>
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['worker:workerApply:review']" title="审核" @click="openReview(record)"
@@ -141,7 +146,8 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '联系方式', dataIndex: 'phone', slotName: 'phone', width: 120 },
   { title: '报考项目', dataIndex: 'projectName', slotName: 'projectName' },
   { title: '预加入班级', dataIndex: 'className', slotName: 'className' },
-  { title: '身份证号', dataIndex: 'idCardNumber', slotName: 'idCardNumber', },
+  { title: '来源', dataIndex: 'applyType', slotName: 'applyType' },
+  { title: '身份证号', dataIndex: 'idCardNumber', slotName: 'idCardNumber' },
   { title: '身份证信息', dataIndex: 'idCardPhotoFront', slotName: 'idCardPhotoFront', width: 200 },
   { title: '一寸免冠照', dataIndex: 'facePhoto', slotName: 'facePhoto', width: 120 },
   { title: '资格申请表', dataIndex: 'qualificationPath', slotName: 'qualificationPath' },
@@ -267,6 +273,29 @@ const handleImageError = (e: Event) => {
   img.onerror = null; // 防止默认图片也加载失败时无限循环
 };
 
+
+const getApplyTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return 'blue'
+    case 1:
+      return 'orange'
+    default:
+      return 'gray'
+  }
+}
+
+const getApplyTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return '扫码报考'
+    case 1:
+      return '机构报考'
+    default:
+      return ''
+  }
+}
+
 const getStatusText = (status: number) => {
   switch (status) {
     case 0:
@@ -281,6 +310,7 @@ const getStatusText = (status: number) => {
       return ''
   }
 }
+
 
 const getStatusColor = (status: number) => {
   switch (status) {
