@@ -148,7 +148,7 @@ const queryForm = reactive<ExamineePaymentAuditQuery>({
 const getStatusText = (auditStatus: number) => {
   switch (auditStatus) {
     case 0:
-      return "待缴费";
+      return "待上传缴费凭证";
     case 1:
       return "已缴费待审核";
     case 2:
@@ -219,11 +219,11 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "auditNoticeUrl",
   },
   {
-    title: "缴费凭证URL",
+    title: "凭证（缴费/退款）",
     dataIndex: "paymentProofUrl",
     slotName: "paymentProofUrl",
   },
-  { title: "缴费时间", dataIndex: "paymentTime", slotName: "paymentTime" },
+  { title: "提交时间", dataIndex: "paymentTime", slotName: "paymentTime" },
   {
     title: "审核状态",
     dataIndex: "auditStatus",
