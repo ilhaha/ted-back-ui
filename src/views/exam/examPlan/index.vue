@@ -35,8 +35,15 @@
 
       <template #toolbar-left>
         <div class="search-container">
-          <a-input v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear class="search-input" />
-          <a-input v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear class="search-input ml-2" />
+          <a-select v-model="queryForm.planType" placeholder="考试人员类型" allow-clear class="search-input ml-2"
+            @change="search">
+            <a-option :value="0">作业人员</a-option>
+            <a-option :value="1">检验人员</a-option>
+          </a-select>
+          <a-input-search @search="search" v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear
+            class="search-input ml-2" />
+          <a-input-search @search="search" v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear
+            class="search-input ml-2" />
           <!-- <a-year-picker
             v-model="queryForm.planYear"
             placeholder="选择年份"
@@ -44,7 +51,7 @@
             style="margin-left: 8px;"
           /> -->
           <!-- <a-input v-model="queryForm.locationName" placeholder="搜索考试地点" allow-clear class="search-input ml-2" /> -->
-          <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2"
+          <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2" @change="search"
             style="margin-left: 8px;">
             <a-option value="1">待主任审批</a-option>
             <a-option value="2">待市监局审批</a-option>
@@ -71,6 +78,11 @@
       <template #endTime="{ record }">
         {{ formatDate(record.endTime) }}
       </template>
+      <template #planType="{ record }">
+        <a-tag :color="getPlanTypeColor(record.planType)" bordered>
+          {{ getPlanTypeText(record.planType) }}
+        </a-tag>
+      </template>
       <template #status="{ record }">
         <a-tag :color="getStatusColor(record.status)" bordered>
           {{ getStatusText(record.status) }}
@@ -78,8 +90,7 @@
       </template>
       <template #examRoom="{ record }">
         <a-space>
-          <a-link title="查看考场" style="text-align: center"
-            @click="showExamRoom(record)">
+          <a-link title="查看考场" style="text-align: center" @click="showExamRoom(record)">
             查看考场
           </a-link>
         </a-space>
@@ -108,36 +119,24 @@
             @click="onDelete(record)">
             删除
           </a-link>
-             <div v-if="record.isFinalConfirmed == 0">
-                    <a-link v-permission="['exam:examPlan:detail']" title="确认时间地点" 
-             @click="onUpdate(record)">确认时间地点</a-link>
-              </div>
+          <div v-if="record.isFinalConfirmed == 0">
+            <a-link v-permission="['exam:examPlan:detail']" title="确认时间地点" @click="onUpdate(record)">确认时间地点</a-link>
+          </div>
         </a-space>
       </template>
     </GiTable>
 
     <!-- 查看考场弹窗 -->
-  <a-modal
-    v-model:visible="visible"
-    title="计划考场信息"
-    width="800px"
-    :footer="null"
-  >
-    <a-table
-      :dataSource="locationList"
-      :columns="locationColumns"
-      :pagination="false"
-      rowKey="locationId"
-      bordered
-      expandable="{ expandedRowRender }"
-    />
-  </a-modal>
+    <a-modal v-model:visible="visible" title="计划考场信息" width="800px" :footer="null">
+      <a-table :dataSource="locationList" :columns="locationColumns" :pagination="false" rowKey="locationId" bordered
+        expandable="{ expandedRowRender }" />
+    </a-modal>
 
     <ExamPlanAddModal ref="ExamPlanAddModalRef" @save-success="search" @update-reviewer="updateReviewer" />
     <ExamPlanDetailDrawer ref="ExamPlanDetailDrawerRef" />
     <ExamPlanOptionModal ref="ExamPlanOptionModalRef" />
     <ExamPlanLocaltionAndRoomModel ref="ExamPlanLocaltionAndRoomModelRef" />
-    <ExamPlanImportModal ref="ExamPlanImportModalRef" @import-success="search"/>
+    <ExamPlanImportModal ref="ExamPlanImportModalRef" @import-success="search" />
   </div>
 </template>
 
@@ -163,6 +162,7 @@ import ExamPlanLocaltionAndRoomModel from "./ExamPlanLocaltionAndRoomModel.vue";
 defineOptions({ name: "ExamPlan" });
 
 const queryForm = reactive<ExamPlanQuery>({
+  planType: 0,
   sort: ["tep.id,desc"],
 });
 
@@ -191,16 +191,21 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "examRoom",
     width: 100,
     align: "center",
-    show:true,
-  },  
+    show: true,
+  },
   // { title: "计划年份", dataIndex: "planYear", slotName: "planYear" },
   // { title: "考试开始时间", dataIndex: "startTime", slotName: "startTime" },
   // { title: "考试结束时间", dataIndex: "endTime", slotName: "endTime" },
   //{ title: "考试地点", dataIndex: "locationName", slotName: "locationId" },
-    {
+  {
     title: "容纳考试人数",
     dataIndex: "maxCandidates",
     slotName: "maxCandidates",
+  },
+  {
+    title: "考试人员类型",
+    dataIndex: "planType",
+    slotName: "planType",
   },
   { title: "计划状态", dataIndex: "status", slotName: "status" },
   { title: "审批人", dataIndex: "approvedUser", slotName: "approvedUser" },
@@ -234,6 +239,28 @@ const ExamPlanImportModalRef =
 
 const onImport = () => {
   ExamPlanImportModalRef.value?.onOpen();
+};
+
+const getPlanTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "orange";
+    case 1:
+      return "cyan";
+    default:
+      return "default";
+  }
+};
+
+const getPlanTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "作业人员";
+    case 1:
+      return "检验人员";
+    default:
+      return "未知类型";
+  }
 };
 
 const getStatusColor = (status: number) => {
@@ -283,6 +310,7 @@ const reset = () => {
   queryForm.planYear = undefined;
   queryForm.locationName = undefined;
   queryForm.status = undefined;
+  queryForm.planType = 0
   search();
 };
 
@@ -340,7 +368,7 @@ const locationList = ref<any[]>([])
 
 const ExamPlanLocaltionAndRoomModelRef = ref<InstanceType<typeof ExamPlanLocaltionAndRoomModel>>();
 // 查看考场信息
-const showExamRoom = async (record: ExamPlanResp) => {  
+const showExamRoom = async (record: ExamPlanResp) => {
   ExamPlanLocaltionAndRoomModelRef.value?.onOption(record)
 };
 

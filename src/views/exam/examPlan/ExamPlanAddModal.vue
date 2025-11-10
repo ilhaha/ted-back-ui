@@ -1,19 +1,9 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="currentColumns" />
     <template #footer>
-      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm"
-        >确认审核</a-button
-      >
+      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm">确认审核</a-button>
     </template>
   </a-modal>
 </template>
@@ -68,6 +58,7 @@ const [form, resetForm] = useResetReactive({
   enrollList: "",
   classroomId: [], // 初始化为空数组，用于存储多选结果
   examType: undefined,
+  planType: 0
 });
 
 const projectBindingDocList = ref([]);
@@ -229,6 +220,24 @@ const columns: ColumnItem[] = reactive([
       disabled: true,
     },
   },
+  {
+    label: '考试人员类型',
+    field: 'planType',
+    type: 'select',
+    span: 22,
+    props: computed(() => ({
+      allowSearch: false,
+      allowClear: false,
+      multiple: false,
+      disabled: isUpdate.value,
+      options: [
+        { label: '作业人员', value: 0 },
+        { label: '检验人员', value: 1 }
+      ],
+      fieldNames: { label: 'label', value: 'value' }
+    })),
+    rules: [{ required: true, message: '请选考试人员类型' }]
+  },
   // {
   //   label: '考试地点',
   //   prop: 'locationId',
@@ -277,20 +286,20 @@ const columns: ColumnItem[] = reactive([
   //   required: true,
   //   span: 22,
   // },
-{
-  label: "考试开始时间",
-  prop: "startTime",
-  field: "startTime",
-  type: "date-picker",
-  required: true,
-  span: 22,
-  props: computed(() => ({
-    showTime: isUpdate.value, // 修改时显示时间选择，新增时仅显示日期
-    format: isUpdate.value ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD",
-    valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
-    placeholder: isUpdate.value ? "请选择日期时间" : "请选择日期",
-  })),
-},
+  {
+    label: "考试开始时间",
+    prop: "startTime",
+    field: "startTime",
+    type: "date-picker",
+    required: true,
+    span: 22,
+    props: computed(() => ({
+      showTime: isUpdate.value, // 修改时显示时间选择，新增时仅显示日期
+      format: isUpdate.value ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD",
+      valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
+      placeholder: isUpdate.value ? "请选择日期时间" : "请选择日期",
+    })),
+  },
 
   // {
   //   label: '考试时间范围',
@@ -301,20 +310,20 @@ const columns: ColumnItem[] = reactive([
   //   span: 22,
   // },
 
-{
-  label: "考试报名时间",
-  prop: "enrollList",
-  type: "range-picker",
-  field: "enrollList",
-  required: true,
-  span: 22,
-  props: computed(() => ({
-    showTime: isUpdate.value ? { format: "HH:mm:ss" } : false,
-    format: isUpdate.value ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD",
-    valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
-    placeholder: isUpdate.value ? "请选择日期时间范围" : "请选择日期范围",
-  })),
-},
+  {
+    label: "考试报名时间",
+    prop: "enrollList",
+    type: "range-picker",
+    field: "enrollList",
+    required: true,
+    span: 22,
+    props: computed(() => ({
+      showTime: isUpdate.value ? { format: "HH:mm:ss" } : false,
+      format: isUpdate.value ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD",
+      valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
+      placeholder: isUpdate.value ? "请选择日期时间范围" : "请选择日期范围",
+    })),
+  },
 ]);
 
 const auditColumns: ColumnItem[] = reactive([
