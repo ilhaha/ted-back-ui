@@ -46,11 +46,12 @@
         <span v-else>-</span>
       </template>
       <template #qualificationPath="{ record }">
-        <a-link v-permission="['document:workerApply:list']" title="详情"
+        <a-link v-permission="['worker:workerApply:detail']" title="预览报名资格申请表"
           @click="getPreviewUrl(record.qualificationPath)">预览</a-link>
       </template>
       <template #docList="{ record }">
-        <a-link v-permission="['document:workerApply:list']" title="详情" @click="getDocList(record.id)">查看</a-link>
+        <a-link v-permission="['worker:workerApplyDocument:list']" title="查看资料"
+          @click="getDocList(record.id)">查看</a-link>
       </template>
       <template #status="{ record }">
         <a-tag :color="getStatusColor(record.status)">
@@ -120,13 +121,7 @@ const [form, resetForm] = useResetReactive({
 const queryForm = reactive<WorkerApplyQuery>({
   classId: undefined,
   candidateName: undefined,
-  gender: undefined,
-  phone: undefined,
-  qualificationName: undefined,
-  idCardNumber: undefined,
-  idCardPhotoFront: undefined,
-  idCardPhotoBack: undefined,
-  facePhoto: undefined,
+  isOrgQuery: false,
   status: undefined,
   sort: ['id,desc']
 })
