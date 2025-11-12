@@ -5,7 +5,7 @@
       :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
         <a-input-search v-model="queryForm.examPlanId" placeholder="请输入考试计划名称" allow-clear @search="search" />
-        <a-input-search v-model="queryForm.examineeId" placeholder="请输入检验人员姓名" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.examineeId" placeholder="请输入作业人员姓名" allow-clear @search="search" />
         <a-select v-model="queryForm.auditStatus" :options="audit_status_enum" placeholder="请选择审核状态" allow-clear
           style="width: 150px" @change="search" />
         <a-button @click="reset">
@@ -24,19 +24,20 @@
         </div>
         <span v-else>-</span>
       </template>
+
       <template #toolbar-right>
-        <!-- <a-button v-permission="['exam:examineePaymentAudit:add']" type="primary" @click="onAdd">
+        <!-- <a-button v-permission="['worker:examineePaymentAudit:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
 <template #default>新增</template>
 </a-button>
-<a-button v-permission="['exam:examineePaymentAudit:export']" @click="onExport">
+<a-button v-permission="['worker:examineePaymentAudit:export']" @click="onExport">
   <template #icon><icon-download /></template>
   <template #default>导出</template>
 </a-button> -->
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['exam:examineePaymentAudit:review']" title="审核" @click="onExamine(record)"
+          <a-link v-permission="['worker:examineePaymentAudit:review']" title="审核" @click="onExamine(record)"
             v-if="record.auditStatus == 1 || record.auditStatus == 4">审核</a-link>
         </a-space>
       </template>
@@ -77,7 +78,7 @@ const queryForm = reactive<ExamineePaymentAuditQuery>({
   examPlanId: undefined,
   examineeId: undefined,
   auditStatus: undefined,
-  isWorker: false,
+  isWorker: true,
   sort: ["paymentTime,asc"],
 });
 
@@ -87,9 +88,6 @@ const audit_status_enum = [
   { label: "审核通过", value: 2 },
   { label: "待补正", value: 3 },
   { label: "补正审核", value: 4 },
-  { label: "退款审核", value: 5 },
-  { label: "已退款", value: 6 },
-  { label: "退款驳回", value: 7 },
 ];
 
 const getStatusText = (auditStatus: number) => {
@@ -147,7 +145,7 @@ const {
   immediate: true,
 });
 const columns = ref<TableInstanceColumns[]>([
-  { title: "检验人员姓名", dataIndex: "examineeName", slotName: "examineeName", width: 120 },
+  { title: "作业人员姓名", dataIndex: "examineeName", slotName: "examineeName", width: 120 },
   { title: "考试计划名称", dataIndex: "planName", slotName: "planName" },
   {
     title: "应缴费金额（元）",
@@ -180,9 +178,9 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:examineePaymentAudit:detail",
-      "exam:examineePaymentAudit:update",
-      "exam:examineePaymentAudit:delete",
+      "worker:examineePaymentAudit:detail",
+      "worker:examineePaymentAudit:update",
+      "worker:examineePaymentAudit:delete",
     ]),
   },
 ]);

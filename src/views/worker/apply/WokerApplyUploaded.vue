@@ -4,7 +4,7 @@
         <div class="tips-card warning-tips" v-if="workerUploadedDocs.status == 0">
             <div class="tips-icon">ℹ️</div>
             <div class="tips-text">
-                您提交的报考资料已提交，等待审核，请耐心等待。
+                您的报考资料已成功提交，正在审核中，请耐心等待审核结果。
             </div>
         </div>
 

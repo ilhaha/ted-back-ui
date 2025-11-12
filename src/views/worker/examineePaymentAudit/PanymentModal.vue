@@ -113,7 +113,6 @@ const save = async () => {
     auditStatus: form.auditStatus,
     rejectReason: form.rejectReason,
   };
-
   try {
     await reviewPayment(payload);
     Message.success("审核成功");
