@@ -9,8 +9,8 @@ const BASE_URL = '/captcha'
 
 
 /** @desc 作业人员获取短信验证码进行报名 */
-export function getApplySmsCaptcha(phone: string, captchaReq: T.BehaviorCaptchaReq) {
-  return http.get<boolean>(`${BASE_URL}/apply/sms?phone=${phone}&captchaVerification=${encodeURIComponent(captchaReq.captchaVerification || '')}`)
+export function getApplySmsCaptcha(phone: string, captchaReq: T.BehaviorCaptchaReq, idCard: string) {
+  return http.get<boolean>(`${BASE_URL}/apply/sms?phone=${phone}&captchaVerification=${encodeURIComponent(captchaReq.captchaVerification || '')}&idCard=${encodeURIComponent(idCard) || ''}`)
 }
 
 /** @desc 获取图片验证码 */

@@ -8,16 +8,16 @@
             <WorkerApplySearch ref="workerApplySearchRef" :classId='classId' @verifiedResult=handVerifiedResult
                 @switchPhoneVerify="handSwitchPhoneVerify" />
 
-            <div class="info-card" v-if="projectNeedUploadDocs.length > 0">
+            <div class="info-card" v-if="projectInfo">
                 <div class="info-header">
                     <span class="info-tag">报名信息</span>
                 </div>
                 <div class="info-content">
                     <p class="exam-info">
                         <span v-if="candidateName">{{ candidateName }}<br></span>
-                        {{ projectNeedUploadDocs[0].categoryName || '' }} /
-                        {{ projectNeedUploadDocs[0].projectName || '' }}
-                        <span class="project-code">[{{ projectNeedUploadDocs[0].projectCode || '' }}]</span>
+                        {{ projectInfo.categoryName || '' }} /
+                        {{ projectInfo.projectName || '' }} /
+                        <span class="project-code">{{ projectInfo.className || '' }}</span>
                     </p>
                 </div>
             </div>
@@ -25,7 +25,7 @@
             <WokerApplyNeedUpload ref="WokerApplyNeedUploadRef" :projectNeedUploadDocs="projectNeedUploadDocs"
                 :classId="classId" @isAllUploaded="handIsAllUploaded" @switchPhoneVerify="handSwitchPhoneVerify"
                 @updateIdCardLast6="hanldUpdateIdCardLast6" @submitAfter="handSubmitAfter"
-                v-if="projectNeedUploadDocs.length > 0 && !workerUploadedDocs" />
+                v-if="!workerUploadedDocs && projectInfo" />
 
             <WokerApplyUploaded ref="WokerApplyUploadedRef" :workerUploadedDocs="workerUploadedDocs"
                 v-if="workerUploadedDocs" />
@@ -33,7 +33,7 @@
     </div>
     <div class="footer">
         <a-button type="primary" size="large" class="confirm-btn" :disabled="isAllUploaded"
-            @click="openPhoneVerifiedModel" v-if="projectNeedUploadDocs.length > 0 && !workerUploadedDocs">
+            @click="openPhoneVerifiedModel" v-if="projectInfo && !workerUploadedDocs">
             确认提交
         </a-button>
         <a-button type="primary" size="large" class="confirm-btn" @click="restUpload"
@@ -87,6 +87,7 @@ const route = useRoute()
 const title = ref('作业人员报考资料补全');
 const classId = ref('')
 const projectNeedUploadDocs = ref<any[]>([])
+const projectInfo = ref<any>()
 const workerUploadedDocs = ref<any>()
 const isAllUploaded = ref(true)
 const phoneVerifiedModel = ref(false)
@@ -147,7 +148,7 @@ const getCaptcha = async (captchaReq: BehaviorCaptchaReq) => {
         captchaLoading.value = true
         captchaBtnName.value = '发送中...'
         // 这里需要调用接口获取验证码
-        await getApplySmsCaptcha(phoneVerifiedForm.phone, captchaReq)
+        await getApplySmsCaptcha(phoneVerifiedForm.phone, captchaReq, encryptByRsa(WokerApplyNeedUploadRef.value?.getFormIdcard()))
         captchaLoading.value = false
         captchaDisable.value = true
         captchaBtnName.value = `获取验证码(${(captchaTime.value -= 1)}s)`
@@ -239,6 +240,7 @@ const handIsAllUploaded = (res: any) => {
 const handVerifiedResult = (res: any) => {
     projectNeedUploadDocs.value = res.projectNeedUploadDocs
     workerUploadedDocs.value = res.workerUploadedDocs
+    projectInfo.value = res.projectInfo
     candidateName.value = res.workerUploadedDocs ? res.workerUploadedDocs.candidateName : ''
     idLast6.value = res.idLast6
 }

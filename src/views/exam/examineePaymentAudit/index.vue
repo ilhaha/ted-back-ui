@@ -264,4 +264,13 @@ const handleImageError = (e: Event) => {
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.image-list {
+  display: flex;
+  /* 横向排列 */
+  flex-wrap: wrap;
+  /* 空间不足自动换行 */
+  gap: 8px;
+  /* 图片间距，可调 */
+}
+</style>

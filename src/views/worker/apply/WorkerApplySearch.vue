@@ -33,19 +33,25 @@ const idLast6 = ref('')
 const isUploadedFlag = ref(false)
 const verifyAndGet = async () => {
     if (loading.value) return
+    if (idLast6.value.trim().length !== 6) {
+        Message.warning("请输入完整的身份证后六位")
+        return
+    }
     try {
         const res = await verify({ idLast6: idLast6.value, classId: props.classId })
         const projectNeedUploadDocs = res.data.projectNeedUploadDocs;
         const workerUploadedDocs = res.data.workerUploadedDocs
-        if (isUploadedFlag.value) {
+        const projectInfo = res.data.projectInfo
+
+        if (isUploadedFlag.value && workerUploadedDocs) {
             Message.warning("您已提交过报名，不可重复提交！")
             emit('switchPhoneVerify', false)
         }
-        emit('verifiedResult', { projectNeedUploadDocs, idLast6: idLast6.value, workerUploadedDocs })
+        emit('verifiedResult', { projectNeedUploadDocs, idLast6: idLast6.value, workerUploadedDocs, projectInfo })
         showDialog.value = false
     } catch (e) {
         console.log(e);
-        
+
     } finally {
         loading.value = false
     }

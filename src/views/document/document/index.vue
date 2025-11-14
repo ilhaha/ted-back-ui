@@ -1,30 +1,12 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="考生资料管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable title="考生资料管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
       <template #previewImage="{ record }">
         <a-space v-if="record.docPath">
-          <a-image
-            v-for="(path, index) in record.docPath.split(',')"
-            :key="index"
-            width="80"
-            height="60"
-            :src="path"
-            :preview-props="{ zoomRate: 1.5 }"
-            class="preview-image"
-            fit="cover"
-            @error="handleImageError"
-          />
+          <a-image v-for="(path, index) in record.docPath.split(',')" :key="index" width="80" height="60" :src="path"
+            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" @error="handleImageError" />
         </a-space>
         <span v-else>-</span>
       </template>
@@ -32,15 +14,8 @@
         <!-- <a-input-search v-model="queryForm.docPath" placeholder="请输入存储路径(如/img/身份证正面.jpg)" allow-clear @search="search" /> -->
         <!-- <a-input-search v-model="queryForm.typeId" placeholder="请输入关联资料类型ID" allow-clear @search="search" /> -->
         <!-- <a-input-search v-model="queryForm.createUser" placeholder="请输入创建人ID" allow-clear @search="search" /> -->
-        <GiForm
-          :style="''"
-          v-model="queryForm"
-          search
-          :columns="searchForm"
-          size="medium"
-          @search="search"
-          @reset="reset"
-        />
+        <GiForm :style="''" v-model="queryForm" search :columns="searchForm" size="medium" @search="search"
+          @reset="reset" />
       </template>
 
       <!--      <template #toolbar-right>-->
@@ -72,12 +47,7 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link
-            v-permission="['document:document:detail']"
-            title="审核"
-            @click="onExamine(record)"
-            >审核</a-link
-          >
+          <a-link v-permission="['document:document:detail']" title="审核" @click="onExamine(record)">审核</a-link>
           <!--          <a-link v-permission="['document:document:update']" title="修改" @click="onUpdate(record)">修改</a-link>-->
           <!--          <a-link-->
           <!--            v-permission="['document:document:delete']"-->
@@ -92,11 +62,7 @@
       </template>
     </GiTable>
 
-    <DocumentAddModal
-      ref="DocumentAddModalRef"
-      @save-success="search"
-      @审核成功="search"
-    />
+    <DocumentAddModal ref="DocumentAddModalRef" @save-success="search" @审核成功="search" />
     <DocumentDetailDrawer ref="DocumentDetailDrawerRef" />
   </div>
 </template>
@@ -177,33 +143,24 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   { title: "用户名称", dataIndex: "nickName", slotName: "nickName" },
   { title: "资料种类", dataIndex: "typeName", slotName: "typeName" },
-  { title: "审核状态", dataIndex: "status", slotName: "status" },
-  { title: "审核备注", dataIndex: "auditRemark", slotName: "auditRemark" },
   {
     title: "资料图片",
     dataIndex: "docPath",
     slotName: "previewImage",
-    width: 150,
     align: "center",
   },
+  { title: "审核状态", dataIndex: "status", slotName: "status" },
+  { title: "审核备注", dataIndex: "auditRemark", slotName: "auditRemark" },
   {
     title: "创建时间",
     dataIndex: "createTime",
     slotName: "createTime",
-    width: 180,
     align: "center",
-  },
-  {
-    title: "更新时间",
-    dataIndex: "updateTime",
-    slotName: "updateTime",
-    width: 180,
   },
   {
     title: "操作",
     dataIndex: "action",
     slotName: "action",
-    width: 200,
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
@@ -268,7 +225,7 @@ const onAdd = () => {
 };
 //审核
 const onExamine = async (record: DocumentResp) => {
-  DocumentAddModalRef.value?.onExamine(record.id,record.typeId, record.candidateId ); 
+  DocumentAddModalRef.value?.onExamine(record.id, record.typeId, record.candidateId);
 };
 // 修改
 const onUpdate = (record: DocumentResp) => {

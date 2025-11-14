@@ -100,40 +100,43 @@
                 </a-upload>
             </div>
         </div>
-        <div class="tips-card">
-            <div class="tips-icon">💡</div>
-            <div class="tips-text">
-                以下为您报考时<span class="highlight">缺少的资料</span>，请按类型补传：
-                每种资料至少1张、最多3张，仅支持图片格式。
+        <div v-if="projectNeedUploadDocs.length > 0">
+
+
+            <div class="tips-card">
+                <div class="tips-icon">💡</div>
+                <div class="tips-text">
+                    以下为您报考时<span class="highlight">缺少的资料</span>，请按类型补传：
+                    每种资料至少1张、最多3张，仅支持图片格式。
+                </div>
+            </div>
+            <div class="doc-card" v-for="item in projectNeedUploadDocs" :key="item.id"
+                @mouseenter="cardHovered = item.id" @mouseleave="cardHovered = ''">
+                <div class="doc-info">
+                    <span class="doc-name">{{ item.typeName }}</span>
+                    <span class="upload-count">
+                        {{ (fileListMap[item.id] || []).length }}/3
+                    </span>
+                </div>
+
+                <div class="upload-wrapper">
+                    <a-upload list-type="picture-card" :file-list="fileListMap[item.id] || []"
+                        :custom-request="(options) => handleUpload(options, item, 'image')"
+                        @before-remove="(file) => handleRemove(file, item)" :accept="'image/*'" image-preview
+                        :show-remove-icon="true" capture="environment">
+                        <template #upload-button>
+                            <div class="upload-btn" :class="{
+                                disabled: (fileListMap[item.id] || []).length >= 3,
+                                hover: cardHovered === item.id && (fileListMap[item.id] || []).length < 3
+                            }">
+                                <IconPlus class="upload-icon" />
+                                <span class="upload-text">上传</span>
+                            </div>
+                        </template>
+                    </a-upload>
+                </div>
             </div>
         </div>
-        <div class="doc-card" v-for="item in projectNeedUploadDocs" :key="item.id" @mouseenter="cardHovered = item.id"
-            @mouseleave="cardHovered = ''">
-            <div class="doc-info">
-                <span class="doc-name">{{ item.typeName }}</span>
-                <span class="upload-count">
-                    {{ (fileListMap[item.id] || []).length }}/3
-                </span>
-            </div>
-
-            <div class="upload-wrapper">
-                <a-upload list-type="picture-card" :file-list="fileListMap[item.id] || []"
-                    :custom-request="(options) => handleUpload(options, item, 'image')"
-                    @before-remove="(file) => handleRemove(file, item)" :accept="'image/*'" image-preview
-                    :show-remove-icon="true" capture="environment">
-                    <template #upload-button>
-                        <div class="upload-btn" :class="{
-                            disabled: (fileListMap[item.id] || []).length >= 3,
-                            hover: cardHovered === item.id && (fileListMap[item.id] || []).length < 3
-                        }">
-                            <IconPlus class="upload-icon" />
-                            <span class="upload-text">上传</span>
-                        </div>
-                    </template>
-                </a-upload>
-            </div>
-        </div>
-
         <a-modal v-model:visible="showDialog" title="身份验证" :mask-closable="false" :footer="false" width="400px"
             @close="verifyIdCardClose">
             <div style="text-align:center;">
@@ -200,9 +203,9 @@ const submitUpload = async (phone: string, idLast6: string, isRestUpload: boolea
     if (!checkIdCardLast6(form.value.idCardNumber, idLast6)) {
         Message.error("上传的身份证与填写的身份证后六位不匹配，请选择操作方式。");
         parentIdLast6.value = idLast6;
-        if (!isRestUpload) {
-            showDialog.value = true;
-        }
+        // if (isRestUpload) {
+        showDialog.value = true;
+        // }
         emit('switchPhoneVerify', false)
         return;
     }
@@ -431,7 +434,11 @@ const handleRemove = (file: any, item: any) => {
 watch(isAllUploaded, (newVal) => {
     emit('isAllUploaded', newVal)
 })
-defineExpose({ submitUpload })
+
+function getFormIdcard() {
+    return form.value.idCardNumber
+}
+defineExpose({ submitUpload, getFormIdcard })
 </script>
 
 <style scoped>

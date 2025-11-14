@@ -99,18 +99,22 @@ const fileListMap = reactive<Record<string, any[]>>({})
 const cardHovered = ref('')
 onMounted(() => {
     const docs = props.workerUploadedDocs?.workerApplyDocuments || []
+
     docs.forEach((item) => {
-        // 若该 typeId 没有初始化，则先创建空数组
-        if (!fileListMap[item.typeId]) {
-            fileListMap[item.typeId] = []
+        if (item.typeId && item.typeName && item.docPaths) {
+            // 若该 typeId 没有初始化，则先创建空数组
+            if (!fileListMap[item.typeId]) {
+                fileListMap[item.typeId] = []
+            }
+
+            // 每条记录只包含一个 docPaths，不需要 split(',')
+            fileListMap[item.typeId].push({
+                uid: `${item.typeId}-${fileListMap[item.typeId].length}-${Date.now()}`,
+                url: item.docPaths,
+                name: item.typeName
+            })
         }
 
-        // 每条记录只包含一个 docPaths，不需要 split(',')
-        fileListMap[item.typeId].push({
-            uid: `${item.typeId}-${fileListMap[item.typeId].length}-${Date.now()}`,
-            url: item.docPaths,
-            name: item.typeName
-        })
     })
 })
 </script>
