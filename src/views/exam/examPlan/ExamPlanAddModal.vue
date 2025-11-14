@@ -56,62 +56,14 @@ const [form, resetForm] = useResetReactive({
   imageUrl: "",
   examPlanName: "",
   enrollList: "",
-  classroomId: [], // 初始化为空数组，用于存储多选结果
+  classroomId: [],
   examType: undefined,
   planType: 0
 });
 
 const projectBindingDocList = ref([]);
 
-// 上传图片
-const handleUpload = (options: RequestOption) => {
-  const controller = new AbortController();
-  (async function requestWrap() {
-    const { onProgress, onError, onSuccess, fileItem, name = "file" } = options;
-    onProgress(20);
-    const formData = new FormData();
-    formData.append(name as string, fileItem.file as Blob);
-    formData.append("type", "pic");
-    try {
-      const res = await upload(formData, {
-        signal: controller.signal,
-      });
-      Message.success("上传成功");
-      form.imageUrl = res.data.url;
-      onSuccess(res.data.thUrl);
-    } catch (error) {
-      onError(error);
-    }
-  })();
-  return {
-    abort() {
-      controller.abort();
-    },
-  };
-};
-// watch(
-//   () => form.locationId,
-//   (val) => {
-//     const examTypeField = columns.find(item => item.field === 'examType')
-//     examTypeField!.show = !!val
-//     if (!val) {
-//       form.examType = null
-//       form.classroomId = []
-//       columns.find(item => item.field === 'classroomId')!.show = false
-//     }
-//   }
-// )
 
-// watch(
-//   () => form.examType,
-//   (val) => {
-//     const classroomField = columns.find(item => item.field === 'classroomId')
-//     classroomField!.show = !!val // 选了考试类型 → 显示地点考场
-//     if (!val) {
-//       form.classroomId = []
-//     }
-//   }
-// )
 
 // 监听新增 删除串口是否打开
 watch(
@@ -124,15 +76,20 @@ watch(
 
 watch(
   () => form.examProjectId,
-  async (newProvinceId) => {
-    if (newProvinceId !== "") {
-      const response = await bindingDocumentListApi(form.examProjectId);
-      projectBindingDocList.value = response.data.map((doc: any) => ({
-        value: doc.id,
-        label: doc.typeName,
-      }));
-      // 重置地点和考场选择
-      // form.locationId = ''
+  async (newExamProjectId) => {
+    if (!newExamProjectId) {
+      form.classroomId = [];
+      return
+    };
+
+    const response = await bindingDocumentListApi(form.examProjectId);
+    projectBindingDocList.value = response.data.map((doc: any) => ({
+      value: doc.id,
+      label: doc.typeName,
+    }));
+
+    // 只有新增或者切换考试项目时才重置
+    if (!isUpdate.value) {
       form.classroomId = [];
     }
   },
@@ -140,48 +97,24 @@ watch(
 );
 
 watch(
-  () => [form.examProjectId],
-  async ([newexamProjectId]) => {
-    if (newexamProjectId) {
-      await getProjectClassRoomSelect(newexamProjectId);
+  () => form.examProjectId,
+  async (newExamProjectId) => {
+    if (!newExamProjectId) return;
+
+    await getProjectClassRoomSelect(newExamProjectId);
+
+    // 只有新增或者切换考试项目时才重置
+    if (!isUpdate.value) {
       form.classroomId = [];
-      columns.find((item) => item.field === "classroomId")!.show = true;
     }
+
+    columns.find((item) => item.field === "classroomId")!.show = true;
   },
   { immediate: false }
 );
 
+
 const columns: ColumnItem[] = reactive([
-  // {
-  //   label: '计划展示图',
-  //   field: 'imageUrl',
-  //   type: 'upload',
-  //   span: 24,
-  //   props: {
-  //     accept: 'image/*',
-  //     limit: 1,
-  //     showFileList: true,
-  //     listType: 'picture-card',
-  //     customRequest: handleUpload,
-  //     fileList: computed(() => {
-  //       if (form.imageUrl) {
-  //         return [{
-  //           uid: '-1',
-  //           name: '已上传图片',
-  //           url: form.imageUrl,
-  //           status: 'done',
-  //         }]
-  //       }
-  //       return []
-  //     }),
-  //     onChange: (fileList: any) => {
-  //       if (fileList.length === 0) {
-  //         form.imageUrl = ''
-  //       }
-  //     },
-  //   },
-  //   required: true,
-  // },
   {
     label: "计划名称",
     prop: "examPlanName",
@@ -238,18 +171,6 @@ const columns: ColumnItem[] = reactive([
     })),
     rules: [{ required: true, message: '请选考试人员类型' }]
   },
-  // {
-  //   label: '考试地点',
-  //   prop: 'locationId',
-  //   type: 'select',
-  //   field: 'locationId',
-  //   required: true,
-  //   span: 22,
-  //   props: {
-  //     options: locationSelectList,
-  //     allowSearch: true,
-  //   },
-  // },
   {
     label: "考试考场",
     prop: "classroomId",
@@ -270,22 +191,21 @@ const columns: ColumnItem[] = reactive([
     },
   },
 
-  // {
-  //   label: '最大考试人数',
-  //   prop: 'maxCandidates',
-  //   type: 'input-number',
-  //   field: 'maxCandidates',
-  //   required: true,
-  //   span: 22,
-  // },
-  //   {
-  //   label: '考试报名时间范围',
-  //   prop: 'enrollList',
-  //   type: 'range-picker',
-  //   field: 'enrollList',
-  //   required: true,
-  //   span: 22,
-  // },
+  {
+    label: "考试报名时间",
+    prop: "enrollList",
+    type: "range-picker",
+    field: "enrollList",
+    required: true,
+    span: 22,
+    props: computed(() => ({
+      disabled: isUpdate.value,
+      showTime: isUpdate.value ? { format: "HH:mm:ss" } : false,
+      format: isUpdate.value ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD",
+      valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
+      placeholder: isUpdate.value ? "请选择日期时间范围" : "请选择日期范围",
+    })),
+  },
   {
     label: "考试开始时间",
     prop: "startTime",
@@ -301,29 +221,8 @@ const columns: ColumnItem[] = reactive([
     })),
   },
 
-  // {
-  //   label: '考试时间范围',
-  //   prop: 'dateRange',
-  //   type: 'range-picker',
-  //   field: 'dateRange',
-  //   required: true,
-  //   span: 22,
-  // },
 
-  {
-    label: "考试报名时间",
-    prop: "enrollList",
-    type: "range-picker",
-    field: "enrollList",
-    required: true,
-    span: 22,
-    props: computed(() => ({
-      showTime: isUpdate.value ? { format: "HH:mm:ss" } : false,
-      format: isUpdate.value ? "YYYY-MM-DD HH:mm:ss" : "YYYY-MM-DD",
-      valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
-      placeholder: isUpdate.value ? "请选择日期时间范围" : "请选择日期范围",
-    })),
-  },
+
 ]);
 
 const auditColumns: ColumnItem[] = reactive([
@@ -422,20 +321,31 @@ const onUpdate = async (id: string) => {
   reset();
   dataId.value = id;
   const { data } = await getExamPlan(id);
+  console.log(data.classroomId, 11111);
+
   data.examType = String(data.examType);
   // 加载关联的项目数据
-  await getDeptProjectsList();
-  await getProjectLocationSelect(data.examProjectId);
-  await getProjectClassRoomSelect(data.examProjectId);
-
-  const res = await getExamClassroom(id);
-  form.classroomId = res.data;
-
+  // await getDeptProjectsList();
+  // await getProjectLocationSelect(data.examProjectId);
+  // await getProjectClassRoomSelect(data.examProjectId);
+  form.classroomId = mapRoomIdsToPaths(data.classroomId, classRoomSelectList.value)
   form.enrollList = [data.enrollStartTime, data.enrollEndTime];
-  // form.dateRange = [data.startTime, data.endTime]
   Object.assign(form, data);
   visible.value = true;
 };
+
+const mapRoomIdsToPaths = (roomIds: number[], options: any[]) => {
+  const paths: number[][] = []
+  roomIds.forEach(roomId => {
+    options.forEach(building => {
+      const child = building.children?.find((c: any) => c.value === roomId)
+      if (child) {
+        paths.push([building.value, child.value])
+      }
+    })
+  })
+  return paths
+}
 
 // 审核
 const onExamineA = async (id: string) => {
