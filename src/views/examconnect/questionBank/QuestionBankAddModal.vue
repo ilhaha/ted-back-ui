@@ -96,6 +96,7 @@ const [form, resetForm] = useResetReactive({
   categoryIds: [],
   imageMinUrl: '',
   imageUrl: '',
+  examType: '',
 })
 
 const findPath = (
@@ -153,6 +154,7 @@ const save = async () => {
       categoryId:  categoryIds,
       options: options.value,
       correctAnswers: correctAnswers.value,
+      examType:form.examType,
     }  
     if (isUpdate.value) {
       await updateQuestionBank(submitData, dataId.value)
@@ -204,7 +206,13 @@ const handleUpload = (options: RequestOption) => {
     },
   }
 }
-
+// 考试类型选项（与数据库枚举值一致：0-未指定，1-作业人员考试，2-无损检验人员考试，3-有损检验人员考试）
+const examTypeOptions = [
+  { label: '未指定', value: 0 },
+  { label: '作业人员考试', value: 1 },
+  { label: '无损/有损检验人员考试', value: 2 },
+  // 后续新增类型直接在这里添加，无需修改表结构
+];
 const columns: ColumnItem[] = reactive([
   {
     label: '附件图片',
@@ -270,8 +278,19 @@ const columns: ColumnItem[] = reactive([
       type: 'button',
     },
   },
+    {
+    label: '考试类型',
+    field: 'examType', // 字段名与数据库字段 exam_type 对应
+    type: 'radio-group',
+    span: 24,
+    props: {
+      options: examTypeOptions, // 引用上面定义的选项数组
+      type: 'button', // 与题目类型保持一致的按钮样式
+      defaultValue: 0, // 默认值为「未指定」（对应数据库默认值 0）
+    },
+    rules: [{ required: true, message: '请选择考试类型' }],
+  },
 ])
-
 // 重置
 const reset = () => {
   formRef.value?.formRef?.resetFields()
@@ -304,6 +323,7 @@ const onUpdate = async (id: string) => {
   form.categoryIds = form.categoryId
   form.imageMinUrl = form.attachment
   form.imageUrl = form.attachment
+    form.examType = data.examType || 0 // 兜底默认值 0，避免 undefined
   options.value = form.options
   if (form.questionType !== 2) {
     correctAnswers.value = form.correctAnswers[0]
