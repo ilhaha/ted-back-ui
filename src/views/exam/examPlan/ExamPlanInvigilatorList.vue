@@ -1,8 +1,8 @@
 <template>
   <a-modal :visible="invigilateWindow" draggable width="60%" :closable="false" title="监考员列表">
     <GiTable row-key="id" :data="tableData" :columns="columns" :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="false" :disabled-tools="['size']"
-      :disabled-column-keys="['name']">
+      @refresh="getInvigilateDate(currentPlanId)" :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="false"
+      :disabled-tools="['size']" :disabled-column-keys="['name']">
       <template #toolbar-right>
         <a-popconfirm content="重新随机分配监考员？此操作会清空当前所有监考分配，是否继续？" ok-text="确定" cancel-text="取消" @ok="onReRandom">
           <a-button v-permission="['exam:examPlan:option']" type="primary"
@@ -203,8 +203,13 @@ const getInvigilateStatusText = (status: number) => {
 
 // 获取监考员列表数据
 const getInvigilateDate = async (planId: number) => {
-  const res = await getInvigilateList(planId)
-  tableData.value = res.data || []
+  loading.value = true
+  try {
+    const res = await getInvigilateList(planId)
+    tableData.value = res.data || []
+  } finally {
+    loading.value = false
+  }
 }
 
 // 打开监考查看窗口
@@ -215,9 +220,6 @@ const onOption = (planId: number, assignType: number) => {
   invigilateWindow.value = true
 }
 
-const closeModel = () => {
-  invigilateWindow.value = false
-}
 defineExpose({ onOption })
 </script>
 
