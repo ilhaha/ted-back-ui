@@ -1,25 +1,18 @@
 <template>
-  <GiTable
-    row-key="id"
-    :data="dataList"
-    :columns="columns"
-    :loading="loading"
-    :scroll="{ x: '100%', y: '100%', minWidth: 600 }"
-    :pagination="pagination"
-    :disabled-tools="['size', 'setting', 'fullscreen']"
-    :disabled-column-keys="['nickname']"
-    :row-selection="{ type: 'checkbox', showCheckedAll: true }"
-    :selected-keys="selectedKeys"
-    @select="select"
-    @select-all="selectAll"
-    @refresh="reset"
-  >
+  <GiTable row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    :scroll="{ x: '100%', y: '100%', minWidth: 600 }" :pagination="pagination"
+    :disabled-tools="['size', 'setting', 'fullscreen']" :disabled-column-keys="['nickname']"
+    :row-selection="{ type: 'checkbox', showCheckedAll: true }" :selected-keys="selectedKeys" @select="select"
+    @select-all="selectAll" @refresh="reset">
     <template #toolbar-left>
-      <a-button v-permission="['system:role:assign']" type="primary" @click="onAssign">
+      <a-button v-permission="['system:role:assign']" type="primary" @click="onAssign"
+        :disabled="roleId == '547888897925840930'">
         <template #icon><icon-plus /></template>
         <template #default>分配角色</template>
       </a-button>
-      <a-button v-permission="['system:role:unassign']" type="primary" status="danger" :disabled="!selectedKeys.length" :title="!selectedKeys.length ? '请选择' : ''" @click="onMulDelete">
+      <a-button v-permission="['system:role:unassign']" type="primary" status="danger"
+        :disabled="!selectedKeys.length || roleId == '547888897925840930'" :title="!selectedKeys.length ? '请选择' : ''"
+        @click="onMulDelete">
         <template #icon><icon-delete /></template>
         <template #default>取消分配</template>
       </a-button>
@@ -44,13 +37,9 @@
     </template>
     <template #action="{ record }">
       <a-space>
-        <a-link
-          v-permission="['system:role:unassign']"
-          status="danger"
-          :disabled="record.disabled"
-          :title="record.disabled ? '该用户为系统内置用户不能取消分配' : '取消分配'"
-          @click="onDelete(record)"
-        >
+        <a-link v-permission="['system:role:unassign']" status="danger"
+          :disabled="record.disabled || roleId == '547888897925840930'"
+          :title="record.disabled ? '该用户为系统内置用户不能取消分配' : '取消分配'" @click="onDelete(record)">
           取消分配
         </a-link>
       </a-space>

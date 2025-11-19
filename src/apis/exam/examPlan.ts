@@ -60,7 +60,12 @@ export interface ExamProjectResp {
 export interface ExamPlanQuery {
   sort: Array<string>
 }
-export interface ExamPlanPageQuery extends ExamPlanQuery, PageQuery {}
+export interface ExamPlanPageQuery extends ExamPlanQuery, PageQuery { }
+
+/** @desc 中心主任确认考试 */
+export function centerDirectorConform(planId: number, isFinalConfirmed: number) {
+  return http.post(`${BASE_URL}/conform/${planId}/${isFinalConfirmed}`)
+}
 
 /** @desc 查询考试计划列表 */
 export function listExamPlan(query: ExamPlanPageQuery) {
@@ -88,6 +93,23 @@ export function getExamPlan(id: string) {
   })
   return data
 }
+
+/**
+ * 获取当前计划可用监考员
+ * @param id 
+ * @returns 
+ */
+export function getAvailableInvigilator(planId: number, rejectedInvigilatorId: number) {
+  const res = http.get<[]>(`${BASE_URL}/available/invigilator/${planId}/${rejectedInvigilatorId}`)
+  return res
+}
+
+
+/** @desc 重新随机分配考试计划的监考员 */
+export function reRandomInvigilators(planId: number, invigilatorNum: number) {
+  return http.post(`${BASE_URL}/rest/random/invigilator/${planId}/${invigilatorNum}`)
+}
+
 
 /** @desc 校验导入考试计划导入Excel文件是否正确 */
 export function importExcel(file: any) {

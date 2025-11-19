@@ -73,10 +73,10 @@
         </div>
       </template>
       <template #startTime="{ record }">
-        {{ formatDate(record.startTime) }}
+        {{ formatDate(record.startTime) }} ~ {{ formatDate(record.endTime) }}
       </template>
-      <template #endTime="{ record }">
-        {{ formatDate(record.endTime) }}
+      <template #enrollStartTime="{ record }">
+        {{ formatDate(record.enrollStartTime) }} ~ {{ formatDate(record.enrollEndTime) }}
       </template>
       <template #planType="{ record }">
         <a-tag :color="getPlanTypeColor(record.planType)" bordered>
@@ -88,6 +88,11 @@
           {{ getStatusText(record.status) }}
         </a-tag>
       </template>
+      <template #isFinalConfirmed="{ record }">
+        <a-tag :color="getIsFinalConfirmedColor(record.isFinalConfirmed)" bordered>
+          {{ getIsFinalConfirmedText(record.isFinalConfirmed) }}
+        </a-tag>
+      </template>
       <template #examRoom="{ record }">
         <a-space>
           <a-link title="查看考场" style="text-align: center" @click="showExamRoom(record)">
@@ -95,16 +100,17 @@
           </a-link>
         </a-space>
       </template>
-      <template #invigilate="{ record }">
+      <!-- <template #invigilate="{ record }">
         <a-space>
           <a-link v-permission="['exam:examPlan:option']" title="选择监考" style="text-align: center"
             @click="onOptionInvigilate(record)">
             选择监考
           </a-link>
         </a-space>
-      </template>
+      </template> -->
       <template #action="{ record }">
         <a-space>
+          <!-- <a-link v-permission="['exam:examPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <div v-show="record.status == 1">
             <a-link v-permission="['exam:examPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
               审核
@@ -113,14 +119,24 @@
           <div v-show="record.status == 2">
             <a-link v-permission="['exam:examPlan:sjjdgljreview']" title="审核" @click="onExamineA(record)">审核</a-link>
           </div>
-          <a-link v-permission="['exam:examPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+          <div v-show="record.isFinalConfirmed > 0">
+            <a-link v-permission="['exam:examPlan:queryInvigilator']" title="查看监考员" style="text-align: center"
+              @click="onOptionInvigilateList(record.id, record.assignType)">
+              监考列表
+            </a-link>
+          </div>
           <a-link v-permission="['exam:examPlan:delete']" v-if="record.status == 1 || record.status == 4"
             status="danger" :disabled="record.disabled" :title="record.disabled ? '不可删除' : '删除'"
             @click="onDelete(record)">
             删除
           </a-link>
-          <div v-if="record.isFinalConfirmed == 0">
-            <a-link v-permission="['exam:examPlan:confirmed']" title="确认时间地点" @click="onUpdate(record)">确认时间地点</a-link>
+          <div v-if="(record.isFinalConfirmed == 0 || record.isFinalConfirmed == 3) && record.status == 3">
+            <a-link v-permission="['exam:examPlan:adminconfirmed']" title="管理员确认考试"
+              @click="onUpdate(record)">考试确认</a-link>
+          </div>
+          <div v-if="record.isFinalConfirmed == 1 && record.status == 3 && userInfo.id != 1">
+            <a-link v-permission="['exam:examPlan:zxzrConfirmed']" title="中心主任确认考试"
+              @click="openConform(record)">考试确认</a-link>
           </div>
         </a-space>
       </template>
@@ -131,12 +147,25 @@
       <a-table :dataSource="locationList" :columns="locationColumns" :pagination="false" rowKey="locationId" bordered
         expandable="{ expandedRowRender }" />
     </a-modal>
+    <!-- 中心主任确认考试 -->
+    <a-modal v-model:visible="conformVisible" title="中心主任确认考试" :mask-closable="false" :esc-to-close="false"
+      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="conformExam" @close="resetForm">
+      <a-form ref="formRef" :model="form" layout="vertical">
+        <a-form-item field="isFinalConfirmed" label="确认结果" :rules="[{ required: true, message: '请选择审核结果' }]">
+          <a-radio-group v-model="form.isFinalConfirmed">
+            <a-radio :value="2">确认通过</a-radio>
+            <a-radio :value="3">驳回</a-radio>
+          </a-radio-group>
+        </a-form-item>
+      </a-form>
+    </a-modal>
 
     <ExamPlanAddModal ref="ExamPlanAddModalRef" @save-success="search" @update-reviewer="updateReviewer" />
     <ExamPlanDetailDrawer ref="ExamPlanDetailDrawerRef" />
     <ExamPlanOptionModal ref="ExamPlanOptionModalRef" />
     <ExamPlanLocaltionAndRoomModel ref="ExamPlanLocaltionAndRoomModelRef" />
     <ExamPlanImportModal ref="ExamPlanImportModalRef" @import-success="search" />
+    <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" />
   </div>
 </template>
 
@@ -152,6 +181,7 @@ import {
   deleteExamPlan,
   exportExamPlan,
   listExamPlan,
+  centerDirectorConform
 } from "@/apis/exam/examPlan";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -159,6 +189,15 @@ import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import type { ProjectResp } from "@/apis/exam/project";
 import ExamPlanLocaltionAndRoomModel from "./ExamPlanLocaltionAndRoomModel.vue";
+import ExamPlanInvigilatorList from "./ExamPlanInvigilatorList.vue";
+import { useResetReactive } from '@/hooks'
+import { useWindowSize } from '@vueuse/core'
+import { useUserStore } from '@/stores'
+import { Message } from '@arco-design/web-vue'
+
+const userStore = useUserStore()
+const userInfo = computed(() => userStore.userInfo)
+
 defineOptions({ name: "ExamPlan" });
 
 const queryForm = reactive<ExamPlanQuery>({
@@ -166,11 +205,21 @@ const queryForm = reactive<ExamPlanQuery>({
   sort: ["tep.id,desc"],
 });
 
+
+const { width } = useWindowSize()
+
+const conformVisible = ref(false);
+
 const rowSelection = reactive({
   type: "checkbox",
   showCheckedAll: true,
   onlyCurrent: false,
 });
+
+const [form, resetForm] = useResetReactive({
+  isFinalConfirmed: 2,
+  id: undefined
+})
 
 const {
   tableData: dataList,
@@ -186,7 +235,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: "计划名称", dataIndex: "examPlanName", slotName: "examPlanName" },
   { title: "考试项目", dataIndex: "projectName", slotName: "examProjectId" },
   {
-    title: "计划考场",
+    title: "考场",
     dataIndex: "examRoom",
     slotName: "examRoom",
     width: 100,
@@ -194,8 +243,8 @@ const columns = ref<TableInstanceColumns[]>([
     show: true,
   },
   // { title: "计划年份", dataIndex: "planYear", slotName: "planYear" },
-  // { title: "考试开始时间", dataIndex: "startTime", slotName: "startTime" },
-  // { title: "考试结束时间", dataIndex: "endTime", slotName: "endTime" },
+  { title: "报名时间", dataIndex: "enrollStartTime", slotName: "enrollStartTime" },
+  { title: "考试时间", dataIndex: "startTime", slotName: "startTime" },
   //{ title: "考试地点", dataIndex: "locationName", slotName: "locationId" },
   {
     title: "容纳考试人数",
@@ -208,17 +257,18 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "planType",
   },
   { title: "计划状态", dataIndex: "status", slotName: "status" },
+  { title: "计划确认状态", dataIndex: "isFinalConfirmed", slotName: "isFinalConfirmed" },
   { title: "审批人", dataIndex: "approvedUser", slotName: "approvedUser" },
   { title: "审批时间", dataIndex: "approvalTime", slotName: "approvalTime" },
-  {
-    title: "监考人员名单",
-    dataIndex: "invigilate",
-    slotName: "invigilate",
-    width: 100,
-    align: "center",
-    fixed: !isMobile() ? "right" : undefined,
-    show: has.hasPermOr(["exam:examPlan:option"]),
-  },
+  // {
+  //   title: "监考人员名单",
+  //   dataIndex: "invigilate",
+  //   slotName: "invigilate",
+  //   width: 100,
+  //   align: "center",
+  //   fixed: !isMobile() ? "right" : undefined,
+  //   show: has.hasPermOr(["exam:examPlan:option"]),
+  // },
   {
     title: "操作",
     dataIndex: "action",
@@ -234,12 +284,45 @@ const columns = ref<TableInstanceColumns[]>([
   },
 ]);
 
+const formRef = ref()
+
 const ExamPlanImportModalRef =
   ref<InstanceType<typeof ExamPlanImportModal>>();
 
 const onImport = () => {
   ExamPlanImportModalRef.value?.onOpen();
 };
+
+
+// 中心主任确认考试
+const conformExam = async () => {
+  try {
+    console.log("开始校验")
+    await formRef.value?.validate()
+    console.log("校验通过")
+
+    const res = await centerDirectorConform(form.id, form.isFinalConfirmed)
+    console.log("接口结果", res.data)
+
+    if (!res.data) return false
+
+    Message.success("已确定")
+    conformVisible.value = false
+    search()
+    return true
+  } catch (e) {
+    console.log("校验或请求失败", e)
+    return false
+  }
+}
+
+
+// 打开中心主任确认考试弹窗
+const openConform = (record: ExamPlanResp) => {
+  conformVisible.value = true
+  form.id = record.id
+}
+
 
 const getPlanTypeColor = (status: number) => {
   switch (status) {
@@ -260,6 +343,37 @@ const getPlanTypeText = (status: number) => {
       return "检验人员";
     default:
       return "未知类型";
+  }
+};
+
+const getIsFinalConfirmedColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "orange";  // 待管理员确定
+    case 1:
+      return "blue";    // 待中心主任确定
+    case 2:
+      return "purple"; // 中心主任确定
+    case 3:
+      return "red";     // 中心主任驳回
+    default:
+      return "default";
+  }
+};
+
+
+const getIsFinalConfirmedText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "待管理员确定";
+    case 1:
+      return "待中心主任确定";
+    case 2:
+      return "中心主任已确定";
+    case 3:
+      return "中心主任已驳回";
+    default:
+      return "未知状态";
   }
 };
 
@@ -353,6 +467,12 @@ const onUpdate = (record: CandidateCertificateResp) => {
 // todo上传
 const test = (selectedRows: ProjectResp[]) => {
   console.log("已选择的行", selectedRows);
+};
+
+const ExamPlanInvigilatorListRef = ref<InstanceType<typeof ExamPlanInvigilatorList>>();
+// 查看监考员列表
+const onOptionInvigilateList = (planId: number, assignType: number) => {
+  ExamPlanInvigilatorListRef.value?.onOption(planId, assignType);
 };
 
 const ExamPlanOptionModalRef = ref<InstanceType<typeof ExamPlanOptionModal>>();

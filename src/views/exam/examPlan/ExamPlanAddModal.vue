@@ -58,7 +58,8 @@ const [form, resetForm] = useResetReactive({
   enrollList: "",
   classroomId: [],
   examType: undefined,
-  planType: 0
+  planType: 0,
+  invigilatorCount: 1
 });
 
 const projectBindingDocList = ref([]);
@@ -220,9 +221,20 @@ const columns: ColumnItem[] = reactive([
       placeholder: isUpdate.value ? "请选择日期时间" : "请选择日期",
     })),
   },
-
-
-
+  {
+    label: '监考员人数',
+    field: 'invigilatorCount',
+    required: true,
+    type: 'InputNumber',
+    span: 22,
+    show: () => isUpdate.value,
+    rules: [{ required: true, message: '请输入监考员人数' }],
+    props: {
+      placeholder: '请输入监考员人数',
+      min: 1,
+      max: 10,
+    },
+  },
 ]);
 
 const auditColumns: ColumnItem[] = reactive([
@@ -271,9 +283,13 @@ const save = async () => {
     }
 
     if (isUpdate.value) {
+      if (form.invigilatorCount < form.classroomId.length) {
+        Message.error("所设置的监考员人数不足以分配到全部考场");
+        return false;
+      }
       await updateExamPlan(form, dataId.value);
-      await updateExamPlanClassroom(form.classroomId, dataId.value);
-      Message.success("修改成功");
+      // await updateExamPlanClassroom(form.classroomId, dataId.value);
+      Message.success("已确认");
     } else {
       await customizAddExamPlan(form);
       Message.success("新增成功");
@@ -304,8 +320,6 @@ const onAuditConfirm = async () => {
       Message.error(response.message || "审核失败");
     }
   } catch (error) {
-    console.error("审核失败:", error);
-    Message.error("审核失败，请稍后重试");
   }
 };
 

@@ -1,10 +1,5 @@
 <template>
-  <a-modal
-    :visible="invigilateWindow"
-    draggable
-    :closable="false"
-    :width="700"
-  >
+  <a-modal :visible="invigilateWindow" draggable :closable="false" :width="700">
     <template #title>
       选择监考人员
     </template>
@@ -25,23 +20,14 @@
           </a-select>
         </div>
         <a-space direction="vertical" size="large" fill>
-          <a-table
-            v-model:selected-keys="invigilates"
-            row-key="id"
-            :loading="tableLoading"
-            :columns="columns"
-            :data="tableData"
-            :row-selection="rowSelection"
-            :pagination="{
+          <a-table v-model:selected-keys="invigilates" row-key="id" :loading="tableLoading" :columns="columns"
+            :data="tableData" :row-selection="rowSelection" :pagination="{
               total,
               current: currentPage,
               pageSize,
               showTotal: true,
               onChange: handlePageChange,
-            }"
-            style="width: 600px; min-height: 288px"
-            @select="checkbox"
-          >
+            }" style="width: 600px; min-height: 288px" @select="checkbox">
             <template #columns>
               <a-table-column title="ID" data-index="id" align="center" :min-width="200" />
               <a-table-column title="姓名" data-index="nickname" align="center" :min-width="150" />
@@ -80,14 +66,8 @@
           </template>
         </a-modal>
         <div class="option-drawer">
-          <a-drawer
-            unmount-on-close
-            :width="800"
-            :height="340"
-            :visible="timeVisible"
-            :placement="position"
-            @cancel="timeVisible = false"
-          >
+          <a-drawer unmount-on-close :width="800" :height="340" :visible="timeVisible" :placement="position"
+            @cancel="timeVisible = false">
             <template #title>
               <div class="content-title">
                 <h3>
@@ -104,22 +84,14 @@
               </div>
             </div>
             <div v-show="!invigilateTimes.invigilateTime" class="drawer-time">暂时没有安排监考时间</div>
-            <div
-              v-for="(item, index) in invigilateTimes.invigilateTime"
-              :key="index"
-              class="drawer-time"
-            >
+            <div v-for="(item, index) in invigilateTimes.invigilateTime" :key="index" class="drawer-time">
               <span>
                 {{ item.startTime }} ~ {{ item.endTime }} ： {{ item.classroomName }} - {{ item.planName }}
               </span>
             </div>
             <template #footer>
               <div class="plan-state">
-                <a-alert
-                  banner
-                  center
-                  :type="answerState"
-                >
+                <a-alert banner center :type="answerState">
                   {{ answer }}
                 </a-alert>
               </div>
@@ -136,13 +108,8 @@
               <a-button>查看已选监考人员</a-button>
               <template #content>
                 <p class="popover-tag">
-                  <a-tag
-                    v-for="item in invigilateInfo"
-                    :key="item.id"
-                    color="arcoblue"
-                    closable
-                    @close="deleteInvigilate(item.id)"
-                  >
+                  <a-tag v-for="item in invigilateInfo" :key="item.id" color="arcoblue" closable
+                    @close="deleteInvigilate(item.id)">
                     {{ item.nickname }}
                   </a-tag>
                   <a-tag v-show="invigilateInfo.length === 0">暂无监考人员</a-tag>
@@ -470,8 +437,8 @@ const handleGetClassroomList = async (record) => {
 
 // 选择监考按钮
 const onOption = async (record) => {
-  if (record.statusString !== '已生效') {
-    Message.error(record.statusString)
+  if (record.isFinalConfirmed !== 1) {
+    Message.error("请先确认考试时间和考场")
     return
   }
   // 参数初始化
@@ -511,7 +478,7 @@ defineExpose({ onOption })
   margin-bottom: 20px;
 }
 
-.examTime > div {
+.examTime>div {
   text-align: center;
   margin-bottom: 15px;
 }
@@ -521,7 +488,7 @@ defineExpose({ onOption })
   text-align: center;
 }
 
-.nickname > input {
+.nickname>input {
   width: 200px;
   height: 30px;
   outline: none;
@@ -531,7 +498,7 @@ defineExpose({ onOption })
   padding-left: 5px;
 }
 
-.nickname > button {
+.nickname>button {
   margin-right: 5px;
 }
 

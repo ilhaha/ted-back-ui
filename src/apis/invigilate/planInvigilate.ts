@@ -59,6 +59,16 @@ export interface ScoreTableItem extends TedExamRecords {
   studentName?: string // 前端展示用考生姓名
 }
 
+
+/**
+ * 更换监考员
+ */
+export const replace = (data: FormData) => {
+  return http.post('/invigilate/replace', data)
+}
+
+
+
 /**
  * 查询待审核和被拒绝的考试记录
  */
@@ -70,6 +80,15 @@ export function queryAlreadyCommitOrReject(examId: any) {
 export function listPlanInvigilateByInvigilator(params: string) {
   return http.get<PageRes<EnrollResp[]>>(`/invigilate/byPlanInvigilatorId?${params}`)
 }
+
+/**
+ * 根据计划id获取计划分配的监考员信息
+ * @param params
+ */
+export function getInvigilateList(planId: number) {
+  return http.get<InvigilateExamDetailResp>(`/invigilate/by/planId/${planId}`)
+}
+
 
 /**
  * 根据考试id查询考试信息和监考人员id
@@ -112,3 +131,4 @@ export const deleteScoreRecord = (planId: number, candidateId: number) => {
 export const updateScoreRecord = (data: TedExamRecords) => {
   return http.post('/exam/review/updateScoresRecord', data)
 }
+

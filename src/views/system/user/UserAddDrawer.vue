@@ -1,13 +1,6 @@
 <template>
-  <a-drawer
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 500 ? 500 : '100%'"
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-drawer v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 500 ? 500 : '100%'" @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns" />
   </a-drawer>
 </template>
@@ -15,7 +8,7 @@
 <script setup lang="ts">
 import { Message, type TreeNodeData } from '@arco-design/web-vue'
 import { useWindowSize } from '@vueuse/core'
-import { addUser, getUser, updateUser,getUserByUserName } from '@/apis/system/user'
+import { addUser, getUser, updateUser, getUserByUserName } from '@/apis/system/user'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import type { Gender, Status } from '@/types/global'
 import { GenderList } from '@/constant/common'
@@ -84,7 +77,11 @@ const columns: ColumnItem[] = reactive([
     props: {
       maxLength: 11,
     },
+    rules: [
+      { required: true, message: '请填写手机号码' },
+    ]
   },
+
   {
     label: '邮箱',
     field: 'email',
@@ -178,10 +175,10 @@ const save = async () => {
         form.password = encryptByRsa(rawPassword) || ''
       }
       let backUsername = form.username
-      
+
       form.username = encryptByRsa(form.username) || ''
-      const res = await getUserByUserName({username:form.username})
-      if(res.data) {
+      const res = await getUserByUserName({ username: form.username })
+      if (res.data) {
         form.username = backUsername
         form.password = backPassword
         Message.error('用户名已存在')
@@ -190,7 +187,7 @@ const save = async () => {
       form.roleIds = [String(form.roleIds)]
       await addUser(form)
       Message.success('新增成功')
-    }    
+    }
     emit('save-success')
     return true
   } catch (error) {
