@@ -1,21 +1,9 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="考试记录管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      :row-selection="rowSelection"
-      :selected-keys="selectedKeys"
-      @refresh="search"
-      @select="handleSelect"
-      @select-all="handleSelectAll"
-    >
+    <GiTable title="考试记录管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" :row-selection="rowSelection" :selected-keys="selectedKeys" @refresh="search"
+      @select="handleSelect" @select-all="handleSelectAll">
       <template #registrationProgress="{ record }">
         <a-tag :color="getProgressColor(Number(record.registrationProgress))">
           {{ getProgressText(Number(record.registrationProgress)) }}
@@ -29,17 +17,8 @@
 
       <template #toolbar-left>
         <a-space>
-          <a-select
-            v-model="queryForm.planId"
-            placeholder="请选择计划名称"
-            allow-clear
-            style="width: 200px"
-          >
-            <a-option
-              v-for="item in plan_id_enum"
-              :key="item.value"
-              :value="item.value"
-            >
+          <a-select v-model="queryForm.planId" placeholder="请选择计划名称" allow-clear style="width: 200px">
+            <a-option v-for="item in plan_id_enum" :key="item.value" :value="item.value">
               {{ item.label }}
             </a-option>
           </a-select>
@@ -69,12 +48,8 @@
       </template>
       <template #toolbar-right>
         <a-space class="batch-actions">
-          <a-button
-            v-permission="['exam:examRecords:audit']"
-            :disabled="!selectedKeys.length"
-            type="primary"
-            @click="handleBatchAudit"
-          >
+          <a-button v-permission="['exam:examRecords:audit']" :disabled="!selectedKeys.length" type="primary"
+            @click="handleBatchAudit">
             <template #icon><icon-check /></template>
             <template #default>批量审核</template>
           </a-button>
@@ -87,17 +62,9 @@
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:examRecords:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-          <a-popconfirm
-            v-permission="['exam:examRecords:audit']"
-            :disabled="record.reviewStatus !== 0"
-            position="br"
-            @ok="handleQuickAudit(record, 1)"
-          >
-            <a-link
-              status="warning"
-              :disabled="record.reviewStatus !== 0"
-              title="点击快速审核"
-            >
+          <a-popconfirm v-permission="['exam:examRecords:audit']" :disabled="record.reviewStatus !== 0" position="br"
+            @ok="handleQuickAudit(record, 1)">
+            <a-link status="warning" :disabled="record.reviewStatus !== 0" content="点击快速审核">
               审核
             </a-link>
             <template #content>
@@ -110,13 +77,8 @@
             </template>
           </a-popconfirm>
         </a-space>
-        <a-link
-          v-permission="['exam:examRecords:delete']"
-          status="danger"
-          :disabled="record.disabled"
-          :title="record.disabled ? '不可删除' : '删除'"
-          @click="onDelete(record)"
-        >
+        <a-link v-permission="['exam:examRecords:delete']" status="danger" :disabled="record.disabled"
+          :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
           删除
         </a-link>
       </template>
@@ -126,12 +88,7 @@
     </GiTable>
 
     <!-- 修改弹窗内容为结构化展示 -->
-    <a-modal
-      v-model:visible="examPaperVisible"
-      title="考试试卷详情"
-      width="800px"
-      :footer="false"
-    >
+    <a-modal v-model:visible="examPaperVisible" title="考试试卷详情" width="800px" :footer="false">
       <div class="exam-paper-container">
         <div class="exam-legend">
           <div class="legend-item">
@@ -153,10 +110,7 @@
             <span class="legend-desc">（多选题）</span>
           </div>
         </div>
-        <div
-          v-for="(question, index) in formattedExamPaper.questions"
-          :key="index" class="question-card"
-        >
+        <div v-for="(question, index) in formattedExamPaper.questions" :key="index" class="question-card">
           <!-- 题型标识 -->
           <div class="question-header">
             <a-tag :color="getQuestionTypeColor(question.questionType)">
@@ -175,15 +129,11 @@
           <div class="options-wrapper">
             <!-- 单选题 -->
             <template v-if="question.questionType === 0">
-              <div
-                v-for="(opt, optIndex) in question.options"
-                :key="optIndex"
-                class="option-item" :class="[{
-                  'missed-answer': opt.isCorrectAnswer && !(question.userAnswer || []).includes(opt.id) && !question.userAnswer,
-                  'correct-answer': opt.isCorrectAnswer && question.userAnswer,
-                  'wrong-judge': (question.userAnswer || []).includes(opt.id) && !opt.isCorrectAnswer,
-                }]"
-              >
+              <div v-for="(opt, optIndex) in question.options" :key="optIndex" class="option-item" :class="[{
+                'missed-answer': opt.isCorrectAnswer && !(question.userAnswer || []).includes(opt.id) && !question.userAnswer,
+                'correct-answer': opt.isCorrectAnswer && question.userAnswer,
+                'wrong-judge': (question.userAnswer || []).includes(opt.id) && !opt.isCorrectAnswer,
+              }]">
                 <span class="option-label">{{ getOptionChar(optIndex) }}</span>
                 {{ opt.question }}
               </div>
@@ -191,15 +141,11 @@
 
             <!-- 多选题 -->
             <template v-if="question.questionType === 2">
-              <div
-                v-for="(opt, optIndex) in question.options"
-                :key="optIndex"
-                class="option-item" :class="{
-                  'correct-answer': opt.isCorrectAnswer && (question.userAnswer || []).includes(opt.id),
-                  'wrong-selected': !opt.isCorrectAnswer && (question.userAnswer || []).includes(opt.id),
-                  'missed-answer': opt.isCorrectAnswer && !(question.userAnswer || []).includes(opt.id),
-                }"
-              >
+              <div v-for="(opt, optIndex) in question.options" :key="optIndex" class="option-item" :class="{
+                'correct-answer': opt.isCorrectAnswer && (question.userAnswer || []).includes(opt.id),
+                'wrong-selected': !opt.isCorrectAnswer && (question.userAnswer || []).includes(opt.id),
+                'missed-answer': opt.isCorrectAnswer && !(question.userAnswer || []).includes(opt.id),
+              }">
                 <span class="option-label">{{ getOptionChar(optIndex) }}</span>
                 {{ opt.question }}
               </div>
@@ -208,15 +154,11 @@
             <!-- 判断题 -->
             <template v-if="question.questionType === 1">
               <a-space>
-                <div
-                  v-for="(opt, optIndex) in question.options"
-                  :key="optIndex"
-                  class="option-item" :class="[{
-                    'missed-answer': opt.isCorrectAnswer && !(question.userAnswer || []).includes(opt.id) && !question.userAnswer,
-                    'correct-answer': opt.isCorrectAnswer && question.userAnswer,
-                    'wrong-judge': (question.userAnswer || []).includes(opt.id) && !opt.isCorrectAnswer,
-                  }]"
-                >
+                <div v-for="(opt, optIndex) in question.options" :key="optIndex" class="option-item" :class="[{
+                  'missed-answer': opt.isCorrectAnswer && !(question.userAnswer || []).includes(opt.id) && !question.userAnswer,
+                  'correct-answer': opt.isCorrectAnswer && question.userAnswer,
+                  'wrong-judge': (question.userAnswer || []).includes(opt.id) && !opt.isCorrectAnswer,
+                }]">
                   {{ opt.question }}
                 </div>
               </a-space>
@@ -226,22 +168,14 @@
       </div>
       <!-- 自定义底部关闭按钮 -->
       <div>
-        <a-button
-          type="primary"
-          style="float: right"
-          @click="examPaperVisible = false"
-        >
+        <a-button type="primary" style="float: right" @click="examPaperVisible = false">
           关闭
         </a-button>
       </div>
     </a-modal>
     <!-- 新增批量审核弹窗 -->
-    <a-modal
-      v-model:visible="batchAuditVisible"
-      title="批量审核"
-      @ok="handleBatchAuditSubmit"
-      @cancel="batchAuditVisible = false"
-    >
+    <a-modal v-model:visible="batchAuditVisible" title="批量审核" @ok="handleBatchAuditSubmit"
+      @cancel="batchAuditVisible = false">
       <a-form :model="batchAuditForm">
         <a-form-item label="审核结果">
           <a-radio-group v-model="batchAuditForm.reviewStatus">
@@ -252,11 +186,8 @@
       </a-form>
     </a-modal>
     <ExamRecordsAddModal ref="ExamRecordsAddModalRef" @save-success="search" />
-    <ExamRecordsDetailDrawer
-      ref="ExamRecordsDetailDrawerRef"
-      :get-progress-color="getProgressColor"
-      :get-progress-text="getProgressText"
-    />
+    <ExamRecordsDetailDrawer ref="ExamRecordsDetailDrawerRef" :get-progress-color="getProgressColor"
+      :get-progress-text="getProgressText" />
   </div>
 </template>
 
@@ -380,8 +311,8 @@ const isTrue = (
 
   // 判断结果并返回对应字符串
   const isCorrect
-      = correctIds.length === processedUserAnswer.length
-        && correctIds.every((id, index) => id === processedUserAnswer[index])
+    = correctIds.length === processedUserAnswer.length
+    && correctIds.every((id, index) => id === processedUserAnswer[index])
 
   return isCorrect ? '对' : '错' // 根据布尔值返回中文
 }
@@ -465,7 +396,7 @@ const handleBatchAuditSubmit = async () => {
     selectedKeys.value = []
     // eslint-disable-next-line ts/no-use-before-define
     search()
-  // eslint-disable-next-line unused-imports/no-unused-vars
+    // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (error) {
     Message.error('批量审核失败')
   }
@@ -526,7 +457,7 @@ const columns = ref<TableInstanceColumns[]>([
     title: '审核状态',
     slotName: 'reviewStatus', // 添加插槽名称
     width: 120,
-    align: 'center', 
+    align: 'center',
   },
   {
     dataIndex: 'action',
@@ -610,7 +541,7 @@ const handleQuickAudit = async (record: ExamRecordsResp) => {
     })
     Message.success('审核提交成功')
     search()
-  // eslint-disable-next-line unused-imports/no-unused-vars
+    // eslint-disable-next-line unused-imports/no-unused-vars
   } catch (error) {
     Message.error('审核提交失败')
   } finally {
@@ -628,6 +559,7 @@ const handleQuickAudit = async (record: ExamRecordsResp) => {
 // 添加批量操作按钮样式
 .batch-actions {
   margin-left: 12px;
+
   .arco-btn {
     margin-right: 8px;
   }
@@ -672,33 +604,37 @@ const handleQuickAudit = async (record: ExamRecordsResp) => {
 
   .options-wrapper {
     .option-item {
-      border: 1px solid #ddd;      /* 默认边框 */
+      border: 1px solid #ddd;
+      /* 默认边框 */
       padding: 10px;
       margin: 5px 0;
-      border-radius: 4px;         /* 圆角 */
+      border-radius: 4px;
+      /* 圆角 */
       cursor: pointer;
-      transition: all 0.3s ease;  /* 过渡动画 */
+      transition: all 0.3s ease;
+      /* 过渡动画 */
 
       /* 悬停效果 */
       .option-item:hover {
-        border-color: #409EFF;      /* Element UI蓝色 */
+        border-color: #409EFF;
+        /* Element UI蓝色 */
         background: #f5f7fa;
       }
 
       &.correct-answer {
-        background: rgba(76,175,80,0.1);
+        background: rgba(76, 175, 80, 0.1);
         border: 1px solid #4CAF50;
       }
 
       /* 错选状态 */
       &.wrong-selected {
-        background: rgba(76,175,80,0.1);
+        background: rgba(76, 175, 80, 0.1);
         border: 2px dashed #f44336;
       }
 
       /* 漏选状态 */
       &.missed-answer {
-        background: rgba(76,175,80,0.1);
+        background: rgba(76, 175, 80, 0.1);
         border: 2px dotted #FFC107;
         opacity: 0.8;
       }
@@ -755,9 +691,18 @@ const handleQuickAudit = async (record: ExamRecordsResp) => {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    &.correct { background: #4CAF50; }
-    &.wrong { background: #f44336; }
-    &.missed { background: #FFC107; }
+
+    &.correct {
+      background: #4CAF50;
+    }
+
+    &.wrong {
+      background: #f44336;
+    }
+
+    &.missed {
+      background: #FFC107;
+    }
   }
 
   .legend-text {
