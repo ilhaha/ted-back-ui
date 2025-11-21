@@ -17,10 +17,10 @@
               <template #icon><icon-plus /></template>
               <template #default>新增</template>
             </a-button>
-            <a-button v-permission="['system:user:import']" @click="onImport">
+            <!-- <a-button v-permission="['system:user:import']" @click="onImport">
               <template #icon><icon-upload /></template>
               <template #default>导入</template>
-            </a-button>
+            </a-button> -->
           </template>
           <!-- <template #toolbar-right>
             <a-button v-permission="['system:user:export']" @click="onExport">
@@ -159,7 +159,7 @@ const columns: TableInstanceColumns[] = [
     tooltip: true,
     fixed: !isMobile() ? 'left' : undefined,
   },
-  // { title: '用户名', dataIndex: 'username', slotName: 'username', minWidth: 140, ellipsis: true, tooltip: true },
+  { title: '用户名', dataIndex: 'username', slotName: 'username', minWidth: 140, ellipsis: true, tooltip: true },
   { title: '状态', dataIndex: 'status', slotName: 'status', align: 'center' },
   { title: '性别', dataIndex: 'gender', slotName: 'gender', align: 'center' },
   { title: '所属部门', dataIndex: 'deptName', minWidth: 180, ellipsis: true, tooltip: true },

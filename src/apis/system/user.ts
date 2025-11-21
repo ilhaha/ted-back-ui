@@ -5,6 +5,12 @@ export type * from './type'
 
 const BASE_URL = '/system/user'
 
+/** @desc 获取用户解密之后的手机号 */
+export function getVerifyPhone(phone: string) {
+  return http.get<string>(`${BASE_URL}/verify/phone`, { phone })
+}
+
+
 /** @desc 查询用户名是否存在 */
 export function getUserByUserName(query: T.UserQuery) {
   return http.get<T.UserDetailResp>(`${BASE_URL}/getUserByUserName`, query)

@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { Message, type TreeNodeData } from '@arco-design/web-vue'
 import { useWindowSize } from '@vueuse/core'
-import { addUser, getUser, updateUser, getUserByUserName } from '@/apis/system/user'
+import { addUser, getUser, updateUser, getUserByUserName, getVerifyPhone } from '@/apis/system/user'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import type { Gender, Status } from '@/types/global'
 import { GenderList } from '@/constant/common'
@@ -163,9 +163,20 @@ const reset = () => {
 // 保存
 const save = async () => {
   const rawPassword = form.password
+  let backUsername = form.username
   try {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
+    const isPhoneValid = /^1[3-9]\d{9}$/.test(form.phone)
+    if (!isPhoneValid) {
+      Message.error("请输入正确的手机号")
+      return false
+    }
+
+    if (!Array.isArray(form.roleIds)) {
+      form.roleIds = [form.roleIds]
+    }
+
     if (isUpdate.value) {
       await updateUser(form, dataId.value)
       Message.success('修改成功')
@@ -174,7 +185,7 @@ const save = async () => {
       if (rawPassword) {
         form.password = encryptByRsa(rawPassword) || ''
       }
-      let backUsername = form.username
+
 
       form.username = encryptByRsa(form.username) || ''
       const res = await getUserByUserName({ username: form.username })
@@ -184,13 +195,13 @@ const save = async () => {
         Message.error('用户名已存在')
         return false;
       }
-      form.roleIds = [String(form.roleIds)]
       await addUser(form)
       Message.success('新增成功')
     }
     emit('save-success')
     return true
   } catch (error) {
+    form.username = backUsername
     form.password = rawPassword
     return false
   }
@@ -221,6 +232,14 @@ const onUpdate = async (id: string) => {
   }
   const { data } = await getUser(id)
   Object.assign(form, data)
+  if (data.phone) {
+    // 获取用户解密之后脱敏的手机号
+    const result = await getVerifyPhone(data.phone);
+
+    form.phone = result.data;
+
+  }
+
   visible.value = true
 }
 
