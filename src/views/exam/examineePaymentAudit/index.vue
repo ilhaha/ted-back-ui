@@ -18,9 +18,12 @@
         }}</a-link>
       </template>
       <template #paymentProofUrl="{ record }">
-        <div v-if="record.paymentProofUrl" class="image-list">
-          <a-image v-for="(path, index) in record.paymentProofUrl.split(',')" :key="index" width="80" height="60"
-            :src="path" :preview-props="{ zoomRate: 1.5 }" fit="cover" @error="handleImageError" />
+         <div v-if="record.paymentProofUrl" class="image-list">
+          <a-link
+            @click="getPreviewUrl(record.paymentProofUrl)"
+            v-if="record.paymentProofUrl"
+            >预览</a-link
+          >
         </div>
         <span v-else>-</span>
       </template>
@@ -37,7 +40,7 @@
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:examineePaymentAudit:review']" title="审核" @click="onExamine(record)"
-            v-if="record.auditStatus == 1 || record.auditStatus == 4">审核</a-link>
+            v-if="record.auditStatus != 0 && record.auditStatus != 3 &&  record.auditStatus != 2 && record.auditStatus != 6   ">审核</a-link>
         </a-space>
       </template>
       <template #auditStatus="{ record }">

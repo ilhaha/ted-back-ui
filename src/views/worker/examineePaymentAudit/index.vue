@@ -1,30 +1,60 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="缴费审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" @refresh="search">
+    <GiTable
+      title="缴费审核管理"
+      row-key="id"
+      :data="dataList"
+      :columns="columns"
+      :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
+      :pagination="pagination"
+      :disabled-tools="['size']"
+      :disabled-column-keys="['name']"
+      @refresh="search"
+    >
       <template #toolbar-left>
-        <a-input-search v-model="queryForm.examPlanId" placeholder="请输入考试计划名称" allow-clear @search="search" />
-        <a-input-search v-model="queryForm.examineeId" placeholder="请输入作业人员姓名" allow-clear @search="search" />
-        <a-select v-model="queryForm.auditStatus" :options="audit_status_enum" placeholder="请选择审核状态" allow-clear
-          style="width: 150px" @change="search" />
+        <a-input-search
+          v-model="queryForm.examPlanId"
+          placeholder="请输入考试计划名称"
+          allow-clear
+          @search="search"
+        />
+        <a-input-search
+          v-model="queryForm.examineeId"
+          placeholder="请输入作业人员姓名"
+          allow-clear
+          @search="search"
+        />
+        <a-select
+          v-model="queryForm.auditStatus"
+          :options="audit_status_enum"
+          placeholder="请选择审核状态"
+          allow-clear
+          style="width: 150px"
+          @change="search"
+        />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
         </a-button>
       </template>
       <template #auditNoticeUrl="{ record }">
-        <a-link @click="getPreviewUrl(record.auditNoticeUrl)" v-if="record.auditNoticeUrl">{{ record.noticeNo
-        }}</a-link>
+        <a-link
+          @click="getPreviewUrl(record.auditNoticeUrl)"
+          v-if="record.auditNoticeUrl"
+          >{{ record.noticeNo }}</a-link
+        >
       </template>
       <template #paymentProofUrl="{ record }">
         <div v-if="record.paymentProofUrl" class="image-list">
-          <a-image v-for="(path, index) in record.paymentProofUrl.split(',')" :key="index" width="80" height="60"
-            :src="path" :preview-props="{ zoomRate: 1.5 }" fit="cover" @error="handleImageError" />
+          <a-link
+            @click="getPreviewUrl(record.paymentProofUrl)"
+            v-if="record.paymentProofUrl"
+            >预览</a-link
+          >
         </div>
         <span v-else>-</span>
       </template>
-
       <template #toolbar-right>
         <!-- <a-button v-permission="['worker:examineePaymentAudit:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
@@ -37,8 +67,13 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['worker:examineePaymentAudit:review']" title="审核" @click="onExamine(record)"
-            v-if="record.auditStatus == 1 || record.auditStatus == 4">审核</a-link>
+          <a-link
+            v-permission="['worker:examineePaymentAudit:review']"
+            title="审核"
+            @click="onExamine(record)"
+            v-if="record.auditStatus == 1 || record.auditStatus == 4"
+            >审核</a-link
+          >
         </a-space>
       </template>
       <template #auditStatus="{ record }">
@@ -48,8 +83,13 @@
       </template>
     </GiTable>
 
-    <ExamineePaymentAuditAddModal ref="ExamineePaymentAuditAddModalRef" @save-success="search" />
-    <ExamineePaymentAuditDetailDrawer ref="ExamineePaymentAuditDetailDrawerRef" />
+    <ExamineePaymentAuditAddModal
+      ref="ExamineePaymentAuditAddModalRef"
+      @save-success="search"
+    />
+    <ExamineePaymentAuditDetailDrawer
+      ref="ExamineePaymentAuditDetailDrawerRef"
+    />
     <PaymentModal ref="PaymentModalRef" @save-success="search" />
   </div>
 </template>
@@ -69,7 +109,7 @@ import {
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
 import { isMobile } from "@/utils";
-import { Message } from '@arco-design/web-vue'
+import { Message } from "@arco-design/web-vue";
 import has from "@/utils/has";
 
 defineOptions({ name: "ExamineePaymentAudit" });
@@ -145,13 +185,18 @@ const {
   immediate: true,
 });
 const columns = ref<TableInstanceColumns[]>([
-  { title: "作业人员姓名", dataIndex: "examineeName", slotName: "examineeName", width: 120 },
+  {
+    title: "作业人员姓名",
+    dataIndex: "examineeName",
+    slotName: "examineeName",
+    width: 120,
+  },
   { title: "考试计划名称", dataIndex: "planName", slotName: "planName" },
   {
     title: "应缴费金额（元）",
     dataIndex: "paymentAmount",
     slotName: "paymentAmount",
-    width: 100
+    width: 100,
   },
   {
     title: "缴费通知单",
