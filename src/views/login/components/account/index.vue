@@ -138,7 +138,6 @@ const handleLogin = async () => {
     })
     Message.success('欢迎使用')
   } catch (error) {
-    console.error(error)
     getCaptcha()
     form.captcha = ''
   } finally {

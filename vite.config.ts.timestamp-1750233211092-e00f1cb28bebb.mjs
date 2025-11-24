@@ -15,20 +15,6 @@ function appInfo() {
     apply: "serve",
     async buildStart() {
       const { bold, green, cyan, bgGreen, underline } = picocolors;
-      console.log(
-        boxen(
-          `${bold(green(`${bgGreen("ContiNew Admin v3.5.0")}`))}
-${cyan("\u5728\u7EBF\u6587\u6863\uFF1A")}${underline("https://continew.top")}
-${cyan("\u5E38\u89C1\u95EE\u9898\uFF1A")}${underline("https://continew.top/faq.html")}
-${cyan("\u6301\u7EED\u8FED\u4EE3\u4F18\u5316\u7684\u524D\u540E\u7AEF\u5206\u79BB\u4E2D\u540E\u53F0\u7BA1\u7406\u7CFB\u7EDF\u6846\u67B6\u3002")}`,
-          {
-            padding: 1,
-            margin: 1,
-            borderStyle: "double",
-            textAlignment: "center"
-          }
-        )
-      );
     }
   };
 }

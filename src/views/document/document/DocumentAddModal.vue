@@ -99,8 +99,6 @@ const handleClose = () => {
 
 //  保存审核结果（含校验）
 const save = async () => {
-  console.log('当前表单数据:', form)
-
   const payload = {
     id: dataId.value, // 资料 ID
     typeId: typeId.value, // 资料种类 ID
@@ -108,8 +106,6 @@ const save = async () => {
     status: form.status, // 审核状态
     auditRemark: form.auditRemark, // 审核备注
   }
-
-  console.log('发送到后端的数据:', payload)
 
   try {
     await reviewDocument(payload); // 调用后端接口

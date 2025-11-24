@@ -64,7 +64,9 @@ export interface ExamPlanPageQuery extends ExamPlanQuery, PageQuery { }
 
 /** @desc 中心主任确认考试 */
 export function centerDirectorConform(planId: number, isFinalConfirmed: number) {
-  return http.post(`${BASE_URL}/conform/${planId}/${isFinalConfirmed}`)
+  return http.post(`${BASE_URL}/conform/${planId}/${isFinalConfirmed}`, {
+    timeout: 300000,
+  })
 }
 
 /** @desc 查询考试计划列表 */

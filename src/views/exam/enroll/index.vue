@@ -159,7 +159,6 @@ const onUpdate = (record: EnrollResp) => {
 const EnrollDetailDrawerRef = ref<InstanceType<typeof EnrollDetailDrawer>>();
 // 详情
 const onDetail = (record: EnrollResp) => {
-  console.log(record);
   EnrollDetailDrawerRef.value?.onOpen(record.id);
 };
 </script>

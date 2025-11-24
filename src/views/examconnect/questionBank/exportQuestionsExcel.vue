@@ -72,7 +72,6 @@ const loadOptions = async () => {
     categoryOptions.value = res.data || []
   } catch (error) {
     Message.error('加载分类选项失败，请刷新重试')
-    console.error('分类加载失败：', error)
   }
 }
 
@@ -144,7 +143,6 @@ const downloadQuestionsExcel = async () => {
   } catch (error) {
     // 错误处理（不关闭弹窗，允许重试）
     Message.error(`导出失败：${(error as Error).message || '未知错误'}`)
-    console.error('Excel导出错误：', error)
   } finally {
     // 无论成功/失败，都重置“下载中”状态
     isDownloading.value = false

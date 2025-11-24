@@ -71,12 +71,10 @@ Modal.confirm({
 
     try {
       const response = await importExcel(formData)
-      console.log('上传成功:', response)
       Message.success('导入成功')
       visible.value = false
       emit('import-success')
     } catch (error) {
-      console.error(error)
     }
   },
 })

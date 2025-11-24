@@ -118,7 +118,6 @@
     // form.applicantFormUrl = data.applicantFormUrl
     Object.assign(form, data)  // 直接将所有数据合并到 form
     form.reexaminStatus = ''
-    // console.log(form)
     visible.value = true
   }
   

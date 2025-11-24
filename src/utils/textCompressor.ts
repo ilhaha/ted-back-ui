@@ -15,7 +15,6 @@ export const decompressBase64 = (base64: string): string => {
 
         return decompressed;
     } catch (error) {
-        console.error('解压失败:', error);
         return '内容解析失败'; // 显示友好错误信息
     }
 };

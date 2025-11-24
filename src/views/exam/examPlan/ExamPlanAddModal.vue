@@ -335,7 +335,6 @@ const onUpdate = async (id: string) => {
   reset();
   dataId.value = id;
   const { data } = await getExamPlan(id);
-  console.log(data.classroomId, 11111);
 
   data.examType = String(data.examType);
   // 加载关联的项目数据

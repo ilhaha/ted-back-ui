@@ -130,7 +130,6 @@ const save = async () => {
     }
 
     const hasEmpty = options.value.some(opt => !opt);
-    console.log(options.value);
     
     if (hasEmpty) {
       Message.warning('选项中内容不允许为空');
@@ -317,7 +316,6 @@ const onUpdate = async (id: string) => {
   categoryOptions.value = res.data || []
   const { data } = await getQuestionBank(id)
   Object.assign(form, data)
-  console.log("form",form);
   
   visible.value = true
   form.categoryIds = form.categoryId

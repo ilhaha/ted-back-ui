@@ -72,9 +72,6 @@ export function listExamLocation(query: ExamLocationPageQuery) {
         case 3: item.operationalStatus = '关闭'; break
       }
     })
-    // items.forEach((item) => {
-    //   console.log(item)
-    // }
   })
   return data
 }

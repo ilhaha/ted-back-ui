@@ -69,14 +69,12 @@ const beforeUpload = (file) => {
 
 const handleFileUpload = async (file) => {
   if (!beforeUpload(file.fileItem.file)) return;
-  console.log(file.fileItem.file)
   const formData = new FormData();
   formData.append('file', file.fileItem.file)
   formData.append('type', 'video')
 
   try {
     const response = await upload( formData )
-    console.log(response.data.url)
     form.videoUrl = response.data.url // 更新表单中的视频URL
     Message.success('上传成功')
   } catch (error) {
@@ -144,7 +142,6 @@ const save = async () => {
   try {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
-    console.log(form)
     if(form.topicNumber === undefined) {
       Message.error('请上传题目数量')
       return false

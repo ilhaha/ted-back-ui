@@ -184,7 +184,6 @@ const searchForm: ColumnItem[] = reactive([
 
 // 搜索
 const searchProject = () => {
-  console.log(213)
 }
 
 const checkboxIds = ref([])

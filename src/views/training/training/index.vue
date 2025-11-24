@@ -145,7 +145,6 @@ const getAnnouncementOptions = async () => {
       value: item.id,
     }))
   } catch (error) {
-    console.error('获取公告列表失败:', error)
   }
 }
 
@@ -193,7 +192,6 @@ const onApprove = async (record: TrainingResp) => {
     })
   } catch (error) {
     message.error('审核通过失败')
-    console.error(error)
   }
 }
 
@@ -209,7 +207,6 @@ const onReject = async (record: TrainingResp) => {
     })
   } catch (error) {
     message.error('审核不通过失败')
-    console.error(error)
   }
 }
 // 确保 search() 函数明确更新了表格数据
@@ -217,7 +214,6 @@ const search = async () => {
   try {
     await getTableData()
   } catch (error) {
-    console.error('刷新数据失败:', error)
   }
 }
 
@@ -234,7 +230,6 @@ const onCancel = async (record: TrainingResp) => {
     })
   } catch (error) {
     message.error('取消审核成功失败')
-    console.error(error)
   }
 }
 

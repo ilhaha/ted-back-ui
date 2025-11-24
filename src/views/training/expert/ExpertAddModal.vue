@@ -92,7 +92,6 @@ const reset = () => {
 const save = async () => {
   try {
     const isInvalid = await formRef.value?.formRef?.validate()
-    console.log(form)
     if (isInvalid) return false
     if (isUpdate.value) {
       await updateExpert(form, dataId.value)

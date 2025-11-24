@@ -102,7 +102,6 @@ const initEditor = () => {
       },
       uploaderEvent: {
         onSuccess: (file , response) => {
-          console.log(response)
           //监听图片上传成功
           //注意：
           // 1、如果此方法返回 false，则图片不会被插入到编辑器
@@ -162,11 +161,9 @@ const initEditor = () => {
       },
       // 可选：自定义上传进度处理
       onProgress: (progress: number) => {
-        console.log('上传进度：', progress)
       },
       // 可选：上传失败处理
       onError: (error: Error) => {
-        console.error('上传失败：', error)
         Message.error('图片上传失败')
       }
     }

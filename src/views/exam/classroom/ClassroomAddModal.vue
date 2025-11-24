@@ -130,7 +130,6 @@ const onUpdate = async (id: string) => {
   const { data } = await getClassroom(id)
   data.examLocationId = Number(data.examLocationId)
   Object.assign(form, data)
-  console.log(form)
   visible.value = true
 }
 

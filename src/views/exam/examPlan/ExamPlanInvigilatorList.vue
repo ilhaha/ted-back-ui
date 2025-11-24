@@ -4,15 +4,16 @@
       @refresh="getInvigilateDate(currentPlanId)" :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="false"
       :disabled-tools="['size']" :disabled-column-keys="['name']">
       <template #toolbar-right>
-        <a-popconfirm content="重新随机分配监考员？此操作会清空当前所有监考分配，是否继续？" ok-text="确定" cancel-text="取消" @ok="onReRandom">
-          <a-button v-permission="['exam:examPlan:option']" type="primary"
-            :disabled="noSecondRandom || tableData.length == 0">
+        <a-popconfirm content="重新随机分配监考员？此操作会清空当前未确认监考分配的监考员，是否继续？" ok-text="确定" cancel-text="取消" @ok="onReRandom">
+          <a-button v-permission="['exam:examPlan:option']" type="primary" :disabled="noSecondRandom ||
+            tableData.length === 0 ||
+            tableData.every(i => i.invigilateStatus === 0)
+            ">
             <template #icon><icon-sync /></template>
             重新随机分配
           </a-button>
         </a-popconfirm>
       </template>
-
       <template #invigilateStatus="{ record }">
         <a-tag :color="getInvigilateStatusColor(record.invigilateStatus)" bordered>
           {{ getInvigilateStatusText(record.invigilateStatus) }}

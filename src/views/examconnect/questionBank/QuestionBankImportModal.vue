@@ -87,7 +87,6 @@ const parsedCategory = computedAsync(async () => {
     const { data } = await getAllPath(selectedCategory.value);
     return data || DEFAULT_EMPTY_CATEGORY;
   } catch (error) {
-    console.error("分类解析失败:", error);
     return DEFAULT_EMPTY_CATEGORY;
   }
 }, DEFAULT_EMPTY_CATEGORY);
@@ -193,8 +192,6 @@ const generateTemplate = () => {
   }
   // --- 新增结束 ---
 
-  console.log(parsedCategory.value);
-  console.log(categoryInfo);
   // 4. 将工作表添加到工作簿，并设置工作表名称为分类信息
   XLSX.utils.book_append_sheet(workbook, worksheet, categoryInfo);
 

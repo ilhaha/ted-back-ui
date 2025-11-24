@@ -8,18 +8,6 @@ export default function appInfo(): Plugin {
     apply: 'serve',
     async buildStart() {
       const { bold, green, cyan, bgGreen, underline } = picocolors
-      // eslint-disable-next-line no-console
-      console.log(
-        boxen(
-          `${bold(green(`${bgGreen('ContiNew Admin v3.5.0')}`))}\n${cyan('在线文档：')}${underline('https://continew.top')}\n${cyan('常见问题：')}${underline('https://continew.top/faq.html')}\n${cyan('持续迭代优化的前后端分离中后台管理系统框架。')}`,
-          {
-            padding: 1,
-            margin: 1,
-            borderStyle: 'double',
-            textAlignment: 'center',
-          },
-        ),
-      )
     },
   }
 }

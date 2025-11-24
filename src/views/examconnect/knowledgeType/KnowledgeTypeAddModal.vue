@@ -1,14 +1,6 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns" />
   </a-modal>
 </template>
@@ -20,8 +12,8 @@ import { getKnowledgeType, addKnowledgeType, updateKnowledgeType } from '@/apis/
 import { selectOptions } from '@/apis/exam/project'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useResetReactive } from '@/hooks'
-import {ref} from "vue";
-import type {LabelValueState} from "@/types/global";
+import { ref } from "vue";
+import type { LabelValueState } from "@/types/global";
 
 const emit = defineEmits<{
   (e: 'save-success'): void
@@ -32,7 +24,7 @@ const { width } = useWindowSize()
 const dataId = ref('')
 const visible = ref(false)
 const isUpdate = computed(() => !!dataId.value)
-const title = computed(() => (isUpdate.value ? '修改知识类型，存储不同类型的知识占比' : '新增知识类型，存储不同类型的知识占比'))
+const title = computed(() => (isUpdate.value ? '修改项目知识类型' : '新增项目知识类型'))
 const formRef = ref<InstanceType<typeof GiForm>>()
 const projectOptions = ref<LabelValueState[]>([
 ])
@@ -61,14 +53,14 @@ const columns: ColumnItem[] = reactive([
     label: '知识类型名称',
     field: 'name',
     type: 'input',
-    span: 24,
+    span: 22,
     rules: [{ required: true, message: '请输入项目ID' }]
   },
   {
     label: '分数占比(整数)',
     field: 'proportion',
     type: 'input-number',
-    span: 16,
+    span: 22,
     rules: [
       { required: true, message: '请输入分数占比' },
       { validator: validateProportion } // 添加自定义校验器
@@ -83,7 +75,7 @@ const columns: ColumnItem[] = reactive([
     label: '所属项目',
     field: 'projectId',
     type: 'select',
-    span: 24,
+    span: 22,
     props: {
       allowSearch: true,
       options: projectOptions,
@@ -121,8 +113,7 @@ const save = async () => {
 const onAdd = async () => {
   reset()
   dataId.value = ''
-  const res = await selectOptions()
-  projectOptions.value = res.data || []
+
   visible.value = true
 }
 
@@ -134,6 +125,12 @@ const onUpdate = async (id: string) => {
   Object.assign(form, data)
   visible.value = true
 }
+
+onMounted(async () => {
+  // 获取项目选项
+  const res = await selectOptions()
+  projectOptions.value = res.data || []
+})
 
 defineExpose({ onAdd, onUpdate })
 </script>

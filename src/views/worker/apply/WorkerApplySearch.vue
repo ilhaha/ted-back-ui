@@ -50,7 +50,6 @@ const verifyAndGet = async () => {
         emit('verifiedResult', { projectNeedUploadDocs, idLast6: idLast6.value, workerUploadedDocs, projectInfo })
         showDialog.value = false
     } catch (e) {
-        console.log(e);
 
     } finally {
         loading.value = false

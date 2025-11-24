@@ -50,7 +50,6 @@ const getVideoDuration = async (videoId: string) => {
     const { data } = await getVideo(videoId)
     videoDuration.value = parseInt(data.duration)
   } catch (error) {
-    console.error('获取视频时长失败:', error)
   }
 }
 

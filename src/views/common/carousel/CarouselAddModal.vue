@@ -170,7 +170,6 @@ const getAnnouncementList = async () => {
     const { data } = await selectAnnouncement()
     announcementList.value = data
   } catch (error) {
-    console.error('获取公告列表失败:', error)
   }
 }
 

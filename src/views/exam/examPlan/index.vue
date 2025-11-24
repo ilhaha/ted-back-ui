@@ -2,7 +2,7 @@
   <div class="gi_table_page">
     <GiTable title="考试计划管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" :row-selection="rowSelection" @refresh="search" @select="test">
+      :disabled-column-keys="['name']" @refresh="search" @select="test">
       <template #examType="{ record }">
         <a-tag :color="getExamTypeColor(record.examType)" bordered>{{
           getExamTypeText(record.examType)
@@ -149,7 +149,7 @@
     </a-modal>
     <!-- 中心主任确认考试 -->
     <a-modal v-model:visible="conformVisible" title="中心主任确认考试" :mask-closable="false" :esc-to-close="false"
-      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="conformExam" @close="resetForm">
+      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="conformExam" :closable="null">
       <a-form ref="formRef" :model="form" layout="vertical">
         <a-form-item field="isFinalConfirmed" label="确认结果" :rules="[{ required: true, message: '请选择审核结果' }]">
           <a-radio-group v-model="form.isFinalConfirmed">
@@ -277,9 +277,7 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:examPlan:detail",
-      "exam:examPlan:update",
-      "exam:examPlan:delete",
+      "exam:paper:generate"
     ]),
   },
 ]);
@@ -297,21 +295,15 @@ const onImport = () => {
 // 中心主任确认考试
 const conformExam = async () => {
   try {
-    console.log("开始校验")
     await formRef.value?.validate()
-    console.log("校验通过")
-
+    Message.warning("正在处理，请耐心等待，可能需要一些时间...")
     const res = await centerDirectorConform(form.id, form.isFinalConfirmed)
-    console.log("接口结果", res.data)
-
     if (!res.data) return false
-
     Message.success("已确定")
     conformVisible.value = false
     search()
     return true
   } catch (e) {
-    console.log("校验或请求失败", e)
     return false
   }
 }
@@ -466,7 +458,6 @@ const onUpdate = (record: CandidateCertificateResp) => {
 
 // todo上传
 const test = (selectedRows: ProjectResp[]) => {
-  console.log("已选择的行", selectedRows);
 };
 
 const ExamPlanInvigilatorListRef = ref<InstanceType<typeof ExamPlanInvigilatorList>>();
@@ -493,7 +484,6 @@ const showExamRoom = async (record: ExamPlanResp) => {
 };
 
 const updateReviewer = (record) => {
-  console.log('abc ', record)
 }
 
 const getExamTypeColor = (status: number) => {
