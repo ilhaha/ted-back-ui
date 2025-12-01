@@ -277,7 +277,9 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:paper:generate"
+      "exam:examPlan:detail",
+      "exam:examPlan:update",
+      "exam:examPlan:delete",
     ]),
   },
 ]);

@@ -47,7 +47,8 @@
           <template #action="{ record }">
             <a-space>
               <a-link v-permission="['system:user:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-              <a-link v-permission="['system:user:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+              <a-link v-permission="['system:user:update']" title="修改" @click="onUpdate(record)"
+                v-if="canShowUpdate(record.roleIds)">修改</a-link>
               <a-link v-permission="['system:user:delete']" status="danger" :disabled="record.isSystem"
                 :title="record.isSystem ? '系统内置数据不能删除' : '删除'" @click="onDelete(record)">
                 删除
@@ -62,8 +63,8 @@
                 <template #content>
                   <a-doption v-permission="['system:user:resetPwd']" title="重置密码"
                     @click="onResetPwd(record)">重置密码</a-doption>
-                  <a-doption v-permission="['system:user:updateRole']" title="分配角色"
-                    @click="onUpdateRole(record)">分配角色</a-doption>
+                  <!-- <a-doption v-permission="['system:user:updateRole']" title="分配角色"
+                    @click="onUpdateRole(record)">分配角色</a-doption> -->
                 </template>
               </a-dropdown>
             </a-space>
@@ -188,6 +189,16 @@ const columns: TableInstanceColumns[] = [
     ]),
   },
 ]
+
+const forbiddenRoleIds = ['547888897925840930', '547888897925840949', '547888897925840935']
+
+const canShowUpdate = computed(() => {
+  return (roleIds: string[]) => {
+    console.log('roleIds', roleIds);
+    
+    return roleIds?.every(id => !forbiddenRoleIds.includes(id))
+  }
+})
 
 // 重置
 const reset = () => {
