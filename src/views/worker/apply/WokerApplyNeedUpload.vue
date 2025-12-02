@@ -61,8 +61,8 @@
                 </div>
                 <div class="upload-wrapper">
                     <a-upload :action="`${uploadUrl}2`" list-type="picture-card" :file-list="faceFileList"
-                        :show-upload-list="false" accept="image/jpeg,image/png,image/jpg"
-                        :before-upload="checkFacePhotoSize" @success="handleFaceSuccess" image-preview>
+                        :show-upload-list="false" accept="image/jpeg,image/png,image/jpg" @success="handleFaceSuccess"
+                        image-preview>
                         <img v-if="form.facePhoto" :src="form.facePhoto" alt="face" style="width: 100%;height: auto;" />
                         <div v-else>
                             <plus-outlined />
@@ -81,7 +81,7 @@
         <div class="tips-card warning-tips">
             <div class="tips-icon">⚠️</div>
             <div class="tips-text">
-                请上传报名资格申请表（<span class="format-tag">仅支持PDF、Word格式</span>），且不能提供虚假材料。<br>
+                请上传报名资格申请表（<span class="format-tag">仅支持上传图片或PDF格式文件</span>），且不能提供虚假材料。<br>
                 <span class="warning-tag">提供虚假资料者，资料退回后将不可再次申报！</span>
             </div>
         </div>
@@ -375,28 +375,6 @@ const handleFaceSuccess = (file: any) => {
     form.value.facePhoto = res.data.url
     faceFileList.value = [file]
     Message.success('一寸免冠照 上传成功')
-}
-
-// 上传前检测尺寸（1寸 295×413 px）
-const checkFacePhotoSize = (file: File) => {
-    return new Promise((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => {
-            const width = img.width
-            const height = img.height
-            if (Math.abs(width - 295) <= 5 && Math.abs(height - 413) <= 5) {
-                resolve(true)
-            } else {
-                Message.error(`人脸证件照尺寸不符合要求（当前：${width}×${height}，需为约295×413像素）`)
-                reject()
-            }
-        }
-        img.onerror = () => {
-            Message.error('无法读取图片，请重新选择文件')
-            reject()
-        }
-        img.src = URL.createObjectURL(file)
-    })
 }
 
 // 图片类资料上传
