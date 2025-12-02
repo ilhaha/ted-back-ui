@@ -27,7 +27,7 @@
         </a-button>
       </template>
       <template #projectName="{ record }">
-        {{ record.categoryName + " / " + record.projectName }}
+        {{ record.projectName }}
       </template>
       <template #idCardPhotoFront="{ record }">
         <a-space v-if="record.idCardPhotoFront">
@@ -136,15 +136,19 @@ const {
   selectedKeys
 } = useTable((page) => listWorkerApply({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
-  { title: '姓名', dataIndex: 'candidateName', slotName: 'candidateName', },
-  { title: '性别', dataIndex: 'gender', slotName: 'gender', width: 80 },
-  { title: '联系方式', dataIndex: 'phone', slotName: 'phone', width: 120 },
-  { title: '报考项目', dataIndex: 'projectName', slotName: 'projectName' },
-  { title: '预加入班级', dataIndex: 'className', slotName: 'className' },
+  { title: '姓名', dataIndex: 'candidateName', slotName: 'candidateName', width: 75 },
+  { title: '性别', dataIndex: 'gender', slotName: 'gender' },
+  { title: '学历', dataIndex: 'education', slotName: 'education' },
+  { title: '联系电话', dataIndex: 'phone', slotName: 'phone', width: 125 },
+  { title: '工作单位', dataIndex: 'workUnit', slotName: 'workUnit' },
+  { title: '通讯地址', dataIndex: 'address', slotName: 'address' },
+  { title: '政治面貌', dataIndex: 'politicalStatus', slotName: 'politicalStatus' },
+  { title: '项目', dataIndex: 'projectName', slotName: 'projectName' },
+  { title: '班级', dataIndex: 'className', slotName: 'className' },
   { title: '来源', dataIndex: 'applyType', slotName: 'applyType' },
-  { title: '身份证号', dataIndex: 'idCardNumber', slotName: 'idCardNumber' },
+  { title: '身份证号', dataIndex: 'idCardNumber', slotName: 'idCardNumber', width: 120 },
   { title: '身份证信息', dataIndex: 'idCardPhotoFront', slotName: 'idCardPhotoFront', width: 200 },
-  { title: '一寸免冠照', dataIndex: 'facePhoto', slotName: 'facePhoto', width: 120 },
+  { title: '一寸免冠照', dataIndex: 'facePhoto', slotName: 'facePhoto', width: 90 },
   { title: '资格申请表', dataIndex: 'qualificationPath', slotName: 'qualificationPath' },
   { title: '报考资料', dataIndex: 'docList', slotName: 'docList' },
   { title: '审核意见', dataIndex: 'remark', slotName: 'remark' },
@@ -296,9 +300,9 @@ const getStatusText = (status: number) => {
     case 0:
       return '未审核'
     case 1:
-      return '审核通过'
+      return '通过'
     case 2:
-      return '审核不通过'
+      return '未通过'
     case 3:
       return '虚假材料'
     default:

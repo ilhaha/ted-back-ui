@@ -96,7 +96,7 @@
             <div class="upload-wrapper">
                 <a-upload list-type="text" :file-list="formFileList"
                     :custom-request="(options) => handleFormUpload(options)" @before-remove="handleFormRemove"
-                    :disabled="formFileList.length >= 1" accept=".pdf,.doc,.docx" draggable>
+                    :disabled="formFileList.length >= 1" accept=".pdf,.jpg,.jpeg,.png" draggable>
                 </a-upload>
             </div>
         </div>
@@ -292,24 +292,32 @@ const handleFormUpload = async (options: any) => {
     const file = options.fileItem.file
 
     const fileExt = file.name.split('.').pop()?.toLowerCase()
-    // 格式校验（仅PDF/Word）
-    if (!['pdf', 'doc', 'docx'].includes(fileExt || '')) {
-        Message.warning('报名资格申请表仅支持PDF、Word格式')
+
+    // 允许的格式：PDF + 图片
+    const allowedExt = ['pdf', 'jpg', 'jpeg', 'png']
+
+    if (!allowedExt.includes(fileExt || '')) {
+        Message.warning('仅支持上传 PDF 或 图片（JPG/PNG）格式')
         options.onError?.()
         return
     }
+
     const formData = new FormData()
     formData.append('file', file)
-    const res = await applyUpload(formData);
+
+    const res = await applyUpload(formData)
     const fileUrl = res.data.url
+
     if (res.data) {
         Message.success('报名资格申请表 上传成功')
         options.onSuccess?.()
+
         formFileList.value.push({
             uid: options.fileItem.uid,
             name: file.name,
             url: fileUrl,
         })
+
         form.value.qualificationName = file.name
         form.value.qualificationFileUrl = fileUrl
     } else {
