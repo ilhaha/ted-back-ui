@@ -101,39 +101,6 @@ const columns: ColumnItem[] = reactive([
     },
   },
   {
-    label: '所属部门',
-    field: 'deptId',
-    type: 'tree-select',
-    span: 24,
-    required: true,
-    props: {
-      data: deptList,
-      allowClear: true,
-      allowSearch: true,
-      fallbackOption: false,
-      filterTreeNode(searchKey: string, nodeData: TreeNodeData) {
-        if (nodeData.title) {
-          return nodeData.title.toLowerCase().includes(searchKey.toLowerCase())
-        }
-        return false
-      },
-    },
-  },
-  {
-    label: '角色',
-    field: 'roleIds',
-    type: 'select',
-    span: 24,
-    required: true,
-    props: {
-      options: roleList,
-      // multiple: true,
-      allowClear: true,
-      allowSearch: true,
-      mode: 'single'
-    },
-  },
-  {
     label: '描述',
     field: 'description',
     type: 'textarea',
@@ -173,9 +140,10 @@ const save = async () => {
       return false
     }
 
-    if (!Array.isArray(form.roleIds)) {
-      form.roleIds = [form.roleIds]
-    }
+    // -------- 固定值 --------
+    form.roleIds = ['547888897925840935'] // 考务角色
+    form.deptId = 1                     // 考试中心部门
+    // -----------------------
 
     if (isUpdate.value) {
       await updateUser(form, dataId.value)
@@ -185,7 +153,6 @@ const save = async () => {
       if (rawPassword) {
         form.password = encryptByRsa(rawPassword) || ''
       }
-
 
       form.username = encryptByRsa(form.username) || ''
       const res = await getUserByUserName({ username: form.username })

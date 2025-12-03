@@ -16,6 +16,7 @@ declare module 'vue' {
     DateRangePicker: typeof import('./../components/DateRangePicker/index.vue')['default']
     DayForm: typeof import('./../components/GenCron/CronForm/component/day-form.vue')['default']
     DocumentPreviewModal: typeof import('./../components/DocumentPreviewModal.vue')['default']
+    DocumentUpload: typeof import('./../components/DocumentUpload/index.vue')['default']
     FilePreview: typeof import('./../components/FilePreview/index.vue')['default']
     GiCellAvatar: typeof import('./../components/GiCell/GiCellAvatar.vue')['default']
     GiCellGender: typeof import('./../components/GiCell/GiCellGender.vue')['default']

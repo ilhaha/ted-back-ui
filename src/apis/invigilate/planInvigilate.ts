@@ -132,3 +132,5 @@ export const updateScoreRecord = (data: TedExamRecords) => {
   return http.post('/exam/review/updateScoresRecord', data)
 }
 
+
+

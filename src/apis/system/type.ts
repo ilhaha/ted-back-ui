@@ -31,6 +31,15 @@ export interface UserImportResp {
   duplicateEmailRows: number
   duplicatePhoneRows: number
 }
+export interface QualificationAddReq {
+  userId: string;
+  qualificationType: string;
+  qualificationNumber: string;
+  issuedBy: string;
+  issueDate: string;
+  expiryDate: string;
+}
+
 export interface UserQuery {
   description?: string
   status?: number
