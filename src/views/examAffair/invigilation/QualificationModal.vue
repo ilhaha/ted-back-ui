@@ -24,15 +24,31 @@
       :pagination="false"
       row-key="id"
     >
+      <!-- 资质图片 -->
       <template #qualificationUrl="{ record }">
-        <a-image
-          width="100"
-          :src="record.qualificationUrl"
-          :preview="true"
-          :preview-props="{
-            actions: ['rotateRight', 'zoomIn', 'zoomOut', 'originalSize'],
-          }"
-        />
+        <div class="image-list">
+          <a-image
+            v-for="(url, index) in record.qualificationUrls"
+            :key="index"
+            width="100"
+            :src="url"
+            :preview="true"
+            :preview-props="{
+              actions: ['rotateRight', 'zoomIn', 'zoomOut', 'originalSize'],
+            }"
+          />
+        </div>
+      </template>
+
+      <!-- 操作列：删除 -->
+      <template #actions="{ record }">
+        <a-popconfirm
+          content="确认删除该资质吗？"
+          type="warning"
+          @ok="handleDelete(record.id)"
+        >
+          <a-button size="small" status="danger">删除</a-button>
+        </a-popconfirm>
       </template>
     </a-table>
 
@@ -65,9 +81,10 @@ import DocumentUpload from "../DocumentUpload/index.vue";
 import {
   getQualificationList,
   addQualification,
+  deleteQualification, // ✅ 删除接口
 } from "@/apis/system/qualification";
 
-// 组件对外暴露方法
+// 弹窗控制
 const visible = ref(false);
 const currentUserId = ref<number | null>(null);
 
@@ -82,7 +99,8 @@ const documentUploadRef = ref();
 
 // 表格列
 const columns = [
-  { title: "资质类别", dataIndex: "categoryName" }, // 添加资质类别列
+  
+  { title: "资质类别", dataIndex: "categoryName" },
   {
     title: "资质证明",
     dataIndex: "qualificationUrl",
@@ -90,6 +108,9 @@ const columns = [
   },
   { title: "上传时间", dataIndex: "createTime" },
   { title: "更新时间", dataIndex: "updateTime" },
+
+  //删除
+  { title: "操作", dataIndex: "actions", slotName: "actions", width: 120 },
 ];
 
 // ======== 公开方法：打开弹窗 ========
@@ -107,15 +128,22 @@ const close = () => {
 // ======== 加载列表 ========
 const loadQualification = async () => {
   if (!currentUserId.value) return;
+
   const res = await getQualificationList({
     userId: currentUserId.value,
     page: currentPage.value,
     pageSize: pageSize.value,
   });
 
-  // 确保数据结构正确
-  tableData.value = res.data || []; // 直接赋值为后端返回的数组
-  total.value = res.data.length || 0; // 设置总数为数组长度
+  // 转换图片 URL 为数组
+  tableData.value = res.data?.map((item) => ({
+    ...item,
+    qualificationUrls: item.qualificationUrl
+      ? item.qualificationUrl.split(",")
+      : [], // 将逗号分隔的字符串转换为数组
+  })) || [];
+
+  total.value = tableData.value.length || 0;
 };
 
 // ======== 上传按钮 ========
@@ -124,8 +152,8 @@ const handleUploadClick = () => {
     Message.warning("用户 ID 未设置");
     return;
   }
-  uploadVisible.value = true; // 打开上传弹窗
-  documentUploadRef.value?.open(currentUserId.value); // 调用子组件的 open 方法
+  uploadVisible.value = true;
+  documentUploadRef.value?.open(currentUserId.value);
 };
 
 // 上传成功
@@ -138,12 +166,25 @@ const handleUploadSuccess = async (data: {
     categoryId: data.typeId,
     qualificationUrl: data.docPath,
   });
+
   Message.success("上传成功");
-  uploadVisible.value = false; // 关闭上传弹窗
-  loadQualification(); // 刷新资质列表
+  uploadVisible.value = false;
+  loadQualification();
 };
 
-// 向父组件暴露方法
+// ======== 删除资质 ========
+const handleDelete = async (qualificationId: number) => {
+  try {
+    await deleteQualification(qualificationId); 
+    Message.success("删除成功");
+    loadQualification(); // 刷新资质列表
+  } catch (error) {
+    console.error("删除资质失败:", error);
+    Message.error("删除资质失败，请稍后重试");
+  }
+};
+
+// 向父组件暴露
 defineExpose({
   open,
 });
@@ -153,5 +194,12 @@ defineExpose({
 .pagination-wrapper {
   margin-top: 16px;
   text-align: right;
+}
+
+.image-list {
+  display: flex; /* 使用 flex 布局 */
+  gap: 8px; /* 图片之间的间距 */
+  flex-wrap: wrap; /* 如果图片过多，自动换行 */
+  align-items: center; /* 垂直居中图片 */
 }
 </style>

@@ -16,3 +16,7 @@ export const addQualification = (params: {
 }) => {
     return http.post(`${BASE_URL}/addQualification`, params);
 };
+/** @desc 删除资格 */
+export const deleteQualification = (id: number) => {
+  return http.del(`${BASE_URL}/${id}`);
+};

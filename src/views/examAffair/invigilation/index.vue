@@ -63,16 +63,15 @@
           <!-- <a-link v-permission="['system:user:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <a-link
             v-permission="['system:user:addQualification']"
-            title="添加资质"
+            title="资质列表"
             @click="onAddQualification(record)"
           >
-            添加资质
+            资质
           </a-link>
           <a-link
             v-permission="['system:user:update']"
             title="修改"
             @click="onUpdate(record)"
-            v-if="canShowUpdate(record.roleIds)"
             >修改</a-link
           >
           <a-link
@@ -134,9 +133,9 @@ import UserUpdateRoleModal from "./UserUpdateRoleModal.vue";
 import QualificationModal from "./QualificationModal.vue";
 import {
   type UserResp,
-  deleteUser,
   exportUser,
   listExamStaff,
+  deleteExamStaff,
 } from "@/apis/system/user";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { DisEnableStatusList } from "@/constant/common";
@@ -316,7 +315,7 @@ const reset = () => {
 
 // 删除
 const onDelete = (record: UserResp) => {
-  return handleDelete(() => deleteUser(record.id), {
+  return handleDelete(() => deleteExamStaff(record.id), {
     content: `是否确定删除用户「${record.nickname}」？`,
     showModal: true,
   });

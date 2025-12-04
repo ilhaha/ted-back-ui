@@ -111,3 +111,7 @@ export function addInvigilates(examPlanId: any, invigilatorIds: any, classroomId
 export function verifyInvigilate(invigilateList: any) {
   return http.get(`${BASE_URL}/verifyInvigilate`, invigilateList)
 }
+/** @desc 删除考务人员 */
+export function deleteExamStaff(id: string) {
+  return http.del(`${BASE_URL}/examStaff/${id}`);
+}
