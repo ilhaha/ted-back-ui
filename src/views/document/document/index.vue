@@ -70,6 +70,9 @@
           getStatusText(record.status)
         }}</a-tag>
       </template>
+            <template #pendingCount="{ record }">
+  {{ record.documents.filter(d => d.status === 0).length }}
+</template>
       <template #action="{ record }">
         <a-space>
           <!-- <a-link v-permission="['document:document:detail']" title="审核" @click="onExamine(record)">审核</a-link> -->
@@ -79,7 +82,7 @@
     </GiTable>
 
     <DocumentAddModal
-      ref="DocumentAddModalRef"
+      ref="DocumentAddModalRef" 
       @save-success="search"
       @审核成功="search"
     />
@@ -170,6 +173,13 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "documentsCount",
     align: "center",
   },
+  {
+  title: "待审核数",
+  dataIndex: "pendingCount",
+  slotName: "pendingCount",
+  align: "center",
+},
+
   // {
   //   title: "资料图片",
   //   dataIndex: "docPath",
