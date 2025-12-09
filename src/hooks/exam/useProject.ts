@@ -1,23 +1,24 @@
 import { ref } from 'vue'
 import type { LabelValueState } from '@/types/global'
-import { getClassRoomSelect, getLocationSelect, getNotBindingDocument, getNotBindingLocation } from '@/apis/exam/project'
+import { getLocalClassroomChoose, getLocationSelect, getNotBindingDocument, getNotBindingLocation } from '@/apis/exam/project'
 
 /** 项目模块 */
 export function useProject(options?: { onSuccess?: () => void }) {
   const loading = ref(false)
   const locationSelectList = ref<LabelValueState[]>([])
-  const classRoomSelectList = ref<LabelValueState[]>([])
+  const operationClassRoomSelectList = ref<LabelValueState[]>([])
+  const theoryClassRoomSelectList = ref<LabelValueState[]>([])
   const notBindingLocationList = ref<LabelValueState[]>([])
   const notBindingDocumentList = ref<LabelValueState[]>([])
 
   /**
    * 获取项目地址下拉框包含label(locationName)、value(id)
    */
-  const getProjectLocationSelect = async (projectId: string) => {
+  const getProjectLocationSelect = async (planType: string) => {
     try {
       loading.value = true
       // 获取项目地点
-      const res = await getLocationSelect(projectId)
+      const res = await getLocationSelect(planType)
       locationSelectList.value = res.data
       options?.onSuccess && options.onSuccess()
     } finally {
@@ -28,11 +29,16 @@ export function useProject(options?: { onSuccess?: () => void }) {
   /**
    * 获取项目考场下拉框包含label(locationName)、value(id)
    */
-  const getProjectClassRoomSelect = async (projectId: string) => {
+  const getProjectClassRoomSelect = async (projectId: string, isOperation: number) => {
     try {
       loading.value = true
-      const res = await getClassRoomSelect(projectId)
-      classRoomSelectList.value = res.data
+      const res = await getLocalClassroomChoose(projectId, isOperation)
+      if (isOperation == 1) {
+        operationClassRoomSelectList.value = res.data
+      } else {
+        theoryClassRoomSelectList.value = res.data
+      }
+
       options?.onSuccess && options.onSuccess()
     } finally {
       loading.value = false
@@ -69,7 +75,8 @@ export function useProject(options?: { onSuccess?: () => void }) {
 
   return {
     locationSelectList,
-    classRoomSelectList,
+    operationClassRoomSelectList,
+    theoryClassRoomSelectList,
     notBindingLocationList,
     notBindingDocumentList,
     getProjectLocationSelect,

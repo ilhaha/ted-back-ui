@@ -1,28 +1,20 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="考场管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
-    <template #examType="{ record }">
+    <GiTable title="考场管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
+      <template #examType="{ record }">
         <a-tag :color="getStatusColor(record.examType)" bordered>{{
           getStatusText(record.examType)
         }}</a-tag>
       </template>
+      <template #classroomType="{ record }">
+        <a-tag :color="getClassroomTypeColor(record.classroomType)" bordered>{{
+          getClassroomTypeText(record.classroomType)
+        }}</a-tag>
+      </template>
       <template #toolbar-right>
-        <a-button
-          v-permission="['exam:classroom:add']"
-          type="primary"
-          @click="onAdd"
-        >
+        <a-button v-permission="['exam:classroom:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
@@ -31,21 +23,16 @@
           <template #default>导出</template>
         </a-button> -->
       </template>
-      
+
       <template #action="{ record }">
         <a-space>
-<!--          <a-link
+          <!--          <a-link
             v-permission="['exam:classroom:detail']"
             title="详情"
             @click="onDetail(record)"
             >详情</a-link
           >-->
-          <a-link
-            v-permission="['exam:classroom:update']"
-            title="修改"
-            @click="onUpdate(record)"
-            >修改</a-link
-          >
+          <a-link v-permission="['exam:classroom:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <!--          <a-link-->
           <!--            v-permission="['exam:classroom:delete']"-->
           <!--            status="danger"-->
@@ -98,11 +85,9 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   // { title: '主键id', dataIndex: 'id', slotName: 'id' },
   { title: "考场名称", dataIndex: "classroomName", slotName: "classroomName" },
-  {
-    title: "考试地点",
-    dataIndex: "examLocation",
-    slotName: "examLocation",
-  },
+  { title: "考试地点", dataIndex: "examLocation", slotName: "examLocation", },
+  { title: "考试人员类型", dataIndex: "classroomType", slotName: "classroomType", },
+  { title: "考试类型", dataIndex: "examType", slotName: "examType", },
   // { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
   // { title: '更新时间', dataIndex: 'updateTime', slotName: 'updateTime' },
   // { title: '创建人', dataIndex: 'createUserString', slotName: 'createUser' },
@@ -176,6 +161,28 @@ const getStatusColor = (status: number) => {
   }
 };
 
+const getClassroomTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "orange";
+    case 1:
+      return "cyan";
+    default:
+      return "default";
+  }
+};
+
+const getClassroomTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "作业人员";
+    case 1:
+      return "检验人员";
+    default:
+      return "未知类型";
+  }
+};
+
 const getStatusText = (status: number) => {
   switch (status) {
     case 0:
@@ -183,7 +190,7 @@ const getStatusText = (status: number) => {
     case 1:
       return "实操考试";
     default:
-      return "未知状态";
+      return "未知";
   }
 };
 </script>

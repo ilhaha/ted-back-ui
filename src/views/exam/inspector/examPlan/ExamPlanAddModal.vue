@@ -59,7 +59,7 @@ const [form, resetForm] = useResetReactive({
   enrollList: "",
   // classroomId: [],
   examType: undefined,
-  planType: 0,
+  planType: 1,
   invigilatorCount: 1,
   theoryClassroomId: [],
   operationClassroomId: []
@@ -312,7 +312,7 @@ const onAdd = async () => {
   reset();
   visible.value = true;
   dataId.value = "";
-  getProjectList(0);
+  getProjectList(1);
 };
 
 // 修改

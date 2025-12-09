@@ -146,10 +146,10 @@ const save = async () => {
       Message.error('请上传题目数量')
       return false
     }
-    if(form.videoUrl === '') {
-      Message.error('请上传视频')
-      return false
-    }
+    // if(form.videoUrl === '') {
+    //   Message.error('请上传视频')
+    //   return false
+    // }
     if (isUpdate.value) {
       await updateCategory(form, dataId.value)
       Message.success('修改成功')

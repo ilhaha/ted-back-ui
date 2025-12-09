@@ -50,10 +50,10 @@
         <!--          style="width: 150px"-->
         <!--          @change="search"-->
         <!--        />-->
-        <a-button type="primary" class="ml-2" @click="search">
+        <!-- <a-button type="primary" class="ml-2" @click="search">
           <template #icon><icon-search /></template>
           搜索
-        </a-button>
+        </a-button> -->
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>

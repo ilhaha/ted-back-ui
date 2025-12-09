@@ -30,30 +30,14 @@
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
         </a-button>
-        <!-- <a-button v-permission="['exam:examPlan:export']" @click="onExport">
-              <template #icon><icon-download /></template>
-              导出
-            </a-button> -->
       </template>
 
       <template #toolbar-left>
         <div class="search-container">
-          <!-- <a-select v-model="queryForm.planType" placeholder="考试人员类型" allow-clear class="search-input ml-2"
-            @change="search">
-            <a-option :value="0">作业人员</a-option>
-            <a-option :value="1">检验人员</a-option>
-          </a-select> -->
           <a-input-search @search="search" v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear
             class="search-input ml-2" />
           <a-input-search @search="search" v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear
             class="search-input ml-2" />
-          <!-- <a-year-picker
-            v-model="queryForm.planYear"
-            placeholder="选择年份"
-            class="search-input ml-2"
-            style="margin-left: 8px;"
-          /> -->
-          <!-- <a-input v-model="queryForm.locationName" placeholder="搜索考试地点" allow-clear class="search-input ml-2" /> -->
           <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2" @change="search"
             style="margin-left: 8px;">
             <a-option value="1">待主任审批</a-option>
@@ -213,7 +197,7 @@ const userInfo = computed(() => userStore.userInfo)
 defineOptions({ name: "ExamPlan" });
 
 const queryForm = reactive<ExamPlanQuery>({
-  planType: 0,
+  planType: 1,
   // sort: ["tep.id,desc"],
 });
 

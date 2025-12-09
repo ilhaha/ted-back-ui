@@ -1,14 +1,6 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns" />
   </a-modal>
 </template>
@@ -37,6 +29,8 @@ const [form, resetForm] = useResetReactive({
   classroomName: '', // 考场名称
   maxCandidates: null, // 最大容纳人数
   examLocation: '', // 考试地点
+  classroomType: 0,
+  examType: 0
 })
 
 // 监听模态框显示状态，加载考试地点数据
@@ -67,6 +61,42 @@ const columns: ColumnItem[] = reactive([
     props: {
       placeholder: '请输入最大容纳人数',
     },
+  },
+  {
+    label: '考试人员类型',
+    field: 'classroomType',
+    type: 'select',
+    span: 24,
+    props: computed(() => ({
+      allowSearch: false,
+      allowClear: false,
+      multiple: false,
+      disabled: isUpdate.value,
+      options: [
+        { label: '作业人员', value: 0 },
+        { label: '检验人员', value: 1 }
+      ],
+      fieldNames: { label: 'label', value: 'value' }
+    })),
+    rules: [{ required: true, message: '请选考试人员类型' }]
+  },
+  {
+    label: '考试类型',
+    field: 'examType',
+    type: 'select',
+    span: 24,
+    props: computed(() => ({
+      allowSearch: false,
+      allowClear: false,
+      multiple: false,
+      disabled: isUpdate.value,
+      options: [
+        { label: '理论考试', value: 0 },
+        { label: '实操考试', value: 1 }
+      ],
+      fieldNames: { label: 'label', value: 'value' }
+    })),
+    rules: [{ required: true, message: '请选考试类型' }]
   },
   {
     label: '考试地点',

@@ -7,10 +7,10 @@ export function usePlan(options?: { onSuccess?: () => void }) {
   const loading = ref(false)
   const deptProjectsList = ref<LabelValueState[]>([])
 
-  const getDeptProjectsList = async () => {
+  const getDeptProjectsList = async (planType: number) => {
     try {
       loading.value = true
-      const res = await deptProjects()
+      const res = await deptProjects(planType)
       deptProjectsList.value = res.data
       options?.onSuccess && options.onSuccess()
     } finally {

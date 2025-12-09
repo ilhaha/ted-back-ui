@@ -115,7 +115,7 @@ import { DisEnableStatusList } from "@/constant/common";
 defineOptions({ name: "Project" });
 
 const queryForm = reactive<ProjectQuery>({
-  projectType: 0,
+  projectType: 1,
   sort: ["updateTime,desc", "createTime,desc", "id,desc"],
 });
 

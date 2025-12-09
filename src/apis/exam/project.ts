@@ -60,7 +60,7 @@ export interface ProjectDetailResp {
 export interface ProjectSearchQuery {
   projectName: string
   projectCode: string
-    createUser: string
+  createUser: string
 }
 
 export interface ProjectLocationList {
@@ -81,7 +81,7 @@ export interface ProjectDocumentList {
 export interface ProjectQuery {
   sort: Array<string>
 }
-export interface ProjectPageQuery extends ProjectQuery, PageQuery {}
+export interface ProjectPageQuery extends ProjectQuery, PageQuery { }
 
 /** @desc 查询项目列表 */
 export function getProjectsWithClassrooms() {
@@ -141,6 +141,12 @@ export function getNotBindingDocument(projectId: string) {
 export function getBindingLocation(projectId: string) {
   return http.post(`${NOT_BINDING_LOCATION}/${projectId}`)
 }
+
+/** @desc 根据项目的考试人员类型和是否有实操考试获取地点-考场级联选择器 */
+export function getLocalClassroomChoose(projectId: string, isOperation: number) {
+  return http.get(`${BASE_URL}/local/classroom/${projectId}/${isOperation}`)
+}
+
 
 /** @desc 查询项目包含地点的下拉框信息 */
 export function getLocationSelect(projectId: string) {

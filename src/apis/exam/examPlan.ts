@@ -62,6 +62,14 @@ export interface ExamPlanQuery {
 }
 export interface ExamPlanPageQuery extends ExamPlanQuery, PageQuery { }
 
+
+/** @desc 调整考试/报名时间 */
+export function adjustPlanTimeApi(data: any, planId: number) {
+  return http.post(`${BASE_URL}/adjustPlanTime/${planId}`, data)
+}
+
+
+
 /** @desc 中心主任确认考试 */
 export function centerDirectorConform(planId: number, isFinalConfirmed: number) {
   return http.post(`${BASE_URL}/conform/${planId}/${isFinalConfirmed}`, {
@@ -75,8 +83,8 @@ export function listExamPlan(query: ExamPlanPageQuery) {
 }
 
 /** @desc 获取当前部门下所有项目的列表 */
-export function deptProjects() {
-  return http.post(`${DEPT_PROJECTS}`)
+export function deptProjects(planType: number) {
+  return http.post(`${DEPT_PROJECTS}/${planType}`)
 }
 
 /** @desc 查询考试计划详情 */

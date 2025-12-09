@@ -44,7 +44,7 @@ const [form, resetForm] = useResetReactive({
   auditStatus: undefined,
   projectStatus: 1,
   categoryId: undefined,
-  porjectType: 0,
+  projectType: 1,
   isOperation: 0,
 })
 

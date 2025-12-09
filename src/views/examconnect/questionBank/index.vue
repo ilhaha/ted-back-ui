@@ -1,46 +1,17 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="题目管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable title="题目管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
-        <a-input-search
-          v-model="queryForm.question"
-          placeholder="题目标题"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.categoryName"
-          placeholder="八大类"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.projectName"
-          placeholder="所属项目"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.knowledgeTypeName"
-          placeholder="知识类型"
-          allow-clear
-          @search="search"
-        />
-        <a-button type="primary" class="ml-2" @click="search">
+        <a-input-search v-model="queryForm.question" placeholder="题目标题" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.categoryName" placeholder="八大类" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.projectName" placeholder="所属项目" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.knowledgeTypeName" placeholder="知识类型" allow-clear @search="search" />
+        <!-- <a-button type="primary" class="ml-2" @click="search">
           <template #icon><icon-search /></template>
-          搜索
-        </a-button>
+搜索
+</a-button> -->
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -56,12 +27,13 @@
           getAttachment(record.attachment)
         }}</a-tag>
       </template>
+      <template #examType="{ record }">
+        <a-tag :color="getExamTypeColor(record.examType)" bordered>{{
+          getExamTypeText(record.examType)
+        }}</a-tag>
+      </template>
       <template #toolbar-right>
-        <a-button
-          v-permission="['examconnect:questionBank:add']"
-          type="primary"
-          @click="onAdd"
-        >
+        <a-button v-permission="['examconnect:questionBank:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           <template #default>新增题目</template>
         </a-button>
@@ -69,42 +41,24 @@
           <template #icon><icon-upload /></template>
           <template #default>导入题目</template>
         </a-button>
-         <a-button @click="onExportExcel">
+        <a-button @click="onExportExcel">
           <template #icon><icon-download /></template>
           <template #default>导出题目Excel</template>
         </a-button>
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link
-            v-permission="['examconnect:questionBank:detail']"
-            title="题目信息"
-            @click="onDetail(record)"
-            >详情</a-link
-          >
-          <a-link
-            v-permission="['examconnect:questionBank:update']"
-            title="修改"
-            @click="onUpdate(record)"
-            >修改</a-link
-          >
-          <a-link
-            v-permission="['examconnect:questionBank:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
+          <a-link v-permission="['examconnect:questionBank:detail']" title="题目信息" @click="onDetail(record)">详情</a-link>
+          <a-link v-permission="['examconnect:questionBank:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+          <a-link v-permission="['examconnect:questionBank:delete']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>
         </a-space>
       </template>
     </GiTable>
 
-    <QuestionBankAddModal
-      ref="QuestionBankAddModalRef"
-      @save-success="search"
-    />
+    <QuestionBankAddModal ref="QuestionBankAddModalRef" @save-success="search" />
     <QuestionBankDetailDrawer ref="QuestionBankDetailDrawerRef" />
     <QuestionBankImportModal ref="QuestionBankImportModalRef" />
     <exportQuestionsExcel ref="exportQuestionsExcelRef" />
@@ -158,6 +112,7 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "knowledgeTypeName",
   },
   { title: "题目类型", dataIndex: "questionType", slotName: "questionType" },
+  { title: "考试人员类型", dataIndex: "examType", slotName: "examType" },
   { title: "题目附件", dataIndex: "attachment", slotName: "attachment" },
   {
     title: "操作",
@@ -212,6 +167,29 @@ const onDelete = (record: QuestionBankResp) => {
 const getStatusColor = (str: string) => {
   if (str) return "green";
   return "red";
+};
+
+
+const getExamTypeColor = (status: number) => {
+  switch (status) {
+    case 1:
+      return "blue"; // 作业人员
+    case 2:
+      return "orange"; // 检验人员
+    default:
+      return "default";
+  }
+};
+
+const getExamTypeText = (status: number) => {
+  switch (status) {
+    case 1:
+      return "作业人员";
+    case 2:
+      return "检验人员";
+    default:
+      return "未知状态";
+  }
 };
 
 const getTypeColor = (str: string | number) => {
