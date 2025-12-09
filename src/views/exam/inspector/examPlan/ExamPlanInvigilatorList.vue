@@ -5,7 +5,7 @@
       :disabled-tools="['size']" :disabled-column-keys="['name']">
       <template #toolbar-right>
         <a-popconfirm content="重新随机分配监考员？此操作会清空当前未确认监考分配的监考员，是否继续？" ok-text="确定" cancel-text="取消" @ok="onReRandom">
-          <a-button v-permission="['exam:examPlan:option']" type="primary" :disabled="noSecondRandom ||
+          <a-button v-permission="['inspector:examPlan:option']" type="primary" :disabled="noSecondRandom ||
             tableData.length === 0 ||
             tableData.every(i => i.invigilateStatus === 0)
             ">
@@ -21,7 +21,7 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['exam:examPlan:updateInvigilator']" status="danger" @click="updateInvigilator(record)"
+          <a-link v-permission="['inspector:examPlan:updateInvigilator']" status="danger" @click="updateInvigilator(record)"
             v-if="record.invigilateStatus == 5">
             更改
           </a-link>

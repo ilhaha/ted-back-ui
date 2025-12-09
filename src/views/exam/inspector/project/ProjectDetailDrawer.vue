@@ -5,32 +5,27 @@
       <a-descriptions-item label="项目名称">{{ dataDetail?.projectName }}</a-descriptions-item>
       <a-descriptions-item label="项目代号">{{ dataDetail?.projectCode }}</a-descriptions-item>
       <!-- <a-descriptions-item label="部门名称">{{ dataDetail?.categoryId }} 分钟</a-descriptions-item> -->
-<!--      <a-descriptions-item label="描述">{{ dataDetail?.redeme }}</a-descriptions-item>-->
-<!--      <a-descriptions-item label="创建人ID">{{ dataDetail?.createUser }}</a-descriptions-item>-->
+      <!--      <a-descriptions-item label="描述">{{ dataDetail?.redeme }}</a-descriptions-item>-->
+      <!--      <a-descriptions-item label="创建人ID">{{ dataDetail?.createUser }}</a-descriptions-item>-->
       <a-descriptions-item label="创建人">{{ dataDetail?.createUserString }}</a-descriptions-item>
-<!--      <a-descriptions-item label="更新人ID">{{ dataDetail?.updateUser }}</a-descriptions-item>-->
+      <!--      <a-descriptions-item label="更新人ID">{{ dataDetail?.updateUser }}</a-descriptions-item>-->
       <a-descriptions-item label="修改人">{{ dataDetail?.updateUserString }}</a-descriptions-item>
       <a-descriptions-item label="创建时间戳">{{ dataDetail?.createTime }}</a-descriptions-item>
       <a-descriptions-item label="更新时间戳">{{ dataDetail?.updateTime }}</a-descriptions-item>
-<!--      <a-descriptions-item label="删除标记">{{ dataDetail?.isDeleted }}</a-descriptions-item>-->
+      <!--      <a-descriptions-item label="删除标记">{{ dataDetail?.isDeleted }}</a-descriptions-item>-->
     </a-descriptions>
 
     <a-space style="margin-bottom: 16px;">
       <!-- <a-button type="primary" @click="onAddress">绑定地址</a-button> -->
-      <a-button type="primary" @click="onDocument">绑定资料</a-button>
+      <a-button type="primary" @click="onDocument" v-permission="['inspector:project:bindDocument']">绑定资料</a-button>
     </a-space>
 
     <!--  地址相关  -->
     <a-table v-if="locationDetail.length > 0" :columns="columns" :data="locationDetail" :pagination="false">
       <template #action="{ record }">
         <a-space>
-          <a-link
-              v-permission="['exam:project:delete']"
-              status="danger"
-              :disabled="record.disabled"
-              :title="record.disabled ? '不可删除' : '删除'"
-              @click="onDeleteLocation(record)"
-          >
+          <a-link v-permission="['inspector:project:delete']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDeleteLocation(record)">
             解绑
           </a-link>
         </a-space>
@@ -43,14 +38,9 @@
     <a-table v-if="documentDetail.length > 0" :columns="documentColumns" :data="documentDetail" :pagination="false">
       <template #action="{ record }">
         <a-space>
-          <a-link
-              v-permission="['exam:project:delete']"
-              status="danger"
-              :disabled="record.disabled"
-              :title="record.disabled ? '不可删除' : '删除'"
-              @click="onDeleteDocument(record)"
-          >
-          解绑
+          <a-link v-permission="['inspector:project:unbind']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDeleteDocument(record)">
+            解绑
           </a-link>
         </a-space>
       </template>
@@ -58,14 +48,14 @@
   </a-drawer>
 
   <a-modal v-model:visible="visibleDel" @ok="ok" @cancel="cancel">
-    <template #title/>
+    <template #title />
     <div style="width: 100%; text-align: center; font-size: 16px; color: red;">
       确定要解除绑定吗？
     </div>
   </a-modal>
 
-  <ProjectBindAddress ref="ProjectBindAddressRef" @save-success="onAddressCompleted"/>
-  <ProjectBindDocument ref="ProjectBindDocumentRef" @save-success="onDocumentCompleted"/>
+  <ProjectBindAddress ref="ProjectBindAddressRef" @save-success="onAddressCompleted" />
+  <ProjectBindDocument ref="ProjectBindDocumentRef" @save-success="onDocumentCompleted" />
 
 </template>
 
@@ -86,7 +76,7 @@ import {
 }
   from '@/apis/exam/project'
 
-import type {TableInstanceColumns} from "@/components/GiTable/type";
+import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import type ProjectAddModal from "@/views/exam/project/ProjectAddModal.vue";
@@ -113,7 +103,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 100,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['exam:project:delete'])
+    show: has.hasPermOr(['inspector:project:delete'])
   }
 ])
 
@@ -126,7 +116,7 @@ const documentColumns = ref<TableInstanceColumns[]>([
     width: 100,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['exam:project:delete'])
+    show: has.hasPermOr(['inspector:project:delete'])
   }
 ])
 
