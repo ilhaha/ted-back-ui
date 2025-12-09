@@ -44,10 +44,16 @@ export interface DocumentQuery {
 
 export interface DocumentPageQuery extends DocumentQuery, PageQuery {}
 
+// /** @desc 查询资料核心存储列表 */
+// export function listDocument(query: DocumentPageQuery) {
+//   return http.get<PageRes<DocumentResp[]>>(`${BASE_URL}`, query)
+// }
+
 /** @desc 查询资料核心存储列表 */
 export function listDocument(query: DocumentPageQuery) {
-  return http.get<PageRes<DocumentResp[]>>(`${BASE_URL}`, query)
+  return http.get<PageRes<DocumentResp[]>>(`${BASE_URL}/pageByCandidate`, query)
 }
+
 /** @desc 获取所有资料种类 */
 export function getDocumentType() {
   return http.get(`${TYPE_NAME_URL}`)
