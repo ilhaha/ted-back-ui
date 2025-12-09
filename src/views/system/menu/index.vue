@@ -1,17 +1,8 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      ref="tableRef"
-      title=""
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1700 }"
-      :pagination="false"
-      :disabled-column-keys="['title']"
-      @refresh="search"
-    >
+    <GiTable ref="tableRef" title="" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1700 }" :pagination="false" :disabled-column-keys="['title']"
+      @refresh="search">
       <template #expand-icon="{ expanded }">
         <IconDown v-if="expanded" />
         <IconRight v-else />
@@ -67,12 +58,8 @@
         <a-space>
           <a-link v-permission="['system:menu:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <a-link v-permission="['system:menu:delete']" status="danger" title="删除" @click="onDelete(record)">删除</a-link>
-          <a-link
-            v-permission="['system:menu:add']"
-            :disabled="![1, 2].includes(record.type)"
-            :title="![1, 2].includes(record.type) ? '不可添加下级菜单' : '新增'"
-            @click="onAdd(record.id)"
-          >
+          <a-link v-permission="['system:menu:add']" :disabled="![1, 2].includes(record.type)"
+            :title="![1, 2].includes(record.type) ? '不可添加下级菜单' : '新增'" @click="onAdd(record.id)">
             新增
           </a-link>
         </a-space>
@@ -161,6 +148,7 @@ const columns: TableInstanceColumns[] = [
 // 重置
 const reset = () => {
   title.value = ''
+  search()
 }
 
 // 删除

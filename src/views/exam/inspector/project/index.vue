@@ -9,11 +9,11 @@
         }}</a-tag>
       </template>
       <template #toolbar-right>
-        <a-button v-permission="['exam:project:add']" type="primary" @click="onAdd">
+        <a-button v-permission="['inspector:project:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           新增
         </a-button>
-        <!-- <a-button v-permission="['exam:project:export']" class="ml-2" @click="onExport">
+        <!-- <a-button v-permission="['inspector:project:export']" class="ml-2" @click="onExport">
               <template #icon><icon-download /></template>
               导出
             </a-button> -->
@@ -51,11 +51,11 @@
             重置
           </a-button>
           <!-- <div class="operation-btns">
-            <a-button v-permission="['exam:project:add']" type="primary" @click="onAdd">
+            <a-button v-permission="['inspector:project:add']" type="primary" @click="onAdd">
               <template #icon><icon-plus /></template>
               新增
             </a-button>
-            <a-button v-permission="['exam:project:export']" class="ml-2" @click="onExport">
+            <a-button v-permission="['inspector:project:export']" class="ml-2" @click="onExport">
               <template #icon><icon-download /></template>
               导出
             </a-button>
@@ -65,19 +65,19 @@
       <template #action="{ record }">
         <a-space :size="2">
           <div v-if="record.projectStatus === 1">
-            <a-link v-permission="['exam:project:examine']" title="审核" @click="onExamineA(record)">审核</a-link>
-            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-            <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-            <a-link v-permission="['exam:project:delete']" status="danger" :disabled="record.disabled"
+            <a-link v-permission="['inspector:project:examine']" title="审核" @click="onExamineA(record)">审核</a-link>
+            <a-link v-permission="['inspector:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+            <a-link v-permission="['inspector:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+            <a-link v-permission="['inspector:project:delete']" status="danger" :disabled="record.disabled"
               :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
               删除
             </a-link>
           </div>
           <div v-else>
-            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-            <!-- <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link> -->
+            <a-link v-permission="['inspector:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+            <!-- <a-link v-permission="['inspector:project:update']" title="修改" @click="onUpdate(record)">修改</a-link> -->
             <!--            <a-link-->
-            <!--                v-permission="['exam:project:delete']"-->
+            <!--                v-permission="['inspector:project:delete']"-->
             <!--                status="danger"-->
             <!--                :disabled="record.disabled"-->
             <!--                :title="record.disabled ? '不可删除' : '删除'"-->
@@ -152,9 +152,9 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:project:detail",
-      "exam:project:update",
-      "exam:project:delete",
+      "inspector:project:detail",
+      "inspector:project:update",
+      "inspector:project:delete",
     ]),
   },
 ]);

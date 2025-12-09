@@ -22,11 +22,11 @@
       </template>
 
       <template #toolbar-right>
-        <a-button v-permission="['exam:examPlan:add']" type="primary" @click="onAdd">
+        <a-button v-permission="['inspector:examPlan:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           新增
         </a-button>
-        <a-button @click="onImport" v-permission="['exam:examPlan:import']">
+        <a-button @click="onImport" v-permission="['inspector:examPlan:import']">
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
         </a-button>
@@ -92,7 +92,7 @@
       </template>
       <!-- <template #invigilate="{ record }">
         <a-space>
-          <a-link v-permission="['exam:examPlan:option']" title="选择监考" style="text-align: center"
+          <a-link v-permission="['inspector:examPlan:option']" title="选择监考" style="text-align: center"
             @click="onOptionInvigilate(record)">
             选择监考
           </a-link>
@@ -100,36 +100,36 @@
       </template> -->
       <template #action="{ record }">
         <a-space>
-          <!-- <a-link v-permission="['exam:examPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
+          <!-- <a-link v-permission="['inspector:examPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <div v-if="record.status == 1">
-            <a-link v-permission="['exam:examPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
+            <a-link v-permission="['inspector:examPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
               审核
             </a-link>
           </div>
           <div v-if="record.status == 2">
-            <a-link v-permission="['exam:examPlan:sjjdgljreview']" title="审核" @click="onExamineA(record)">审核</a-link>
+            <a-link v-permission="['inspector:examPlan:sjjdgljreview']" title="审核" @click="onExamineA(record)">审核</a-link>
           </div>
           <div v-if="record.isFinalConfirmed > 0">
-            <a-link v-permission="['exam:examPlan:queryInvigilator']" title="查看监考员" style="text-align: center"
+            <a-link v-permission="['inspector:examPlan:queryInvigilator']" title="查看监考员" style="text-align: center"
               @click="onOptionInvigilateList(record.id, record.assignType)">
               监考列表
             </a-link>
           </div>
-          <a-link v-permission="['exam:examPlan:delete']" v-if="record.status == 1 || record.status == 4"
+          <a-link v-permission="['inspector:examPlan:delete']" v-if="record.status == 1 || record.status == 4"
             status="danger" :disabled="record.disabled" :title="record.disabled ? '不可删除' : '删除'"
             @click="onDelete(record)">
             删除
           </a-link>
           <div v-if="record.isFinalConfirmed == 0 && record.status == 3">
-            <a-link v-permission="['exam:examPlan:updateTime']" title="修改"
+            <a-link v-permission="['inspector:examPlan:updateTime']" title="修改"
               @click="adjustTimeSchedule(record)">调整时间安排</a-link>
           </div>
           <div v-if="(record.isFinalConfirmed == 0 || record.isFinalConfirmed == 3) && record.status == 3">
-            <a-link v-permission="['exam:examPlan:adminconfirmed']" title="管理员确认考试"
+            <a-link v-permission="['inspector:examPlan:adminconfirmed']" title="管理员确认考试"
               @click="onUpdate(record)">考试确认</a-link>
           </div>
           <div v-if="record.isFinalConfirmed == 1 && record.status == 3 && userInfo.id != 1">
-            <a-link v-permission="['exam:examPlan:zxzrConfirmed']" title="中心主任确认考试"
+            <a-link v-permission="['inspector:examPlan:zxzrConfirmed']" title="中心主任确认考试"
               @click="openConform(record)">考试确认</a-link>
           </div>
         </a-space>
@@ -254,9 +254,9 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:examPlan:detail",
-      "exam:examPlan:update",
-      "exam:examPlan:delete",
+      "inspector:examPlan:detail",
+      "inspector:examPlan:update",
+      "inspector:examPlan:delete",
     ]),
   },
 ]);
