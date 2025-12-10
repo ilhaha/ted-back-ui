@@ -4,7 +4,7 @@
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
-        <a-input-search v-model="queryForm.question" placeholder="题目标题" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.question" placeholder="问题" allow-clear @search="search" />
         <a-input-search v-model="queryForm.categoryName" placeholder="八大类" allow-clear @search="search" />
         <a-input-search v-model="queryForm.projectName" placeholder="所属项目" allow-clear @search="search" />
         <a-input-search v-model="queryForm.knowledgeTypeName" placeholder="知识类型" allow-clear @search="search" />
@@ -35,16 +35,16 @@
       <template #toolbar-right>
         <a-button v-permission="['examconnect:questionBank:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
-          <template #default>新增题目</template>
+          <template #default>新增</template>
         </a-button>
-        <a-button @click="onImport">
+        <a-button @click="onImport" v-permission="['examconnect:questionBank:add']">
           <template #icon><icon-upload /></template>
-          <template #default>导入题目</template>
+          <template #default>导入</template>
         </a-button>
-        <a-button @click="onExportExcel">
+        <!-- <a-button @click="onExportExcel">
           <template #icon><icon-download /></template>
-          <template #default>导出题目Excel</template>
-        </a-button>
+          <template #default>导出</template>
+        </a-button> -->
       </template>
       <template #action="{ record }">
         <a-space>
@@ -60,8 +60,8 @@
 
     <QuestionBankAddModal ref="QuestionBankAddModalRef" @save-success="search" />
     <QuestionBankDetailDrawer ref="QuestionBankDetailDrawerRef" />
-    <QuestionBankImportModal ref="QuestionBankImportModalRef" />
-    <exportQuestionsExcel ref="exportQuestionsExcelRef" />
+    <QuestionBankImportModal ref="QuestionBankImportModalRef" @import-success="search" />
+    <ExportQuestionsExcel ref="ExportQuestionsExcelRef" />
   </div>
 </template>
 
@@ -69,7 +69,7 @@
 import QuestionBankAddModal from "./QuestionBankAddModal.vue";
 import QuestionBankDetailDrawer from "./QuestionBankDetailDrawer.vue";
 import QuestionBankImportModal from "./QuestionBankImportModal.vue";
-import exportQuestionsExcel from "./exportQuestionsExcel.vue";
+import ExportQuestionsExcel from "./ExportQuestionsExcel.vue";
 import {
   type QuestionBankResp,
   type QuestionBankQuery,
@@ -103,7 +103,7 @@ const {
   immediate: true,
 });
 const columns = ref<TableInstanceColumns[]>([
-  { title: "题目标题", dataIndex: "question", slotName: "question" },
+  { title: "问题", dataIndex: "question", slotName: "question" },
   { title: "所属八大类", dataIndex: "categoryName", slotName: "categoryName" },
   { title: "所属考试项目", dataIndex: "projectName", slotName: "projectName" },
   {
@@ -111,7 +111,7 @@ const columns = ref<TableInstanceColumns[]>([
     dataIndex: "knowledgeTypeName",
     slotName: "knowledgeTypeName",
   },
-  { title: "题目类型", dataIndex: "questionType", slotName: "questionType" },
+  { title: "题型", dataIndex: "questionType", slotName: "questionType" },
   { title: "考试人员类型", dataIndex: "examType", slotName: "examType" },
   { title: "题目附件", dataIndex: "attachment", slotName: "attachment" },
   {
@@ -240,7 +240,7 @@ const onImport = () => {
 };
 
 const exportQuestionsExcelRef =
-  ref<InstanceType<typeof exportQuestionsExcel>>();
+  ref<InstanceType<typeof ExportQuestionsExcel>>();
 // 导入功能excel
 const onExportExcel = () => {
   exportQuestionsExcelRef.value?.onOpen();

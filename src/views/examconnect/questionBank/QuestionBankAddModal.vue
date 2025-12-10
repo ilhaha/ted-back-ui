@@ -1,14 +1,6 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns" />
 
     <!-- 动态输入框 -->
@@ -16,8 +8,8 @@
       <!-- 单选题和判断题 -->
       <a-radio-group v-model="correctAnswers">
         <div v-for="(option, index) in options" :key="index" class="option-row">
-          <a-textarea  v-model="options[index]" placeholder="请输入选项" allow-clear/>
-          <a-radio  :value="index" class="radio-button">正确答案</a-radio>
+          <a-textarea v-model="options[index]" placeholder="请输入选项" allow-clear />
+          <a-radio :value="index" class="radio-button">正确答案</a-radio>
         </div>
       </a-radio-group>
     </template>
@@ -26,8 +18,8 @@
       <!-- 多选题 -->
       <a-checkbox-group v-model="correctAnswers">
         <div v-for="(option, index) in options" :key="index" class="option-row">
-          <a-textarea  v-model="options[index]" placeholder="请输入选项" allow-clear/>
-          <a-checkbox  :value="index" class="checkbox-button">答案</a-checkbox>
+          <a-textarea v-model="options[index]" placeholder="请输入选项" allow-clear />
+          <a-checkbox :value="index" class="checkbox-button">答案</a-checkbox>
         </div>
       </a-checkbox-group>
     </template>
@@ -35,7 +27,7 @@
     <template v-else>
       <!-- 简答题 -->
       <div class="option-row">
-        <a-textarea v-model="options[0]" placeholder="请输入参考答案" allow-clear/>
+        <a-textarea v-model="options[0]" placeholder="请输入参考答案" allow-clear />
       </div>
     </template>
 
@@ -96,7 +88,7 @@ const [form, resetForm] = useResetReactive({
   categoryIds: [],
   imageMinUrl: '',
   imageUrl: '',
-  examType: '',
+  examType: 1,
 })
 
 const findPath = (
@@ -130,7 +122,7 @@ const save = async () => {
     }
 
     const hasEmpty = options.value.some(opt => !opt);
-    
+
     if (hasEmpty) {
       Message.warning('选项中内容不允许为空');
       return false;
@@ -144,17 +136,17 @@ const save = async () => {
     if (!Array.isArray(correctAnswers.value)) {
       correctAnswers.value = [correctAnswers.value]
     }
-    
+
     const submitData = {
       questionType: form.questionType,
       question: form.question,
       imageMinUrl: form.imageMinUrl,
       imageUrl: form.imageUrl,
-      categoryId:  categoryIds,
+      categoryId: categoryIds,
       options: options.value,
       correctAnswers: correctAnswers.value,
-      examType:form.examType,
-    }  
+      examType: form.examType,
+    }
     if (isUpdate.value) {
       await updateQuestionBank(submitData, dataId.value)
       Message.success('修改成功')
@@ -181,24 +173,24 @@ watch(() => form.questionType, (newValue) => {
 // 上传图片
 const handleUpload = (options: RequestOption) => {
   const controller = new AbortController()
-  ;(async function requestWrap() {
-    const { onProgress, onError, onSuccess, fileItem, name = 'file' } = options
-    onProgress(20)
-    const formData = new FormData()
-    formData.append(name as string, fileItem.file as Blob)
-    formData.append('type', 'pic')
-    try {
-      const res = await upload(formData, {
-        signal: controller.signal
-      })
-      Message.success('上传成功')
-      form.imageMinUrl = res.data.thUrl
-      form.imageUrl = res.data.url
-      onSuccess(res.data.thUrl)
-    } catch (error) {
-      onError(error)
-    }
-  })()
+    ; (async function requestWrap() {
+      const { onProgress, onError, onSuccess, fileItem, name = 'file' } = options
+      onProgress(20)
+      const formData = new FormData()
+      formData.append(name as string, fileItem.file as Blob)
+      formData.append('type', 'pic')
+      try {
+        const res = await upload(formData, {
+          signal: controller.signal
+        })
+        Message.success('上传成功')
+        form.imageMinUrl = res.data.thUrl
+        form.imageUrl = res.data.url
+        onSuccess(res.data.thUrl)
+      } catch (error) {
+        onError(error)
+      }
+    })()
   return {
     abort() {
       controller.abort()
@@ -207,9 +199,8 @@ const handleUpload = (options: RequestOption) => {
 }
 // 考试类型选项（与数据库枚举值一致：0-未指定，1-作业人员考试，2-无损检验人员考试，3-有损检验人员考试）
 const examTypeOptions = [
-  { label: '未指定', value: 0 },
-  { label: '作业人员考试', value: 1 },
-  { label: '无损/有损检验人员考试', value: 2 },
+  { label: '作业人员', value: 1 },
+  { label: '检验人员', value: 2 },
   // 后续新增类型直接在这里添加，无需修改表结构
 ];
 const columns: ColumnItem[] = reactive([
@@ -243,7 +234,7 @@ const columns: ColumnItem[] = reactive([
       }
     },
   },
-    {
+  {
     label: '知识类型',
     field: 'categoryIds',
     type: 'cascader',
@@ -256,36 +247,35 @@ const columns: ColumnItem[] = reactive([
     rules: [{ required: true, message: '请选择知识类型' }]
   },
   {
-    label: '题目标题',
+    label: '问题',
     field: 'question',
     type: 'textarea',
     span: 24,
-    rules: [{ required: true, message: '请输入题目标题' }]
+    rules: [{ required: true, message: '请输入问题' }]
   },
   {
-    label: '题目类型',
+    label: '题型',
     field: 'questionType',
     type: 'radio-group',
     span: 24,
     props: {
       options: [
-        {label: '选择题', value: 0},
-        {label: '多选题', value: 2},
-        {label: '判断题', value: 1},
+        { label: '选择题', value: 0 },
+        { label: '多选题', value: 2 },
+        { label: '判断题', value: 1 },
         // {label: '简单题', value: 3},
       ],
       type: 'button',
     },
   },
-    {
-    label: '考试类型',
+  {
+    label: '考试人员类型',
     field: 'examType', // 字段名与数据库字段 exam_type 对应
     type: 'radio-group',
     span: 24,
     props: {
       options: examTypeOptions, // 引用上面定义的选项数组
       type: 'button', // 与题目类型保持一致的按钮样式
-      defaultValue: 0, // 默认值为「未指定」（对应数据库默认值 0）
     },
     rules: [{ required: true, message: '请选择考试类型' }],
   },
@@ -316,12 +306,12 @@ const onUpdate = async (id: string) => {
   categoryOptions.value = res.data || []
   const { data } = await getQuestionBank(id)
   Object.assign(form, data)
-  
+
   visible.value = true
   form.categoryIds = form.categoryId
   form.imageMinUrl = form.attachment
   form.imageUrl = form.attachment
-    form.examType = data.examType || 0 // 兜底默认值 0，避免 undefined
+  form.examType = data.examType || 0 // 兜底默认值 0，避免 undefined
   options.value = form.options
   if (form.questionType !== 2) {
     correctAnswers.value = form.correctAnswers[0]
@@ -339,12 +329,12 @@ defineExpose({ onAdd, onUpdate })
   align-items: center;
   margin-bottom: 8px;
   gap: 8px;
-  width: 175%;  // 添加100%宽度
+  width: 175%; // 添加100%宽度
 
   .arco-textarea-wrapper {
     flex: 1;
-    width: 100%;  // 确保文本框占据所有可用空间
-    min-width: 0;  // 防止flex项溢出
+    width: 100%; // 确保文本框占据所有可用空间
+    min-width: 0; // 防止flex项溢出
     margin-left: 10px;
     height: 100px;
   }
@@ -352,7 +342,7 @@ defineExpose({ onAdd, onUpdate })
   .radio-button {
     flex-shrink: 0;
     margin-left: 8px;
-    white-space: nowrap;  // 防止文字换行
+    white-space: nowrap; // 防止文字换行
   }
 }
 
@@ -374,17 +364,17 @@ defineExpose({ onAdd, onUpdate })
 :deep(.arco-textarea) {
   width: 100%;
   display: block;
-  min-height: 60px;  // 增加默认最小高度
+  min-height: 60px; // 增加默认最小高度
 }
 
 :deep(.arco-textarea-wrapper) {
   width: 100%;
   flex: 1;
-  
+
   textarea {
-    min-height: 60px;  // 确保textarea本身也有最小高度
-    line-height: 1.5;  // 调整行高
-    padding: 8px;      // 增加内边距
+    min-height: 60px; // 确保textarea本身也有最小高度
+    line-height: 1.5; // 调整行高
+    padding: 8px; // 增加内边距
   }
 }
 

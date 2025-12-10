@@ -1,6 +1,7 @@
 <template>
-    <a-modal v-model:visible="visible" title="考试计划导入" :mask-closable="false" :width="600" :footer="null">
+    <a-modal v-model:visible="visible" title="检验人员考试计划导入" :mask-closable="false" :width="600" :footer="null">
         <div class="import-modal-content">
+            <a-alert>下载模板后请严格按照模板规则填写</a-alert>
             <div class="action-buttons">
                 <a-button type="outline" @click="downloadTemplate">
                     <template #icon>
@@ -8,7 +9,8 @@
                     </template>
                     下载导入模板
                 </a-button>
-                <a-upload :show-file-list="false" :before-upload="beforeUpload" :custom-request="customRequest">
+                <a-upload :show-file-list="false" :before-upload="beforeUpload" :custom-request="customRequest"
+                    accept=".xls,.xlsx">
                     <a-button type="primary">
                         <template #icon>
                             <icon-upload />
@@ -291,7 +293,6 @@ defineExpose({ onOpen })
     display: flex;
     gap: 16px;
     justify-content: center;
-    /* margin-top: 24px; */
-    /* margin-bottom: 18px; */
+    margin-top: 24px;
 }
 </style>

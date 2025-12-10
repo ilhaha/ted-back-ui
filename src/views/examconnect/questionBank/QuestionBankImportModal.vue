@@ -1,21 +1,11 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    title="题目导入"
-    :mask-closable="false"
-    :width="600"
-    :footer="false"
-  >
+  <a-modal v-model:visible="visible" title="题目导入" :mask-closable="false" :width="600" :footer="false">
     <div class="import-modal-content">
       <a-alert>请先选择分类再下载模板，系统会自动填充分类信息到模板中</a-alert>
       <div class="cascader-container">
         <a-form layout="vertical">
           <a-form-item label="题目分类" field="categoryIds">
-            <a-cascader
-              v-model="selectedCategory"
-              :options="categoryOptions"
-              placeholder="请选择分类"
-            />
+            <a-cascader v-model="selectedCategory" :options="categoryOptions" placeholder="请选择分类" />
           </a-form-item>
         </a-form>
       </div>
@@ -27,23 +17,15 @@
           </template>
           下载模板
         </a-button>
-        <!-- 手动选择文件 -->
-        <input
-          type="file"
-          accept=".xlsx"
-          @change="handleFileChange"
-          style="display: inline-block"
-        />
-        <a-button
-          type="primary"
-          :disabled="!selectedFile"
-          @click="handleConfirmUpload"
-        >
-          <template #icon>
-            <icon-upload />
-          </template>
-          确认上传
-        </a-button>
+        <a-upload :show-file-list="false" :before-upload="beforeUpload" :custom-request="customRequest"
+          :disabled="selectedCategory.length <= 0" accept=".xls,.xlsx">
+          <a-button type="primary">
+            <template #icon>
+              <icon-upload />
+            </template>
+            上传文件
+          </a-button>
+        </a-upload>
       </div>
     </div>
   </a-modal>
@@ -51,11 +33,13 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { Message } from "@arco-design/web-vue";
-import * as XLSX from "xlsx";
+import { Message, Modal } from "@arco-design/web-vue";
+import XLSX from "xlsx-js-style";
 import { computedAsync } from "@vueuse/core";
 import { getOptions } from "@/apis/examconnect/questionBank";
 import { getAllPath, verifyExcel } from "@/apis/exam/category";
+
+const emit = defineEmits(['import-success'])
 
 const visible = ref(false);
 const selectedCategory = ref<string[]>([]);
@@ -67,18 +51,50 @@ const DEFAULT_EMPTY_CATEGORY = {
   knowledgeTypeName: "",
 };
 
-const customRequest = async (options) => {
-  const formData = new FormData();
-  formData.append("file", options.fileItem.file);
-  try {
-    const response = await verifyExcel(formData);
-    Message.success("上传成功");
-    visible.value = false; // 关闭上传框
-    window.location.reload(); // 刷新页面
-  } catch (error) {
-    Message.error("校验失败");
+const customRequest = async (options: any) => {
+
+  if (!selectedCategory.value.length) {
+    Message.error("请先选择分类");
+    return;
   }
-};
+  const file = options.fileItem.file
+
+  if (!beforeUpload(file)) return
+
+  // 弹出确认框
+  Modal.confirm({
+    title: '确认上传',
+    content: `确定要上传文件「${file.name}」吗？`,
+    okText: '确认上传',
+    cancelText: '取消',
+    async onOk() {
+      const formData = new FormData()
+      formData.append('file', file)
+      try {
+        await verifyExcel(formData);
+        Message.success('导入成功')
+        visible.value = false
+        emit('import-success')
+      } catch (error) {
+      }
+    },
+  })
+}
+
+// 上传前校验
+const beforeUpload = (file: File) => {
+  const isExcel =
+    file.type === 'application/vnd.ms-excel' ||
+    file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+  if (!isExcel) {
+    Message.error('只能上传 Excel 文件（.xls 或 .xlsx）')
+    return false
+  }
+
+  return true
+}
+
 
 // 异步计算属性
 const parsedCategory = computedAsync(async () => {
@@ -98,101 +114,82 @@ const loadOptions = async () => {
 };
 
 // 生成模板文件
-// 生成模板文件
 const generateTemplate = () => {
-  // 1. 创建分类信息字符串（用于工作表名称）
+  // 1. 分类信息（用于 sheet 名称）
   const categoryInfo = [
     parsedCategory.value.categoryId,
     parsedCategory.value.projectId,
     parsedCategory.value.knowledgeTypeId,
   ].join(",");
 
-  // 2. 创建模板数据（新的格式）
+  // 2. Excel 内容
   const templateData = [
-    // 表头
     [
-      "题目标题",
-      "题目类型（0单选，1判断，2多选）",
-      "考试类型（0-未指定，1-作业人员考试，2-无损/有损检验人员考试）",
-      "选项",
-      "是否正确答案(填是或否)",
-      "选项",
-      "是否正确答案(填是或否)",
-      "选项",
-      "是否正确答案(填是或否)",
-      "选项",
-      "是否正确答案(填是或否)",
-      "（如果有更多选项按照前面格式往后叠加）",
+      "问题",
+      "题型（0单选，1判断，2多选）",
+      "考试人员类型（1-作业人员，2-检验人员）",
+      "选项A",
+      "选项B",
+      "选项C",
+      "选项D",
+      "答案（多选用英文逗号分隔，如：A,B）",
     ],
-    // 示例数据行
     [
-      "TestA", // 题目标题
-      "0", // 题目类型
-      "0", // 考试类型
-      "选项A", // 选项
-      "是", // 是否正确答案
-      "选项B", // 选项
-      "否", // 是否正确答案
-      "选项C", // 选项
-      "否", // 是否正确答案
-      "选项D", // 选项
-      "否", // 是否正确答案
-      "第一行仅为参考格式，请勿填写",
+      "示例题目",
+      "0",
+      "0",
+      "答案A",
+      "答案B",
+      "答案C",
+      "答案D",
+      "A",
     ],
   ];
 
-  // 3. 创建工作簿和工作表
+  // 3. 创建工作簿和表
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet(templateData);
-  // +++ 新增：设置列宽 +++
-  // 计算每列的最佳宽度（字符数）
+
+  // === 设置列宽（xlsx-js-style 支持）===
   const colWidths = templateData[0].map((_, colIndex) => {
-    // 获取该列所有单元格内容的最大长度
     const maxLength = Math.max(
       ...templateData.map((row) => {
         const cellValue = row[colIndex]?.toString() || "";
         return cellValue.length;
       })
     );
-    // 设置宽度为最大字符数+5个字符的缓冲
-    return { wch: Math.min(Math.max(maxLength + 15, 15), 50) }; // 限制在15-50字符宽度
+    return { wch: Math.min(Math.max(maxLength + 20, 20), 50) };
   });
-
-  // 应用列宽设置
   worksheet["!cols"] = colWidths;
 
-  // +++ 新增：设置单元格样式（居中+标题加粗）+++
-  const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1:Z100"); // 动态获取范围[8](@ref)
+  // === 设置单元格样式（居中、标题加粗）===
+  const range = XLSX.utils.decode_range(worksheet["!ref"]);
 
   for (let R = range.s.r; R <= range.e.r; R++) {
     for (let C = range.s.c; C <= range.e.c; C++) {
       const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
-      let cell = worksheet[cellAddress];
+      const cell = worksheet[cellAddress];
 
-      // 确保单元格对象存在
-      if (!cell) {
-        cell = { t: "s", v: templateData[R]?.[C] || "" };
-        worksheet[cellAddress] = cell;
-      }
+      if (!cell) continue;
 
-      // 初始化样式对象
       cell.s = cell.s || {};
 
-      // 设置居中（关键修正）[1,8](@ref)
-      cell.s.alignment = cell.s.alignment || {};
-      cell.s.alignment.horizontal = "center"; // 水平居中
-      cell.s.alignment.vertical = "middle"; // 垂直居中
+      // 所有单元格居中
+      cell.s.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+      };
 
-      // 标题行加粗（第一行）[7](@ref)
+      // 第一行标题加粗
       if (R === 0) {
-        cell.s.font = cell.s.font || {};
-        cell.s.font.bold = true;
+        cell.s.font = {
+          bold: true,
+        };
       }
     }
   }
-  // --- 新增结束 ---
 
-  // 4. 将工作表添加到工作簿，并设置工作表名称为分类信息
+  // 4. 添加到 workbook
   XLSX.utils.book_append_sheet(workbook, worksheet, categoryInfo);
 
   return workbook;
@@ -212,22 +209,6 @@ const downloadTemplate = () => {
   );
 };
 
-// 上传前校验
-const beforeUpload = (file: File) => {
-  if (!selectedCategory.value.length) {
-    Message.error("请先选择分类");
-    return false;
-  }
-  // 文件类型校验，只允许 .xlsx
-  const isXlsx =
-    file.type ===
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-  if (!isXlsx) {
-    Message.error("只允许上传 .xlsx 格式的文件");
-    return false;
-  }
-  return true;
-};
 
 // 选择文件
 const handleFileChange = (e: Event) => {
@@ -267,14 +248,15 @@ const handleConfirmUpload = async () => {
     visible.value = false;
     window.location.reload();
   } catch (error) {
-    Message.error("校验失败");
+    // Message.error("校验失败");
   }
 };
 
 // 打开弹窗
 const onOpen = async () => {
-  await loadOptions();
+  selectedCategory.value = []
   visible.value = true;
+  await loadOptions();
 };
 
 // 工具函数：根据ID获取标签
