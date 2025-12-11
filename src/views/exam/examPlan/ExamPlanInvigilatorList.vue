@@ -14,6 +14,15 @@
           </a-button>
         </a-popconfirm>
       </template>
+      <template #examType="{ record }">
+        <a-tag :color="getStatusColor(record.examType)" bordered>{{
+          getStatusText(record.examType)
+        }}</a-tag>
+      </template>
+      <template #examPassword="{ record }">
+       <span v-if="record.examType == 0">{{ record.examPassword }}</span>
+       <span v-else>-</span>
+      </template>
       <template #invigilateStatus="{ record }">
         <a-tag :color="getInvigilateStatusColor(record.invigilateStatus)" bordered>
           {{ getInvigilateStatusText(record.invigilateStatus) }}
@@ -82,8 +91,14 @@ const columns = [
     dataIndex: 'classroomName',
   },
   {
+    title: '考试类型',
+    dataIndex: 'examType',
+    slotName: "examType",
+  },
+  {
     title: '开考密码',
     dataIndex: 'examPassword',
+    slotName: "examPassword",
   },
   {
     title: '状态',
@@ -165,7 +180,27 @@ const reset = () => {
   form.invigilateId = undefined
 };
 
+const getStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "理论考试";
+    case 1:
+      return "实操考试";
+    default:
+      return "未知";
+  }
+};
 
+const getStatusColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 理论考试
+    case 1:
+      return "orange"; // 实操考试
+    default:
+      return "default";
+  }
+};
 
 const getInvigilateStatusColor = (status: number) => {
   switch (status) {
