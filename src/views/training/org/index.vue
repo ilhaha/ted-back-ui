@@ -15,8 +15,8 @@
 
         <!-- <a-button type="primary" class="ml-2" @click="search">
           <template #icon><icon-search /></template>
-          搜索
-        </a-button> -->
+搜索
+</a-button> -->
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -34,11 +34,12 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['training:org:update']" title="查看账号" @click="showAccount(record)"
-            v-if="record.accountName">查看账号</a-link>
-          <a-link v-permission="['training:org:update']" title="绑定账号" @click="onBinding(record)" v-else>绑定账号</a-link>
+          <!-- <a-link v-permission="['training:org:update']" title="查看账号" @click="showAccount(record)"
+            v-if="record.accountName">查看账号</a-link> -->
+          <!-- <a-link v-permission="['training:org:update']" title="绑定账号" @click="onBinding(record)" v-else>绑定账号</a-link> -->
           <!-- <a-link v-permission="['training:org:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <a-link v-permission="['training:org:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+          <a-link v-permission="['training:org:resetPwd']" title="重置密码" @click="onResetPwd(record)">重置密码</a-link>
           <a-link v-permission="['training:org:delete']" status="danger" :disabled="record.disabled"
             :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
@@ -50,7 +51,8 @@
     <OrgAddModal ref="OrgAddModalRef" @save-success="search" />
     <OrgDetailDrawer ref="OrgDetailDrawerRef" />
     <OrgBindAccount ref="bindAccountRef" @save-success="search" />
-    <OrgAccountModal ref="accountModalRef" @unbind-success="search"/>
+    <OrgAccountModal ref="accountModalRef" @unbind-success="search" />
+    <UserResetPwdModal ref="UserResetPwdModalRef" />
 
   </div>
 </template>
@@ -59,7 +61,7 @@
 import OrgAddModal from './OrgAddModal.vue'
 import OrgDetailDrawer from './OrgDetailDrawer.vue'
 import OrgAccountModal from './OrgAccountModal.vue'
-
+import UserResetPwdModal from '@/views/system/user/UserResetPwdModal.vue'
 import { type OrgResp, type OrgQuery, deleteOrg, exportOrg, listOrg } from '@/apis/training/org'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
@@ -86,14 +88,16 @@ const {
   handleDelete
 } = useTable((page) => listOrg({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
-  { title: '机构代号', dataIndex: 'code', slotName: 'code',width: 120 },
-  { title: '机构名称', dataIndex: 'name', slotName: 'name',width: 120 },
+  { title: '机构代号', dataIndex: 'code', slotName: 'code', },
+  { title: '机构名称', dataIndex: 'name', slotName: 'name', },
   { title: '机构八大类归属', dataIndex: 'categoryNames', slotName: 'categoryNames' },
   { title: '统一社会信用代码', dataIndex: 'socialCode', slotName: 'socialCode' },
   { title: '地址', dataIndex: 'location', slotName: 'location' },
-  { title: '法定代表人', dataIndex: 'legalPerson', slotName: 'legalPerson',width: 130},
-  { title: '公司规模大小', dataIndex: 'scale', slotName: 'scale',width: 130},
+  { title: '法定代表人', dataIndex: 'legalPerson', slotName: 'legalPerson', },
+  { title: '机构规模大小', dataIndex: 'scale', slotName: 'scale', },
   { title: '营业执照', dataIndex: 'businessLicense', slotName: 'previewImage' },
+  { title: '机构账号', dataIndex: 'username', slotName: 'username' },
+  { title: '联系电话', dataIndex: 'phone', slotName: 'phone' },
   {
     title: '操作',
     dataIndex: 'action',
@@ -104,6 +108,13 @@ const columns = ref<TableInstanceColumns[]>([
     show: has.hasPermOr(['training:org:detail', 'training:org:update', 'training:org:delete'])
   }
 ]);
+const UserResetPwdModalRef = ref<InstanceType<typeof UserResetPwdModal>>()
+// 重置密码
+const onResetPwd = (record: any) => {
+  console.log(111);
+
+  UserResetPwdModalRef.value?.onOpen(record.userId)
+}
 
 const bindAccountRef = ref<InstanceType<typeof OrgBindAccount>>()
 

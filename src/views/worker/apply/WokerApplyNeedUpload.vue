@@ -15,7 +15,7 @@
                 <div class="upload-wrapper">
                     <a-upload :action="`${uploadUrl}1`" list-type="picture-card" :file-list="frontFileList"
                         :show-upload-list="false" accept="image/jpeg,image/png,image/jpg" @success="handleFrontSuccess"
-                        image-preview>
+                        image-preview :max="1" :limit="1">
                         <img v-if="form.idCardPhotoFront" :src="form.idCardPhotoFront" alt="front"
                             style="width: 100%;height: auto;" />
                         <div v-else>
@@ -38,7 +38,7 @@
                 <div class="upload-wrapper">
                     <a-upload :action="`${uploadUrl}0`" list-type="picture-card" :file-list="backFileList"
                         :show-upload-list="false" accept="image/jpeg,image/png,image/jpg" @success="handleBackSuccess"
-                        image-preview>
+                        image-preview :max="1" :limit="1">
                         <img v-if="form.idCardPhotoBack" :src="form.idCardPhotoBack" alt="back"
                             style="width: 100%;height: auto;" />
                         <div v-else>
@@ -62,7 +62,7 @@
                 <div class="upload-wrapper">
                     <a-upload :action="`${uploadUrl}2`" list-type="picture-card" :file-list="faceFileList"
                         :show-upload-list="false" accept="image/jpeg,image/png,image/jpg" @success="handleFaceSuccess"
-                        image-preview>
+                        image-preview :max="1" :limit="1">
                         <img v-if="form.facePhoto" :src="form.facePhoto" alt="face" style="width: 100%;height: auto;" />
                         <div v-else>
                             <plus-outlined />
@@ -123,7 +123,7 @@
                     <a-upload list-type="picture-card" :file-list="fileListMap[item.id] || []"
                         :custom-request="(options) => handleUpload(options, item, 'image')"
                         @before-remove="(file) => handleRemove(file, item)" :accept="'image/*'" image-preview
-                        :show-remove-icon="true" capture="environment">
+                        :show-remove-icon="true" capture="environment" :max="3" :limit="3">
                         <template #upload-button>
                             <div class="upload-btn" :class="{
                                 disabled: (fileListMap[item.id] || []).length >= 3,

@@ -94,7 +94,7 @@ const columns: ColumnItem[] = reactive([
     type: "input",
     field: "examPlanName",
     required: true,
-    span: 22,
+    span: 24,
     props: computed(() => ({
       allowSearch: true,
       disabled: isUpdate.value,
@@ -106,7 +106,7 @@ const columns: ColumnItem[] = reactive([
     type: "select",
     field: "examProjectId",
     required: true,
-    span: 22,
+    span: 24,
     props: computed(() => ({
       options: deptProjectsList,
       allowSearch: true,
@@ -117,7 +117,7 @@ const columns: ColumnItem[] = reactive([
     label: "考试所需资料(仅展示)",
     field: "documents",
     type: "checkbox-group",
-    span: 22,
+    span: 24,
     props: {
       options: projectBindingDocList,
       multiple: true,
@@ -133,7 +133,7 @@ const columns: ColumnItem[] = reactive([
     type: "cascader",
     required: true,
     show: false,
-    span: 22,
+    span: 24,
     props: {
       options: theoryClassRoomSelectList,
       allowSearch: true,
@@ -153,7 +153,7 @@ const columns: ColumnItem[] = reactive([
     type: "cascader",
     required: true,
     show: false,
-    span: 22,
+    span: 24,
     props: {
       options: operationClassRoomSelectList,
       allowSearch: true,
@@ -172,7 +172,7 @@ const columns: ColumnItem[] = reactive([
     type: "range-picker",
     field: "enrollList",
     required: true,
-    span: 22,
+    span: 24,
     props: computed(() => ({
       disabled: isUpdate.value,
       showTime: isUpdate.value ? { format: "HH:mm:ss" } : false,
@@ -187,7 +187,7 @@ const columns: ColumnItem[] = reactive([
     field: "startTime",
     type: "date-picker",
     required: true,
-    span: 22,
+    span: 24,
     props: computed(() => ({
       showTime: isUpdate.value, // 修改时显示时间选择，新增时仅显示日期
       format: isUpdate.value ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD",
@@ -200,7 +200,7 @@ const columns: ColumnItem[] = reactive([
     field: 'maxCandidates',
     required: true,
     type: 'InputNumber',
-    span: 22,
+    span: 24,
     show: () => !isUpdate.value,
     rules: [{ required: true, message: '请输入考试人数' }],
     props: {
@@ -214,7 +214,7 @@ const columns: ColumnItem[] = reactive([
     field: 'invigilatorCount',
     required: true,
     type: 'InputNumber',
-    span: 22,
+    span: 24,
     show: () => isUpdate.value,
     rules: [{ required: true, message: '请输入监考员人数' }],
     props: {
