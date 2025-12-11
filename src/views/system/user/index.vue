@@ -95,6 +95,9 @@ import { useDownload, useResetReactive, useTable } from '@/hooks'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
 import type { ColumnItem } from '@/components/GiForm'
+import { useDept, useRole } from '@/hooks/app'
+
+const { roleList, getRoleList } = useRole()
 
 defineOptions({ name: 'SystemUser' })
 
@@ -103,6 +106,21 @@ const [queryForm, resetForm] = useResetReactive({
 })
 const queryFormColumns: ColumnItem[] = reactive([
   {
+    label: '角色',
+    field: 'roleId',
+    type: 'select',
+    span: { xs: 24, sm: 8, xxl: 8 },
+    required: true,
+    props: {
+      options: roleList,
+      // multiple: true,
+      allowClear: true,
+      allowSearch: true,
+      mode: 'single',
+      placeholder: '请选择角色',
+    },
+  },
+  {
     type: 'input',
     field: 'description',
     span: { xs: 24, sm: 8, xxl: 8 },
@@ -110,20 +128,8 @@ const queryFormColumns: ColumnItem[] = reactive([
       hideLabel: true,
     },
     props: {
-      placeholder: '搜索用户名/昵称/描述',
+      placeholder: '搜索昵称',
       showWordLimit: false,
-    },
-  },
-  {
-    type: 'select',
-    field: 'status',
-    span: { xs: 24, sm: 6, xxl: 8 },
-    formItemProps: {
-      hideLabel: true,
-    },
-    props: {
-      options: DisEnableStatusList,
-      placeholder: '请选择状态',
     },
   },
   // {
@@ -195,7 +201,7 @@ const forbiddenRoleIds = ['547888897925840930', '547888897925840949', '547888897
 const canShowUpdate = computed(() => {
   return (roleIds: string[]) => {
     console.log('roleIds', roleIds);
-    
+
     return roleIds?.every(id => !forbiddenRoleIds.includes(id))
   }
 })
@@ -259,6 +265,12 @@ const UserUpdateRoleModalRef = ref<InstanceType<typeof UserUpdateRoleModal>>()
 const onUpdateRole = (record: UserResp) => {
   UserUpdateRoleModalRef.value?.onOpen(record.id)
 }
+
+onMounted(async () => {
+  if (!roleList.value.length) {
+    await getRoleList()
+  }
+})
 </script>
 
 <style scoped lang="scss">
