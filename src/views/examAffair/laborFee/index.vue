@@ -94,7 +94,7 @@ import has from "@/utils/has";
 import { useTable, useDownload } from "@/hooks";
 import LaborFeeAddModal from "./LaborFeeAddModal.vue";
 import LaborFeeDetailDrawer from "./LaborFeeDetailDrawer.vue";
-import { Message } from '@arco-design/web-vue';
+import { Message } from "@arco-design/web-vue";
 import {
   type LaborFeeResp,
   type LaborFeeQuery,
@@ -176,7 +176,8 @@ const onToggleEnabled = async (record, val) => {
   try {
     await toggleLaborFeeEnabled({ id: record.id, isEnabled: val });
     record.isEnabled = val;
-    Message.success(val ? '已启用' : '已禁用');
+    search();
+    Message.success(val ? "已启用" : "已禁用");
   } catch (e) {
     // 回滚状态
     record.isEnabled = !val;
