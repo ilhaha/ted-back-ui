@@ -147,6 +147,9 @@
         </a-form-item>
       </a-form>
     </a-modal>
+        <a-modal v-model:visible="showImagePreview" title="申请表">
+      <img :src="imagePreviewUrl" style="width: 100%" />
+    </a-modal>
   </div>
 </template>
 
@@ -363,25 +366,33 @@ const handleImageError = (e: Event) => {
 };
 
 
+const showImagePreview = ref(false);
+const imagePreviewUrl = ref("");
 const getPreviewUrl = (url: string) => {
-  if (!url) {
-    Message.warning("暂无文件可预览");
+  const ext = url.split(".").pop()?.toLowerCase();
+  const imageTypes = ["jpg", "jpeg", "png", "gif", "webp", "bmp"];
+
+  if (imageTypes.includes(ext)) {
+    // 不用 fetch，不触发跨域，不下载
+    imagePreviewUrl.value = url;
+    showImagePreview.value = true;
     return;
   }
-  // 提取文件扩展名
-  const ext = url.split(".").pop()?.toLowerCase();
+
   if (ext === "pdf") {
-    //  PDF 直接在浏览器中预览
     window.open(url, "_blank");
-  } else if (["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext)) {
-    //  Office 文件使用微软在线预览
+    return;
+  }
+
+  if (["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext)) {
     const previewUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(
       url
     )}`;
     window.open(previewUrl, "_blank");
-  } else {
-    Message.warning("暂不支持此文件类型预览");
+    return;
   }
+
+  Message.warning("暂不支持此文件类型预览");
 };
 
 </script>

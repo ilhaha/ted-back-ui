@@ -63,3 +63,9 @@ export function deleteLaborFee(id: string) {
 export function exportLaborFee(query: LaborFeeQuery) {
   return http.download(`${BASE_URL}/export`, query)
 }
+
+/** @desc 更改考试劳务费是否启用 */
+export const toggleLaborFeeEnabled = (data: { id: number; isEnabled: boolean }) => {
+  return http.put(`${BASE_URL}/toggleLaborFeeEnabled`, data)
+}
+
