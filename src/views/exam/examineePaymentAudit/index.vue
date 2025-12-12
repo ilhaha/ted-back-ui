@@ -99,7 +99,7 @@ const queryForm = reactive<ExamineePaymentAuditQuery>({
   examineeId: undefined,
   auditStatus: undefined,
   isWorker: false,
-  sort: ["paymentTime,desc"],
+  sort: ["createTime,desc"],
 });
 
 const audit_status_enum = [
@@ -159,9 +159,11 @@ const getStatusColor = (auditStatus: number) => {
 };
 const reviewIds = ref<any[]>([]);
 
+
 const isImage = (url: string) => {
   return /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
 }
+
 const {
   tableData: dataList,
   loading,
