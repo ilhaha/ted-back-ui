@@ -2,7 +2,8 @@
   <div class="gi_table_page">
     <GiTable title="缴费审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" @refresh="search">
+      :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
+      @select-all="selectAll">
       <template #toolbar-left>
         <a-input-search v-model="queryForm.examPlanId" placeholder="请输入考试计划名称" allow-clear @search="search" />
         <a-input-search v-model="queryForm.examineeId" placeholder="请输入检验人员姓名" allow-clear @search="search" />
@@ -18,16 +19,33 @@
         }}</a-link>
       </template>
       <template #paymentProofUrl="{ record }">
-         <div v-if="record.paymentProofUrl" class="image-list">
-          <a-link
-            @click="getPreviewUrl(record.paymentProofUrl)"
-            v-if="record.paymentProofUrl"
-            >预览</a-link
-          >
-        </div>
+        <template v-if="record.paymentProofUrl">
+          <div class="image-list">
+
+            <template v-for="(url, idx) in record.paymentProofUrl.split(',')" :key="idx">
+
+              <!-- 图片预览 -->
+              <a-image v-if="isImage(url)" width="80" height="60" :src="url" fit="cover"
+                :preview-props="{ zoomRate: 1.5 }" class="preview-image" @error="handleImageError" />
+
+              <!-- PDF 预览 -->
+              <div v-else>
+                <a-link title="预览" @click="getPreviewUrl(url)">
+                  PDF 预览
+                </a-link>
+              </div>
+            </template>
+
+          </div>
+        </template>
         <span v-else>-</span>
       </template>
       <template #toolbar-right>
+        <a-button v-permission="['exam:examineePaymentAudit:review']" type="primary" @click="batchReview"
+          :disabled="!selectedKeys.length">
+          <template #icon><icon-check /></template>
+          <template #default>批量审核</template>
+        </a-button>
         <!-- <a-button v-permission="['exam:examineePaymentAudit:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
 <template #default>新增</template>
@@ -39,8 +57,8 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['exam:examineePaymentAudit:review']" title="审核" @click="onExamine(record)"
-            v-if="record.auditStatus != 0 && record.auditStatus != 3 &&  record.auditStatus != 2 && record.auditStatus != 6   ">审核</a-link>
+          <a-link v-permission="['exam:examineePaymentAudit:review']" title="审核" @click="sinReview(record)"
+            v-if="record.auditStatus != 0 && record.auditStatus != 3 && record.auditStatus != 2 && record.auditStatus != 6">审核</a-link>
         </a-space>
       </template>
       <template #auditStatus="{ record }">
@@ -81,7 +99,7 @@ const queryForm = reactive<ExamineePaymentAuditQuery>({
   examineeId: undefined,
   auditStatus: undefined,
   isWorker: false,
-  sort: ["paymentTime,asc"],
+  sort: ["paymentTime,desc"],
 });
 
 const audit_status_enum = [
@@ -139,16 +157,32 @@ const getStatusColor = (auditStatus: number) => {
       return "default";
   }
 };
+const reviewIds = ref<any[]>([]);
 
+const isImage = (url: string) => {
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
+}
 const {
   tableData: dataList,
   loading,
   pagination,
   search,
   handleDelete,
+  selectedKeys,
+  select,
+  selectAll
 } = useTable((page) => listExamineePaymentAudit({ ...queryForm, ...page }), {
   immediate: true,
 });
+const rowSelection = reactive({
+  type: 'checkbox',
+  showCheckedAll: true,
+  onlyCurrent: false,
+  selectedRowKeys: selectedKeys,
+  onChange: (keys: string[]) => {
+    selectedKeys.value = keys
+  }
+})
 const columns = ref<TableInstanceColumns[]>([
   { title: "检验人员姓名", dataIndex: "examineeName", slotName: "examineeName", width: 120 },
   { title: "考试计划名称", dataIndex: "planName", slotName: "planName" },
@@ -223,12 +257,36 @@ const onUpdate = (record: ExamineePaymentAuditResp) => {
 };
 
 const PaymentModalRef = ref<InstanceType<typeof PaymentModal>>();
+const sinReview = (record: any) => {
+  reviewIds.value = [];
+  reviewIds.value.push(record.id);
+  onExamine(reviewIds.value)
+}
+
+// 批量审核
+const batchReview = () => {
+  if (selectedKeys.value.length === 0) {
+    Message.warning("请选择需要审核的记录");
+    return;
+  }
+  // 先清空
+  reviewIds.value = [];
+  for (const row of dataList.value) {
+    if (selectedKeys.value.includes(row.id)) {
+      if (row.auditStatus !== 1 && row.auditStatus !== 4) {
+        Message.warning("选中的记录中包含非未审核状态的数据，请重新选择");
+        return;
+      }
+      reviewIds.value.push(row.id);
+    }
+  }
+  onExamine(reviewIds.value)
+};
+
 //审核
-const onExamine = async (record: ExamineePaymentAuditResp) => {
+const onExamine = async (reviewIds: any[]) => {
   PaymentModalRef.value?.onExamine(
-    record.id,
-    record.examineeId,
-    record.examPlanId
+    reviewIds
   );
 };
 

@@ -1,28 +1,25 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="特种设备人员资格申请管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      :row-selection="{ type: 'checkbox', showCheckedAll: true }"
-      @select="select"
-      @select-all="selectAll"
-      @refresh="search"
-    >
-    <template #previewImage="{ record }">
-  <template v-if="record.imageUrl">
-    <a-link
-          @click="getPreviewUrl(record.imageUrl)"
-          >预览</a-link>
-  </template>
-  <span v-else>-</span>
-</template>
+    <GiTable title="检验人员资格申请表管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" :row-selection="{ type: 'checkbox', showCheckedAll: true }" @select="select"
+      @select-all="selectAll" @refresh="search">
+
+      <template #previewImage="{ record }">
+        <!-- 文件存在 -->
+        <template v-if="record.imageUrl">
+          <!-- 图片显示缩略图 -->
+          <a-image v-if="isImage(record.imageUrl)" width="80" height="60" :src="record.imageUrl"
+            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" @error="handleImageError" />
+          <!-- PDF 显示预览按钮 -->
+          <a-link v-else v-permission="['worker:workerApply:detail']" title="预览报名资格申请表"
+            @click="getPreviewUrl(record.imageUrl)">
+            预览
+          </a-link>
+        </template>
+        <!-- 文件不存在 -->
+        <span v-else>-</span>
+      </template>
       <template #candidateName="{ record }">
         <span>{{ record.createUserString }}</span>
       </template>
@@ -34,34 +31,20 @@
       </template>
 
       <template #toolbar-left>
-        <a-input-search
-          v-model="queryForm.candidatesName"
-          placeholder="请输入考生名称"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.examPlanName"
-          placeholder="请输入考试计划名称"
-          allow-clear
-          @search="search"
-        />
+        <a-input-search v-model="queryForm.candidatesName" placeholder="请输入考生名称" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.examPlanName" placeholder="请输入考试计划名称" allow-clear @search="search" />
         <!-- <a-button type="primary" class="ml-2" @click="search">
           <template #icon><icon-search /></template>
-          搜索
-        </a-button> -->
+搜索
+</a-button> -->
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
         </a-button>
       </template>
       <template #toolbar-right>
-        <a-button
-          v-permission="['exam:specialCertificationApplicant:audit']"
-          type="primary"
-          :disabled="!selectedKeys.length"
-          @click="onBatchAudit"
-        >
+        <a-button v-permission="['exam:specialCertificationApplicant:audit']" type="primary"
+          :disabled="!selectedKeys.length" @click="onBatchAudit">
           <template #icon><icon-check /></template>
           <template #default>批量审核</template>
         </a-button>
@@ -72,12 +55,8 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link
-            v-permission="['exam:specialCertificationApplicant:detail']"
-            title="详情"
-            @click="onDetail(record)"
-            >详情</a-link
-          >
+          <a-link v-permission="['exam:specialCertificationApplicant:detail']" title="详情"
+            @click="onDetail(record)">详情</a-link>
           <!-- <a-link
             v-permission="['exam:specialCertificationApplicant:delete']"
             status="danger"
@@ -88,36 +67,21 @@
           
             删除
           </a-link> -->
-          <a-link
-            v-if="record.status === 0 || record.status === 4"
-            v-permission="['exam:specialCertificationApplicant:audit']"
-            status="success"
-            title="审核"
-            @click="onAudit(record)"
-          >
+          <a-link v-if="record.status === 0 || record.status === 4"
+            v-permission="['exam:specialCertificationApplicant:audit']" status="success" title="审核"
+            @click="onAudit(record)">
             审核
           </a-link>
         </a-space>
       </template>
     </GiTable>
 
-    <SpecialCertificationApplicantAddModal
-      ref="SpecialCertificationApplicantAddModalRef"
-      @save-success="search"
-    />
-    <SpecialCertificationApplicantDetailDrawer
-      ref="SpecialCertificationApplicantDetailDrawerRef"
-      :candidate-name-map="{}"
-    />
+    <SpecialCertificationApplicantAddModal ref="SpecialCertificationApplicantAddModalRef" @save-success="search" />
+    <SpecialCertificationApplicantDetailDrawer ref="SpecialCertificationApplicantDetailDrawerRef"
+      :candidate-name-map="{}" />
 
-    <a-modal
-      v-permission="['exam:specialCertificationApplicant:mutyaudit']"
-      v-model:visible="batchAuditVisible"
-      title="批量审核"
-      :mask-closable="false"
-      :closable="false"
-      :footer="false"
-    >
+    <a-modal v-permission="['exam:specialCertificationApplicant:mutyaudit']" v-model:visible="batchAuditVisible"
+      title="批量审核" :mask-closable="false" :closable="false" :footer="false">
       <a-form layout="vertical">
         <a-form-item label="审核结果">
           <a-radio-group v-model="batchAuditStatus">
@@ -128,27 +92,15 @@
           </a-radio-group>
         </a-form-item>
         <a-form-item v-if="batchAuditStatus === 2" label="不通过原因">
-          <a-input
-            v-model="batchAuditReason"
-            placeholder="请输入不通过原因"
-            allow-clear
-          />
+          <a-input v-model="batchAuditReason" placeholder="请输入不通过原因" allow-clear />
         </a-form-item>
         <a-form-item>
           <a-space>
-            <a-button
-              type="primary"
-              :loading="batchAuditLoading"
-              @click="handleBatchAudit"
-              >确定</a-button
-            >
+            <a-button type="primary" :loading="batchAuditLoading" @click="handleBatchAudit">确定</a-button>
             <a-button @click="batchAuditVisible = false">取消</a-button>
           </a-space>
         </a-form-item>
       </a-form>
-    </a-modal>
-        <a-modal v-model:visible="showImagePreview" title="申请表">
-      <img :src="imagePreviewUrl" style="width: 100%" />
     </a-modal>
   </div>
 </template>
@@ -196,6 +148,11 @@ const {
   (page) => listSpecialCertificationApplicant({ ...queryForm, ...page }),
   { immediate: true }
 );
+
+const isImage = (url: string) => {
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
+}
+
 
 const getStatusColor = (status: number) => {
   switch (status) {
@@ -366,33 +323,25 @@ const handleImageError = (e: Event) => {
 };
 
 
-const showImagePreview = ref(false);
-const imagePreviewUrl = ref("");
 const getPreviewUrl = (url: string) => {
+  if (!url) {
+    Message.warning("暂无文件可预览");
+    return;
+  }
+  // 提取文件扩展名
   const ext = url.split(".").pop()?.toLowerCase();
-  const imageTypes = ["jpg", "jpeg", "png", "gif", "webp", "bmp"];
-
-  if (imageTypes.includes(ext)) {
-    // 不用 fetch，不触发跨域，不下载
-    imagePreviewUrl.value = url;
-    showImagePreview.value = true;
-    return;
-  }
-
   if (ext === "pdf") {
+    //  PDF 直接在浏览器中预览
     window.open(url, "_blank");
-    return;
-  }
-
-  if (["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext)) {
+  } else if (["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext)) {
+    //  Office 文件使用微软在线预览
     const previewUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(
       url
     )}`;
     window.open(previewUrl, "_blank");
-    return;
+  } else {
+    Message.warning("暂不支持此文件类型预览");
   }
-
-  Message.warning("暂不支持此文件类型预览");
 };
 
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="作业人员报名管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="作业人员报名资料管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
       @select-all="selectAll">
@@ -22,7 +22,7 @@
       <template #toolbar-right>
         <a-button v-permission="['worker:workerApply:review']" type="primary" @click="batchReview"
           :disabled="!selectedKeys.length">
-          <template #icon><icon-plus /></template>
+          <template #icon><icon-check /></template>
           <template #default>批量审核</template>
         </a-button>
       </template>
@@ -46,8 +46,19 @@
         <span v-else>-</span>
       </template>
       <template #qualificationPath="{ record }">
-        <a-link v-permission="['worker:workerApply:detail']" title="预览报名资格申请表"
-          @click="getPreviewUrl(record.qualificationPath)">预览</a-link>
+        <!-- 文件存在 -->
+        <template v-if="record.qualificationPath">
+          <!-- 图片显示缩略图 -->
+          <a-image v-if="isImage(record.qualificationPath)" width="80" height="60" :src="record.qualificationPath"
+            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" @error="handleImageError" />
+          <!-- PDF 显示预览按钮 -->
+          <a-link v-else v-permission="['worker:workerApply:detail']" title="预览报名资格申请表"
+            @click="getPreviewUrl(record.qualificationPath)">
+            预览
+          </a-link>
+        </template>
+        <!-- 文件不存在 -->
+        <span v-else>-</span>
       </template>
       <template #docList="{ record }">
         <a-link v-permission="['worker:workerApplyDocument:list']" title="查看资料"
@@ -67,6 +78,9 @@
         <a-space>
           <a-link v-permission="['worker:workerApply:review']" title="审核" @click="openReview(record)"
             v-if="record.status == 0">审核</a-link>
+        </a-space>
+        <a-space>
+          <a-link v-permission="['worker:workerApply:detail']" title="审核" @click="openDetail(record.id)">详情</a-link>
         </a-space>
       </template>
     </GiTable>
@@ -92,11 +106,13 @@
         </a-form-item>
       </a-form>
     </a-modal>
+    <WorkerApplyDetailDrawer ref="WorkerApplyDetailDrawerRef" />
   </div>
 </template>
 
 <script setup lang="ts">
 import WorkerApplyDocument from '../workerApplyDocument/index.vue'
+import WorkerApplyDetailDrawer from './WorkerApplyDetailDrawer.vue'
 import { type WorkerApplyResp, type WorkerApplyQuery, review, listWorkerApply } from '@/apis/worker/workerApply'
 import { getSelectOrgProjectClass } from '@/apis/training/org'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
@@ -138,12 +154,12 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   { title: '姓名', dataIndex: 'candidateName', slotName: 'candidateName', width: 75 },
   { title: '性别', dataIndex: 'gender', slotName: 'gender' },
-  { title: '学历', dataIndex: 'education', slotName: 'education' },
+  // { title: '学历', dataIndex: 'education', slotName: 'education' },
   { title: '联系电话', dataIndex: 'phone', slotName: 'phone', width: 125 },
-  { title: '工作单位', dataIndex: 'workUnit', slotName: 'workUnit' },
-  { title: '通讯地址', dataIndex: 'address', slotName: 'address' },
-  { title: '政治面貌', dataIndex: 'politicalStatus', slotName: 'politicalStatus' },
-  { title: '项目', dataIndex: 'projectName', slotName: 'projectName' },
+  // { title: '工作单位', dataIndex: 'workUnit', slotName: 'workUnit' },
+  // { title: '通讯地址', dataIndex: 'address', slotName: 'address' },
+  // { title: '政治面貌', dataIndex: 'politicalStatus', slotName: 'politicalStatus' },
+  { title: '报考项目', dataIndex: 'projectName', slotName: 'projectName' },
   { title: '班级', dataIndex: 'className', slotName: 'className' },
   { title: '来源', dataIndex: 'applyType', slotName: 'applyType' },
   { title: '身份证号', dataIndex: 'idCardNumber', slotName: 'idCardNumber', width: 120 },
@@ -164,6 +180,9 @@ const columns = ref<TableInstanceColumns[]>([
   }
 ]);
 
+const isImage = (url: string) => {
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
+}
 const rowSelection = reactive({
   type: 'checkbox',
   showCheckedAll: true,
@@ -237,6 +256,12 @@ const reset = () => {
   queryForm.status = undefined
   search()
 }
+
+const WorkerApplyDetailDrawerRef = ref<InstanceType<typeof WorkerApplyDetailDrawer>>()
+
+const openDetail = (id: string) => {
+  WorkerApplyDetailDrawerRef.value?.onOpen(id)
+};
 
 
 const WorkerApplyDocumentRef = ref<InstanceType<typeof WorkerApplyDocument>>()

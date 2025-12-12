@@ -1,7 +1,7 @@
 <template>
   <div class="gi_table_page">
     <GiTable
-      title="考生资料管理"
+      title="检验人员报名资料管理"
       row-key="id"
       :data="dataList"
       :columns="columns"

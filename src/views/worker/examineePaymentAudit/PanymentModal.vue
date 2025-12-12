@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+  <a-modal v-model:visible="visible" title="审核缴费资料" :mask-closable="false" :esc-to-close="false"
     :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="handleClose">
     <GiForm ref="formRef" v-model="form" :columns="columns.filter((c) => !c.hidden)" />
   </a-modal>
@@ -19,32 +19,25 @@ const AUDIT_STATUS = {
   REJECTED: 3, // 补正
 } as const;
 
+const reviewIds = ref<any[]>([]);
+
 // 状态选项
 const statusOptions = [
-  { label: "审核通过", value: AUDIT_STATUS.PASSED },
+  { label: "通过", value: AUDIT_STATUS.PASSED },
   { label: "补正", value: AUDIT_STATUS.REJECTED },
 ];
 
 const emit = defineEmits<{ (e: "save-success"): void }>();
 const { width } = useWindowSize();
-
-// ------------ 关键 data 和 ref 提前放置确保正常访问 ---------------
-const dataId = ref("");
-const examineeId = ref<string | undefined>();
-const examPlanId = ref<string | undefined>();
 const visible = ref(false);
 
-// 是否为审核模式，根据 dataId 判断
-const isExamine = computed(() => !!dataId.value);
-const title = computed(() =>
-  isExamine.value ? "审核缴费资料" : "新增缴费资料"
-);
+
 
 const formRef = ref<InstanceType<typeof GiForm>>();
 
 // 表单状态
 const [form, resetForm] = useResetReactive({
-  auditStatus: undefined,
+  auditStatus: AUDIT_STATUS.PASSED,
   rejectReason: "",
 });
 
@@ -107,15 +100,13 @@ const save = async () => {
   const isInvalid = await formRef.value?.formRef?.validate()
   if (isInvalid) return false
   const payload = {
-    id: dataId.value,
-    examineeId: examineeId.value,
-    examPlanId: examPlanId.value,
+    reviewIds: reviewIds.value,
     auditStatus: form.auditStatus,
     rejectReason: form.rejectReason,
   };
   try {
     await reviewPayment(payload);
-    Message.success("审核成功");
+    Message.success("已审核");
     emit("save-success");
     handleClose();
   } catch (error) {
@@ -124,11 +115,8 @@ const save = async () => {
 };
 
 // 打开审核弹窗
-const onExamine = (id: string, examineeIdParam: string, examPlanIdParam: string) => {
-  dataId.value = id
-  examineeId.value = examineeIdParam
-  examPlanId.value = examPlanIdParam
-
+const onExamine = (waitReviewIds: any[]) => {
+  reviewIds.value = waitReviewIds
   form.rejectReason = ''
   visible.value = true
 }

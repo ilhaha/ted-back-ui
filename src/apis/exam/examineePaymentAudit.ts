@@ -51,6 +51,7 @@ export interface ExamineePaymentAuditQuery {
   examPlanId: string | undefined
   examineeId: string | undefined
   auditStatus: string | undefined
+  classId: string | undefined
   sort: Array<string>
 }
 export interface ExamineePaymentAuditPageQuery extends ExamineePaymentAuditQuery, PageQuery {}
@@ -86,7 +87,7 @@ export function exportExamineePaymentAudit(query: ExamineePaymentAuditQuery) {
 }
 
 /** @desc 考生缴费审核 */
-export function reviewPayment(query: ExamineePaymentAuditQuery) {
+export function reviewPayment(query: any) {
   return http.post(`${BASE_URL}/reviewPayment`, query)
 }
 
