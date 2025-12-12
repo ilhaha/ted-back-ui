@@ -103,7 +103,7 @@ const queryForm = reactive<ExamineePaymentAuditQuery>({
   auditStatus: undefined,
   classId: undefined,
   isWorker: true,
-  sort: ["createTime,desc"],
+  sort: ["paymentTime,desc"],
 });
 
 const orgCategoryClassOptions = ref<any[]>([])

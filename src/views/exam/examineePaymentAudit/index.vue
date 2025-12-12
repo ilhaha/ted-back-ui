@@ -99,7 +99,7 @@ const queryForm = reactive<ExamineePaymentAuditQuery>({
   examineeId: undefined,
   auditStatus: undefined,
   isWorker: false,
-  sort: ["createTime,desc"],
+  sort: ["paymentTime,desc"],
 });
 
 const audit_status_enum = [
