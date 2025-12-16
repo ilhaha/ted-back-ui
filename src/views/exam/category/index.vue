@@ -19,7 +19,7 @@
           controls
           style="width: 120px; height: 80px"
         ></video>
-        <span v-else>无视频</span>
+        <span v-else>-</span>
       </template>
       <template #toolbar-left>
         <a-input-search

@@ -107,7 +107,7 @@ const columns = [
     slotName: "qualificationUrl",
   },
   { title: "上传时间", dataIndex: "createTime" },
-  { title: "更新时间", dataIndex: "updateTime" },
+  // { title: "更新时间", dataIndex: "updateTime" },
 
   //删除
   { title: "操作", dataIndex: "actions", slotName: "actions", width: 120 },

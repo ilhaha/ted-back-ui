@@ -176,7 +176,7 @@
     <ExamPlanOptionModal ref="ExamPlanOptionModalRef" />
     <ExamPlanLocaltionAndRoomModel ref="ExamPlanLocaltionAndRoomModelRef" />
     <ExamPlanImportModal ref="ExamPlanImportModalRef" @import-success="search" />
-    <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" />
+    <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" @close-invigilator="search"/>
   </div>
 </template>
 

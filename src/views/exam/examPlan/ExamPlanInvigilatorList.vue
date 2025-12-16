@@ -6,8 +6,7 @@
       <template #toolbar-right>
         <a-popconfirm content="重新随机分配监考员？此操作会清空当前未确认监考分配的监考员，是否继续？" ok-text="确定" cancel-text="取消" @ok="onReRandom">
           <a-button v-permission="['exam:examPlan:option']" type="primary" :disabled="noSecondRandom ||
-            tableData.length === 0 ||
-            tableData.every(i => i.invigilateStatus === 0)
+            tableData.length === 0
             ">
             <template #icon><icon-sync /></template>
             重新随机分配
@@ -20,8 +19,8 @@
         }}</a-tag>
       </template>
       <template #examPassword="{ record }">
-       <span v-if="record.examType == 0">{{ record.examPassword }}</span>
-       <span v-else>-</span>
+        <span v-if="record.examType == 0">{{ record.examPassword }}</span>
+        <span v-else>-</span>
       </template>
       <template #invigilateStatus="{ record }">
         <a-tag :color="getInvigilateStatusColor(record.invigilateStatus)" bordered>
@@ -30,15 +29,14 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['exam:examPlan:updateInvigilator']" status="danger" @click="updateInvigilator(record)"
-            v-if="record.invigilateStatus == 5">
+          <a-link v-permission="['exam:examPlan:updateInvigilator']" status="danger" @click="updateInvigilator(record)">
             更改
           </a-link>
         </a-space>
       </template>
     </GiTable>
     <template #footer>
-      <a-button type="text" @click="invigilateWindow = false">关闭</a-button>
+      <a-button type="text" @click="closeInvigilator">关闭</a-button>
     </template>
   </a-modal>
   <a-modal v-model:visible="changeInvigilatorWindow" title="更换新监考员" :mask-closable="false" :esc-to-close="false"
@@ -62,6 +60,8 @@ import { Message } from '@arco-design/web-vue'
 import { useResetReactive } from "@/hooks";
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useWindowSize } from '@vueuse/core'
+
+const emit = defineEmits(["close-invigilator"]);
 
 const { width } = useWindowSize()
 const currentPlanId = ref()
@@ -138,6 +138,11 @@ const currentColumns: ColumnItem[] = reactive([
     },
   },
 ])
+
+const closeInvigilator = () => {
+  invigilateWindow.value = false
+  emit("close-invigilator")
+}
 // 重新分配监考员
 const onReRandom = async () => {
   const res = await reRandomInvigilators(currentPlanId.value, tableData.value.length)

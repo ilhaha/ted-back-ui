@@ -1,24 +1,11 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="考试劳务费配置管理"
-      :row-key="(record) => record.id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :pagination="pagination"
-      @refresh="search"
-    >
+    <GiTable title="考试劳务费配置管理" :row-key="(record) => record.id" :data="dataList" :columns="columns" :loading="loading"
+      :pagination="pagination" @refresh="search" :disabled-tools="['size']">
       <!-- 左侧工具栏 -->
       <template #toolbar-left>
-        <a-select
-          v-model="queryForm.isEnabled"
-          :options="isEnabledOptions"
-          placeholder="请选择是否启用"
-          allow-clear
-          style="width: 150px"
-          @change="search"
-        />
+        <a-select v-model="queryForm.isEnabled" :options="isEnabledOptions" placeholder="请选择是否启用" allow-clear
+          style="width: 150px" @change="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -27,29 +14,22 @@
 
       <!-- 右侧工具栏 -->
       <template #toolbar-right>
-        <a-button
-          v-permission="['invigilate:laborFee:add']"
-          type="primary"
-          @click="onAdd"
-        >
+        <a-button v-permission="['invigilate:laborFee:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
-        <a-button
+        <!-- <a-button
           v-permission="['invigilate:laborFee:export']"
           @click="onExport"
         >
           <template #icon><icon-download /></template>
           <template #default>导出</template>
-        </a-button>
+        </a-button> -->
       </template>
 
       <!-- 是否启用列 -->
       <template #isEnabled="{ record }">
-        <a-switch
-          v-model="record.isEnabled"
-          @change="(val) => onToggleEnabled(record, val)"
-        >
+        <a-switch v-model="record.isEnabled" @change="(val) => onToggleEnabled(record, val)">
           <template #checked>启用</template>
           <template #un-checked>禁用</template>
         </a-switch>
@@ -63,18 +43,9 @@
             @click="onDetail(record)"
             >详情</a-link
           > -->
-          <a-link
-            v-permission="['invigilate:laborFee:update']"
-            @click="onUpdate(record)"
-            >修改</a-link
-          >
-          <a-link
-            v-permission="['invigilate:laborFee:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
+          <a-link v-permission="['invigilate:laborFee:update']" @click="onUpdate(record)">修改</a-link>
+          <a-link v-permission="['invigilate:laborFee:delete']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>
         </a-space>
@@ -129,15 +100,16 @@ const {
 // 表格列
 const columns = ref([
   {
-    title: "实操考试劳务费单价（元）",
-    dataIndex: "practicalFee",
-    slotName: "practicalFee",
-  },
-  {
     title: "理论考试劳务费单价（元）",
     dataIndex: "theoryFee",
     slotName: "theoryFee",
   },
+  {
+    title: "实操考试劳务费单价（元）",
+    dataIndex: "practicalFee",
+    slotName: "practicalFee",
+  },
+
   { title: "备注", dataIndex: "remark", slotName: "remark" },
   { title: "是否启用", dataIndex: "isEnabled", slotName: "isEnabled" },
   {

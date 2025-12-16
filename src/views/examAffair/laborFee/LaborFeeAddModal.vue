@@ -1,14 +1,6 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns" />
   </a-modal>
 </template>
@@ -39,18 +31,18 @@ const [form, resetForm] = useResetReactive({
 
 const columns: ColumnItem[] = reactive([
   {
-    label: '实操考试劳务费单价（元）',
-    field: 'practicalFee',
-    type: 'input-number', 
-    span: 24,
-    rules: [{ required: true, message: '请输入实操考试劳务费单价（元）' }]
-  },
-  {
     label: '理论考试劳务费单价（元）',
     field: 'theoryFee',
-    type: 'input-number', 
+    type: 'input-number',
     span: 24,
     rules: [{ required: true, message: '请输入理论考试劳务费单价（元）' }]
+  },
+  {
+    label: '实操考试劳务费单价（元）',
+    field: 'practicalFee',
+    type: 'input-number',
+    span: 24,
+    rules: [{ required: true, message: '请输入实操考试劳务费单价（元）' }]
   },
   {
     label: '备注',
