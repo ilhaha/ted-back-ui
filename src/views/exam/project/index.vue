@@ -1,15 +1,28 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="项目管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" @refresh="search">
+    <GiTable
+      title="项目管理"
+      row-key="id"
+      :data="dataList"
+      :columns="columns"
+      :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
+      :pagination="pagination"
+      :disabled-tools="['size']"
+      :disabled-column-keys="['name']"
+      @refresh="search"
+    >
       <template #isOperation="{ record }">
         <a-tag :color="getExamTypeColor(record.isOperation)" bordered>{{
           getExamTypeText(record.isOperation)
         }}</a-tag>
       </template>
       <template #toolbar-right>
-        <a-button v-permission="['exam:project:add']" type="primary" @click="onAdd">
+        <a-button
+          v-permission="['exam:project:add']"
+          type="primary"
+          @click="onAdd"
+        >
           <template #icon><icon-plus /></template>
           新增
         </a-button>
@@ -22,9 +35,11 @@
       <template #imageUrl="{ record }">
         <a-image width="100" height="100" :src="record.imageUrl">
           <template #loader>
-            <img width="200"
+            <img
+              width="200"
               src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb051163646151a4a5083b.png~tplv-uwbnlip3yd-webp.webp"
-              style="filter: blur(5px)" />
+              style="filter: blur(5px)"
+            />
           </template>
         </a-image>
       </template>
@@ -36,10 +51,20 @@
 
       <template #toolbar-left>
         <div class="search-container">
-          <a-input-search @search="search" v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear
-            class="search-input ml-2" />
-          <a-input-search @search="search" v-model="queryForm.projectCode" placeholder="搜索项目代号" allow-clear
-            class="search-input ml-2" />
+          <a-input-search
+            @search="search"
+            v-model="queryForm.projectName"
+            placeholder="搜索项目名称"
+            allow-clear
+            class="search-input ml-2"
+          />
+          <a-input-search
+            @search="search"
+            v-model="queryForm.projectCode"
+            placeholder="搜索项目代号"
+            allow-clear
+            class="search-input ml-2"
+          />
           <!-- <a-input v-model="queryForm.createUser" placeholder="搜索创建人" allow-clear
             style="width: 100%; margin-left: 8px" /> -->
           <!-- <a-button type="primary" class="ml-2" @click="search">
@@ -65,16 +90,57 @@
       <template #action="{ record }">
         <a-space :size="2">
           <div v-if="record.projectStatus === 1">
-            <a-link v-permission="['exam:project:examine']" title="审核" @click="onExamineA(record)">审核</a-link>
-            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-            <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-            <a-link v-permission="['exam:project:delete']" status="danger" :disabled="record.disabled"
-              :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
+            <a-link
+              v-permission="['exam:project:examine']"
+              title="审核"
+              @click="onExamineA(record)"
+              >审核</a-link
+            >
+            <a-link
+              v-permission="['exam:project:detail']"
+              title="详情"
+              @click="onDetail(record)"
+              >详情</a-link
+            >
+            <a-link
+              v-permission="['exam:project:update']"
+              title="修改"
+              @click="onUpdate(record)"
+              >修改</a-link
+            >
+            <a-link
+              v-permission="['exam:project:delete']"
+              status="danger"
+              :disabled="record.disabled"
+              :title="record.disabled ? '不可删除' : '删除'"
+              @click="onDelete(record)"
+            >
               删除
             </a-link>
           </div>
+          <!-- 状态2：仅显示详情 + 删除 -->
+          <div v-else-if="record.projectStatus === 2">
+            <a-link
+              v-permission="['exam:project:detail']"
+              title="详情"
+              @click="onDetail(record)"
+              >详情</a-link
+            >
+             <a-link
+              v-permission="['exam:project:update']"
+              title="修改"
+              @click="onUpdate(record)"
+              >修改</a-link
+            >
+          </div>
+
           <div v-else>
-            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+            <a-link
+              v-permission="['exam:project:detail']"
+              title="详情"
+              @click="onDetail(record)"
+              >详情</a-link
+            >
             <!-- <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link> -->
             <!--            <a-link-->
             <!--                v-permission="['exam:project:delete']"-->
@@ -130,19 +196,60 @@ const {
 });
 const columns = ref<TableInstanceColumns[]>([
   // { title: "项目展示图", dataIndex: "imageUrl", slotName: "imageUrl" },
-  { title: "项目名称", dataIndex: "projectName", slotName: "projectName", align: "center" },
-  { title: "所属八大类", dataIndex: "categoryName", slotName: "categoryName", align: "center" },
-  { title: "项目代码", dataIndex: "projectCode", slotName: "projectCode", align: "center" },
-  { title: "考试时长（分钟）", dataIndex: "examDuration", slotName: "examDuration", align: "center" },
-  { title: "项目状态", dataIndex: "projectStatus", slotName: "projectStatus", align: "center" },
-  { title: "实操考试", dataIndex: "isOperation", slotName: "isOperation", align: "center" },
-  { title: "项目收费标准（元）", dataIndex: "examFee", slotName: "examFee", align: "center" },
+  {
+    title: "项目名称",
+    dataIndex: "projectName",
+    slotName: "projectName",
+    align: "center",
+  },
+  {
+    title: "所属八大类",
+    dataIndex: "categoryName",
+    slotName: "categoryName",
+    align: "center",
+  },
+  {
+    title: "项目代码",
+    dataIndex: "projectCode",
+    slotName: "projectCode",
+    align: "center",
+  },
+  {
+    title: "考试时长（分钟）",
+    dataIndex: "examDuration",
+    slotName: "examDuration",
+    align: "center",
+  },
+  {
+    title: "项目状态",
+    dataIndex: "projectStatus",
+    slotName: "projectStatus",
+    align: "center",
+  },
+  {
+    title: "实操考试",
+    dataIndex: "isOperation",
+    slotName: "isOperation",
+    align: "center",
+  },
+  {
+    title: "项目收费标准（元）",
+    dataIndex: "examFee",
+    slotName: "examFee",
+    align: "center",
+  },
   {
     title: "创建人",
     dataIndex: "createUserString",
-    slotName: "createUserString", align: "center"
+    slotName: "createUserString",
+    align: "center",
   },
-  { title: "创建时间", dataIndex: "createTime", slotName: "createTime", align: "center" },
+  {
+    title: "创建时间",
+    dataIndex: "createTime",
+    slotName: "createTime",
+    align: "center",
+  },
   //{ title: "部门名称", dataIndex: "deptName", slotName: "deptName" },
   {
     title: "操作",
@@ -351,8 +458,8 @@ const getExamTypeText = (status: number) => {
   align-items: center;
   width: 100%;
 
-  >.arco-input-wrapper,
-  >.arco-select {
+  > .arco-input-wrapper,
+  > .arco-select {
     width: 200px;
   }
 

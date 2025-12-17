@@ -124,9 +124,9 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   // { title: '地点ID', dataIndex: 'id', slotName: 'id' },
   { title: '考试地点名称', dataIndex: 'locationName', slotName: 'locationName' },
-  { title: '所在省', dataIndex: 'provinceName', slotName: 'provinceName' },
-  { title: '所在市', dataIndex: 'cityName', slotName: 'cityName' },
-  { title: '所在区', dataIndex: 'streetName', slotName: 'streetName' },
+  // { title: '所在省', dataIndex: 'provinceName', slotName: 'provinceName' },
+  // { title: '所在市', dataIndex: 'cityName', slotName: 'cityName' },
+  // { title: '所在区', dataIndex: 'streetName', slotName: 'streetName' },
   { title: '详细地址', dataIndex: 'detailedAddress', slotName: 'detailedAddress' },
   // 0:运营;1:休息;2:维护;3:关闭;
   //{ title: '运营状态', dataIndex: 'operationalStatus', slotName: 'operationalStatus' },

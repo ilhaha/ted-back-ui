@@ -55,20 +55,20 @@ const columns: ColumnItem[] = reactive([
     span: 24,
     required: true,
   },
-  {
-    label: '选择地区',
-    prop: 'region', // 绑定的字段名
-    field: 'region',
-    type: 'cascader',
-    span: 24,
-    show: () =>dataId.value === '',
-    required: true,
-    props: {
-      options: provinces, // 省市区数据
-      allowSearch: true,
-      onChange: (value: string) => handleRegionChange(value), 
-    },
-  },
+  // {
+  //   label: '选择地区',
+  //   prop: 'region', // 绑定的字段名
+  //   field: 'region',
+  //   type: 'cascader',
+  //   span: 24,
+  //   show: () =>dataId.value === '',
+  //   required: true,
+  //   props: {
+  //     options: provinces, // 省市区数据
+  //     allowSearch: true,
+  //     onChange: (value: string) => handleRegionChange(value), 
+  //   },
+  // },
   {
     label: '详细地址',
     prop: 'detailedAddress',
@@ -96,34 +96,34 @@ const columns: ColumnItem[] = reactive([
   // },
 ])
 
-const handleRegionChange = (value: string) => {
-    const {provinceId,cityId,areaId} = getRegionByAreaId(value);
-    form.provinceId = provinceId
-    form.cityId = cityId
-    form.streetId = areaId
-}
+// const handleRegionChange = (value: string) => {
+//     const {provinceId,cityId,areaId} = getRegionByAreaId(value);
+//     form.provinceId = provinceId
+//     form.cityId = cityId
+//     form.streetId = areaId
+// }
 
-const getRegionByAreaId = (areaId: string) => {
-  let provinceId = '';
-  let cityId = '';
-  // Iterate through provinces
-  for (const province of provinces.value) {
-    // Iterate through cities in each province
-    for (const city of province.children) {
-      // Iterate through areas in each city
-      for (const area of city.children) {
-        if (area.value === areaId) {
-          provinceId = province.value;  // Found the province ID
-          cityId = city.value;  // Found the city ID
-          return { provinceId, cityId, areaId };  // Return the IDs of the province, city, and area
-        }
-      }
-    }
-  }
+// const getRegionByAreaId = (areaId: string) => {
+//   let provinceId = '';
+//   let cityId = '';
+//   // Iterate through provinces
+//   for (const province of provinces.value) {
+//     // Iterate through cities in each province
+//     for (const city of province.children) {
+//       // Iterate through areas in each city
+//       for (const area of city.children) {
+//         if (area.value === areaId) {
+//           provinceId = province.value;  // Found the province ID
+//           cityId = city.value;  // Found the city ID
+//           return { provinceId, cityId, areaId };  // Return the IDs of the province, city, and area
+//         }
+//       }
+//     }
+//   }
   
-  // If not found, return undefined or handle as needed
-  return { provinceId: undefined, cityId: undefined, areaId: undefined };
-}
+//   // If not found, return undefined or handle as needed
+//   return { provinceId: undefined, cityId: undefined, areaId: undefined };
+// }
 // 重置
 const reset = () => {
   formRef.value?.formRef?.resetFields()
@@ -148,26 +148,26 @@ const save = async () => {
     return false
   }
 }
-const getAddressTree = async  () => {
-   const res = await ilhahaProvinces()
-    // 确保数据结构符合 cascader 组件的要求
-    provinces.value = res.data.map((province: RcDistrictDO) => ({
-      label: province.district, // 显示的名称
-      value: province.districtId, // 绑定的值
-      children: province.child?.map((city: RcDistrictDO) => ({
-        label: city.district,
-        value: city.districtId,
-        children: city.child?.map((area: RcDistrictDO) => ({
-          label: area.district,
-          value: area.districtId,
-        }))
-      }))
-    }))
-}
+// const getAddressTree = async  () => {
+//    const res = await ilhahaProvinces()
+//     // 确保数据结构符合 cascader 组件的要求
+//     provinces.value = res.data.map((province: RcDistrictDO) => ({
+//       label: province.district, // 显示的名称
+//       value: province.districtId, // 绑定的值
+//       children: province.child?.map((city: RcDistrictDO) => ({
+//         label: city.district,
+//         value: city.districtId,
+//         children: city.child?.map((area: RcDistrictDO) => ({
+//           label: area.district,
+//           value: area.districtId,
+//         }))
+//       }))
+//     }))
+// }
 // 新增
 const onAdd = async () => {
   reset()
-getAddressTree();
+// getAddressTree();
   dataId.value = ''
   visible.value = true
 }
