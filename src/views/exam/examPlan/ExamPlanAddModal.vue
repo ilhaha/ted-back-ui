@@ -1,9 +1,19 @@
 <template>
-  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
+  <a-modal
+    v-model:visible="visible"
+    :title="title"
+    :mask-closable="false"
+    :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'"
+    draggable
+    @before-ok="save"
+    @close="reset"
+  >
     <GiForm ref="formRef" v-model="form" :columns="currentColumns" />
     <template #footer>
-      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm">确认审核</a-button>
+      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm"
+        >确认审核</a-button
+      >
     </template>
   </a-modal>
 </template>
@@ -22,7 +32,7 @@ import {
   getExamClassroom,
 } from "@/apis/exam/examPlan";
 import { type ColumnItem, GiForm } from "@/components/GiForm";
-import { usePlan, useProject, useResetReactive } from "@/hooks";
+import { useExamPlanProject, useProject, useResetReactive } from "@/hooks";
 import { bindingDocumentListApi } from "@/apis/exam/project";
 import { upload } from "@/apis/common/carousel";
 import { useUserStore } from "@/stores";
@@ -40,7 +50,8 @@ const title = computed(() =>
   isUpdate.value ? "确认考试计划地点时间" : "新增考试计划"
 );
 const formRef = ref<InstanceType<typeof GiForm>>();
-const { deptProjectsList, getDeptProjectsList } = usePlan();
+const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
+
 const {
   locationSelectList,
   getProjectLocationSelect,
@@ -62,12 +73,10 @@ const [form, resetForm] = useResetReactive({
   planType: 0,
   invigilatorCount: 1,
   theoryClassroomId: [],
-  operationClassroomId: []
+  operationClassroomId: [],
 });
 
 const projectBindingDocList = ref([]);
-
-
 
 // 监听新增 删除串口是否打开
 watch(
@@ -81,11 +90,9 @@ watch(
       value: doc.id,
       label: doc.typeName,
     }));
-
   },
   { immediate: false }
 );
-
 
 const columns: ColumnItem[] = reactive([
   {
@@ -102,13 +109,12 @@ const columns: ColumnItem[] = reactive([
   },
   {
     label: "考试项目",
-    prop: "examProjectId",
-    type: "select",
     field: "examProjectId",
+    type: "cascader",
     required: true,
     span: 24,
     props: computed(() => ({
-      options: deptProjectsList,
+      options: examProjectOptions.value,
       allowSearch: true,
       disabled: isUpdate.value,
     })),
@@ -196,29 +202,29 @@ const columns: ColumnItem[] = reactive([
     })),
   },
   {
-    label: '考试人数上限',
-    field: 'maxCandidates',
+    label: "考试人数上限",
+    field: "maxCandidates",
     required: true,
-    type: 'InputNumber',
+    type: "InputNumber",
     span: 24,
     show: () => !isUpdate.value,
-    rules: [{ required: true, message: '请输入考试人数' }],
+    rules: [{ required: true, message: "请输入考试人数" }],
     props: {
-      placeholder: '请输入考试人数',
+      placeholder: "请输入考试人数",
       min: 1,
       max: 999,
     },
   },
   {
-    label: '监考员人数',
-    field: 'invigilatorCount',
+    label: "监考员人数",
+    field: "invigilatorCount",
     required: true,
-    type: 'InputNumber',
+    type: "InputNumber",
     span: 24,
     show: () => isUpdate.value,
-    rules: [{ required: true, message: '请输入监考员人数' }],
+    rules: [{ required: true, message: "请输入监考员人数" }],
     props: {
-      placeholder: '请输入监考员人数',
+      placeholder: "请输入监考员人数",
       min: 1,
       max: 10,
     },
@@ -242,7 +248,6 @@ const auditColumns: ColumnItem[] = reactive([
     },
   },
 ]);
-
 
 // 动态计算当前显示的列
 const currentColumns = computed(() => {
@@ -268,7 +273,10 @@ const save = async () => {
     if (isInvalid) return false;
 
     if (isUpdate.value) {
-      if (form.invigilatorCount < (form.theoryClassroomId.length + form.operationClassroomId.length)) {
+      if (
+        form.invigilatorCount <
+        form.theoryClassroomId.length + form.operationClassroomId.length
+      ) {
         Message.error("所设置的监考员人数不足以分配到全部考场");
         return false;
       }
@@ -299,13 +307,12 @@ const onAuditConfirm = async () => {
     } else {
       Message.error(response.message || "审核失败");
     }
-  } catch (error) {
-  }
+  } catch (error) {}
 };
 
 const getProjectList = async (planType: number) => {
-  await getDeptProjectsList(planType)
-}
+  await getExamProjectOptions(planType);
+};
 
 // 新增
 const onAdd = async () => {
@@ -314,38 +321,44 @@ const onAdd = async () => {
   dataId.value = "";
   getProjectList(0);
 };
-
 // 修改
 const onUpdate = async (id: string) => {
-  reset();
-  dataId.value = id;
-  visible.value = true;
-  const { data } = await getExamPlan(id);
-  await getDeptProjectsList(data.planType)
-  const project = deptProjectsList.value.find((p: any) => p.value === data.examProjectId);
-  await getProjectClassRoomSelect(project.value, 0);
-  columns.find((item) => item.field === "theoryClassroomId")!.show = true;
-  if (project.isOperation == 1) {
-    columns.find((item) => item.field === "operationClassroomId")!.show = true;
-    await getProjectClassRoomSelect(project.value, 1);
+  reset()
+  dataId.value = id
+  visible.value = true
+
+  const { data } = await getExamPlan(id)
+
+  await getExamProjectOptions(data.planType)
+
+  const [projectId, subProjectId] = data.examProjectId
+
+  const project = examProjectOptions.value.find(p => p.value === projectId)
+  const subProject = project?.children?.find(c => c.value === subProjectId)
+
+  // 理论考场
+  await getProjectClassRoomSelect(subProjectId, 0)
+
+  // 实操考场
+  if (subProject?.isOperation === 1) {
+    await getProjectClassRoomSelect(subProjectId, 1)
   }
-  // 加载关联的项目数据
-  form.enrollList = [data.enrollStartTime, data.enrollEndTime];
-  Object.assign(form, data);
-};
+
+  Object.assign(form, data)
+}
 
 const mapRoomIdsToPaths = (roomIds: number[], options: any[]) => {
-  const paths: number[][] = []
-  roomIds.forEach(roomId => {
-    options.forEach(building => {
-      const child = building.children?.find((c: any) => c.value === roomId)
+  const paths: number[][] = [];
+  roomIds.forEach((roomId) => {
+    options.forEach((building) => {
+      const child = building.children?.find((c: any) => c.value === roomId);
       if (child) {
-        paths.push([building.value, child.value])
+        paths.push([building.value, child.value]);
       }
-    })
-  })
-  return paths
-}
+    });
+  });
+  return paths;
+};
 // 审核
 const onExamineA = async (id: string) => {
   reset();

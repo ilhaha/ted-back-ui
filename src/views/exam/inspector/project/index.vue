@@ -73,6 +73,21 @@
               删除
             </a-link>
           </div>
+            <!-- 状态2：仅显示详情 + 删除 -->
+          <div v-else-if="record.projectStatus === 2">
+            <a-link
+              v-permission="['exam:project:detail']"
+              title="详情"
+              @click="onDetail(record)"
+              >详情</a-link
+            >
+             <a-link
+              v-permission="['exam:project:update']"
+              title="修改"
+              @click="onUpdate(record)"
+              >修改</a-link
+            >
+          </div>
           <div v-else>
             <a-link v-permission="['inspector:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
             <!-- <a-link v-permission="['inspector:project:update']" title="修改" @click="onUpdate(record)">修改</a-link> -->

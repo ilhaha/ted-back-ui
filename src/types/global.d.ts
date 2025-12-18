@@ -14,6 +14,20 @@ export interface LabelValueState {
   extra?: string
 }
 
+export interface ExamProjectOption {
+  label: string
+  value: number
+  children?: ExamProjectChild[]
+}
+
+export interface ExamProjectChild {
+  label: string
+  value: number
+  disabled?: boolean
+  isOperation?: 0 | 1
+}
+
+
 declare global{
   type Recordable<T = any> = Record<string, T>
 }

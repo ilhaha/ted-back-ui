@@ -22,7 +22,7 @@ import {
   getExamClassroom,
 } from "@/apis/exam/examPlan";
 import { type ColumnItem, GiForm } from "@/components/GiForm";
-import { usePlan, useProject, useResetReactive } from "@/hooks";
+import { useExamPlanProject, useProject, useResetReactive } from "@/hooks";
 import { bindingDocumentListApi } from "@/apis/exam/project";
 import { upload } from "@/apis/common/carousel";
 import { useUserStore } from "@/stores";
@@ -40,7 +40,7 @@ const title = computed(() =>
   isUpdate.value ? "确认考试计划地点时间" : "新增考试计划"
 );
 const formRef = ref<InstanceType<typeof GiForm>>();
-const { deptProjectsList, getDeptProjectsList } = usePlan();
+const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
 const {
   locationSelectList,
   getProjectLocationSelect,
@@ -102,13 +102,12 @@ const columns: ColumnItem[] = reactive([
   },
   {
     label: "考试项目",
-    prop: "examProjectId",
-    type: "select",
     field: "examProjectId",
+    type: "cascader",
     required: true,
     span: 24,
     props: computed(() => ({
-      options: deptProjectsList,
+      options: examProjectOptions.value,
       allowSearch: true,
       disabled: isUpdate.value,
     })),
@@ -304,8 +303,8 @@ const onAuditConfirm = async () => {
 };
 
 const getProjectList = async (planType: number) => {
-  await getDeptProjectsList(planType)
-}
+  await getExamProjectOptions(planType);
+};
 
 // 新增
 const onAdd = async () => {
@@ -317,22 +316,29 @@ const onAdd = async () => {
 
 // 修改
 const onUpdate = async (id: string) => {
-  reset();
-  dataId.value = id;
-  visible.value = true;
-  const { data } = await getExamPlan(id);
-  await getDeptProjectsList(data.planType)
-  const project = deptProjectsList.value.find((p: any) => p.value === data.examProjectId);
-  await getProjectClassRoomSelect(project.value, 0);
-  columns.find((item) => item.field === "theoryClassroomId")!.show = true;
-  if (project.isOperation == 1) {
-    columns.find((item) => item.field === "operationClassroomId")!.show = true;
-    await getProjectClassRoomSelect(project.value, 1);
+  reset()
+  dataId.value = id
+  visible.value = true
+
+  const { data } = await getExamPlan(id)
+
+  await getExamProjectOptions(data.planType)
+
+  const [projectId, subProjectId] = data.examProjectId
+
+  const project = examProjectOptions.value.find(p => p.value === projectId)
+  const subProject = project?.children?.find(c => c.value === subProjectId)
+
+  // 理论考场
+  await getProjectClassRoomSelect(subProjectId, 0)
+
+  // 实操考场
+  if (subProject?.isOperation === 1) {
+    await getProjectClassRoomSelect(subProjectId, 1)
   }
-  // 加载关联的项目数据
-  form.enrollList = [data.enrollStartTime, data.enrollEndTime];
-  Object.assign(form, data);
-};
+
+  Object.assign(form, data)
+}
 
 const mapRoomIdsToPaths = (roomIds: number[], options: any[]) => {
   const paths: number[][] = []
