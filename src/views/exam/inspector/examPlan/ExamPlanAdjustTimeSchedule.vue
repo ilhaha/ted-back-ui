@@ -14,7 +14,7 @@ import {
   adjustPlanTimeApi
 } from "@/apis/exam/examPlan";
 import { type ColumnItem, GiForm } from "@/components/GiForm";
-import { usePlan, useProject, useResetReactive } from "@/hooks";
+import { useExamPlanProject, useProject, useResetReactive } from "@/hooks";
 import { bindingDocumentListApi } from "@/apis/exam/project";
 import { upload } from "@/apis/common/carousel";
 import { useUserStore } from "@/stores";
@@ -32,7 +32,7 @@ const title = computed(() =>
   isUpdate.value ? "调整考试/报名时间" : "新增考试计划"
 );
 const formRef = ref<InstanceType<typeof GiForm>>();
-const { deptProjectsList, getDeptProjectsList } = usePlan();
+const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
 
 const [form, resetForm] = useResetReactive({
   enrollList: "",
@@ -76,13 +76,12 @@ const columns: ColumnItem[] = reactive([
   },
   {
     label: "考试项目",
-    prop: "examProjectId",
-    type: "select",
     field: "examProjectId",
+    type: "cascader",
     required: true,
-    span: 22,
+    span: 24,
     props: computed(() => ({
-      options: deptProjectsList,
+      options: examProjectOptions.value,
       allowSearch: true,
       disabled: isUpdate.value,
     })),
@@ -157,8 +156,9 @@ const save = async () => {
 
 
 const getProjectList = async (planType: number) => {
-  await getDeptProjectsList(planType)
-}
+  await getExamProjectOptions(planType);
+};
+
 
 // 修改
 const onUpdate = async (id: string) => {
@@ -166,7 +166,7 @@ const onUpdate = async (id: string) => {
   dataId.value = id;
   visible.value = true;
   const { data } = await getExamPlan(id);
-  await getDeptProjectsList(data.planType)
+  await getExamProjectOptions(data.planType)
   // 加载关联的项目数据
   form.enrollList = [data.enrollStartTime, data.enrollEndTime];
   Object.assign(form, data);
