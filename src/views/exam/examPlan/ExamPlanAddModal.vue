@@ -267,32 +267,69 @@ const reset = () => {
 };
 
 // 保存
+const loading = ref(false);
 const save = async () => {
-  try {
-    const isInvalid = await formRef.value?.formRef?.validate();
-    if (isInvalid) return false;
+  if (loading.value) return false;
+  loading.value = true;
 
+  try {
+    // 表单实例校验
+    if (!formRef.value?.formRef) {
+      Message.error("表单未加载完成，请重试");
+      return false;
+    }
+    await formRef.value.formRef.validate();
+
+    // 计算考场总数
+    const theoryLen = form.theoryClassroomId?.length || 0;
+    const operationLen = form.operationClassroomId?.length || 0;
+    const totalClassroom = theoryLen + operationLen;
+
+    //  核心：校验是否选择考场
+    if (totalClassroom === 0) {
+      Message.error("请至少选择一个理论或实操考场");
+      return false;
+    }
+
+    // 监考员人数校验
+    const invigilatorCount = Number(form.invigilatorCount) || 0;
+    if (invigilatorCount <= 0) {
+      Message.error("监考员人数必须为正整数");
+      return false;
+    }
+    if (invigilatorCount < totalClassroom) {
+      Message.error(`需要至少${totalClassroom}名监考员（当前仅${invigilatorCount}名）`);
+      return false;
+    }
+
+    //  封装参数（兜底格式）
+    const submitForm = {
+      ...form,
+      theoryClassroomId: form.theoryClassroomId || [],
+      operationClassroomId: form.operationClassroomId || [],
+      invigilatorCount: invigilatorCount
+    };
+
+    //  发送请求
     if (isUpdate.value) {
-      if (
-        form.invigilatorCount <
-        form.theoryClassroomId.length + form.operationClassroomId.length
-      ) {
-        Message.error("所设置的监考员人数不足以分配到全部考场");
-        return false;
-      }
-      await updateExamPlan(form, dataId.value);
-      Message.success("已确认");
+      await updateExamPlan(submitForm, dataId.value);
+      Message.success("修改成功");
     } else {
-      await customizAddExamPlan(form);
+      await customizAddExamPlan(submitForm);
       Message.success("新增成功");
     }
+
     emit("save-success");
+    visible.value = false;
     return true;
+
   } catch (error) {
     return false;
+
+  } finally {
+    loading.value = false;
   }
 };
-
 const onAuditConfirm = async () => {
   try {
     if (form.status === undefined || form.status === null) {
@@ -323,30 +360,58 @@ const onAdd = async () => {
 };
 // 修改
 const onUpdate = async (id: string) => {
-  reset()
-  dataId.value = id
-  visible.value = true
+  reset();
+  dataId.value = id;
+  visible.value = true;
 
-  const { data } = await getExamPlan(id)
+  try {
+    // 1. 获取考试计划详情
+    const { data: examPlanData } = await getExamPlan(id);
+    // 2. 获取部门项目列表（父项目数组）
+    await getExamProjectOptions(examPlanData.planType);
+    const parentProjects = examProjectOptions.value;
 
-  await getExamProjectOptions(data.planType)
+    // 3. 核心：根据子项目ID（examProjectId）找对应的子项目+父项目
+    const subProjectId = examPlanData.examProjectId; // 子项目ID（如81）
+    let targetSubProject = null;
+    let targetParentProject = null;
+    // 遍历父项目数组，找包含当前子项目ID的父项
+    for (const parent of parentProjects) {
+      targetSubProject = parent.children?.find(
+        (child: any) => child.value === subProjectId
+      );
+      if (targetSubProject) {
+        targetParentProject = parent;
+        break;
+      }
+    }
 
-  const [projectId, subProjectId] = data.examProjectId
+    // 容错：如果没找到子项目，提示并终止后续逻辑
+    if (!targetSubProject) {
+      console.warn(`未找到ID为${subProjectId}的子项目`);
+      Object.assign(form, examPlanData);
+      return;
+    }
 
-  const project = examProjectOptions.value.find(p => p.value === projectId)
-  const subProject = project?.children?.find(c => c.value === subProjectId)
+    // 4. 加载理论考场（用子项目ID）
+    await getProjectClassRoomSelect(subProjectId, 0);
+    columns.find((item) => item.field === "theoryClassroomId")!.show = true;
 
-  // 理论考场
-  await getProjectClassRoomSelect(subProjectId, 0)
+    // 5. 加载实操考场（如果子项目是实操类型）
+    if (targetSubProject.isOperation === 1) {
+      columns.find((item) => item.field === "operationClassroomId")!.show = true;
+      await getProjectClassRoomSelect(subProjectId, 1);
+    }
 
-  // 实操考场
-  if (subProject?.isOperation === 1) {
-    await getProjectClassRoomSelect(subProjectId, 1)
+    // 6. 表单赋值
+    form.enrollList = [examPlanData.enrollStartTime, examPlanData.enrollEndTime];
+    Object.assign(form, examPlanData);
+
+  } catch (e) {
+    console.error("考试计划回显失败：", e);
+    // 可加错误提示，比如ElMessage.error('数据加载失败')
   }
-
-  Object.assign(form, data)
-}
-
+};
 const mapRoomIdsToPaths = (roomIds: number[], options: any[]) => {
   const paths: number[][] = [];
   roomIds.forEach((roomId) => {
