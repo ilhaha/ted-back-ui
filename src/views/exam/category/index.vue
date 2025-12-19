@@ -1,33 +1,14 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="八大类管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable title="八大类管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
       <template #video="{ record }">
-        <video
-          v-if="record.videoUrl"
-          :src="record.videoUrl"
-          controls
-          style="width: 120px; height: 80px"
-        ></video>
+        <video v-if="record.videoUrl" :src="record.videoUrl" controls style="width: 120px; height: 80px"></video>
         <span v-else>-</span>
       </template>
       <template #toolbar-left>
-        <a-input-search
-          v-model="queryForm.name"
-          placeholder="请输入种类名称"
-          allow-clear
-          @search="search"
-        />
+        <a-input-search v-model="queryForm.name" placeholder="请输入种类名称" allow-clear @search="search" />
         <a-button type="primary" class="ml-2" @click="search">
           <template #icon><icon-search /></template>
           搜索
@@ -38,11 +19,7 @@
         </a-button>
       </template>
       <template #toolbar-right>
-        <a-button
-          v-permission="['exam:category:add']"
-          type="primary"
-          @click="onAdd"
-        >
+        <a-button v-permission="['exam:category:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
@@ -51,27 +28,25 @@
           <template #default>导出</template>
         </a-button> -->
       </template>
+      <template #enableProctorWarning="{ record }">
+        <a-switch v-model="record.enableProctorWarning"
+          :disabled="!has.hasPermOr(['category:enableProctorWarning:update'])"
+          @change="(checked) => handleProctorWarningChange(record, checked)">
+          <template #checked>开启</template>
+          <template #unchecked>关闭</template>
+        </a-switch>
+      </template>
       <template #action="{ record }">
         <a-space>
-<!--          <a-link
+          <!--          <a-link
             v-permission="['exam:category:detail']"
             title="详情"
             @click="onDetail(record)"
             >详情</a-link
           >-->
-          <a-link
-            v-permission="['exam:category:update']"
-            title="修改"
-            @click="onUpdate(record)"
-            >修改</a-link
-          >
-          <a-link
-            v-permission="['exam:category:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
+          <a-link v-permission="['exam:category:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+          <a-link v-permission="['exam:category:delete']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>
         </a-space>
@@ -92,12 +67,15 @@ import {
   deleteCategory,
   exportCategory,
   listCategory,
+  updateCategory
 } from "@/apis/exam/category";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
 import { useDict } from "@/hooks/app";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
+import { useUserStore } from '@/stores'
+
 
 defineOptions({ name: "Category" });
 
@@ -105,6 +83,7 @@ const queryForm = reactive<CategoryQuery>({
   name: undefined,
   sort: ["id,desc"],
 });
+const userStore = useUserStore()
 
 const {
   tableData: dataList,
@@ -125,6 +104,11 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "video",
   },
   {
+    title: "违规行为提醒",
+    dataIndex: "enableProctorWarning",
+    slotName: "enableProctorWarning",
+  },
+  {
     title: "操作",
     dataIndex: "action",
     slotName: "action",
@@ -139,6 +123,9 @@ const columns = ref<TableInstanceColumns[]>([
   },
 ]);
 
+const handleProctorWarningChange = async (record) => {
+  await updateCategory(record, record.id)
+}
 // 重置
 const reset = () => {
   queryForm.name = undefined;

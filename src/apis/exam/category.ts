@@ -1,5 +1,5 @@
 import http from '@/utils/http'
-import type {LabelValueState} from "@/types/global";
+import type { LabelValueState } from "@/types/global";
 
 const BASE_URL = '/exam/category'
 const SELECT_OPTIONS = `${BASE_URL}/selectOptions`
@@ -18,6 +18,7 @@ export interface CategoryResp {
   updateUserString: string
   disabled: boolean
   topicNumber: number
+  enableProctorWarning: string
   videoUrl: string
 }
 export interface CategoryDetailResp {
@@ -34,12 +35,14 @@ export interface CategoryDetailResp {
   updateUserString: string
   topicNumber: number
   videoUrl: string
+  enableProctorWarning: string,
+
 }
 export interface CategoryQuery {
   name: string | undefined
   sort: Array<string>
 }
-export interface CategoryPageQuery extends CategoryQuery, PageQuery {}
+export interface CategoryPageQuery extends CategoryQuery, PageQuery { }
 
 
 export function selectOptions() {
