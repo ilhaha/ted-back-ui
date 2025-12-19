@@ -171,7 +171,6 @@ const columns: ColumnItem[] = reactive([
       },
     },
   },
-
   {
     label: "考试报名时间",
     prop: "enrollList",
@@ -265,7 +264,6 @@ const reset = () => {
   columns.find((item) => item.field === "theoryClassroomId")!.show = false;
   columns.find((item) => item.field === "operationClassroomId")!.show = false;
 };
-
 // 保存
 const loading = ref(false);
 const save = async () => {
@@ -285,24 +283,26 @@ const save = async () => {
     const operationLen = form.operationClassroomId?.length || 0;
     const totalClassroom = theoryLen + operationLen;
 
-    //  核心：校验是否选择考场
-    if (totalClassroom === 0) {
+    // 核心修改：仅修改时校验是否选择考场（新增时跳过）
+    if (isUpdate.value && totalClassroom === 0) {
       Message.error("请至少选择一个理论或实操考场");
       return false;
     }
 
-    // 监考员人数校验
+    // 监考员人数校验：仅当有考场时才校验（新增/修改通用）
     const invigilatorCount = Number(form.invigilatorCount) || 0;
-    if (invigilatorCount <= 0) {
-      Message.error("监考员人数必须为正整数");
-      return false;
-    }
-    if (invigilatorCount < totalClassroom) {
-      Message.error(`需要至少${totalClassroom}名监考员（当前仅${invigilatorCount}名）`);
-      return false;
+    if (totalClassroom > 0) { // 有考场时才校验人数
+      if (invigilatorCount <= 0) {
+        Message.error("监考员人数必须为正整数");
+        return false;
+      }
+      if (invigilatorCount < totalClassroom) {
+        Message.error(`需要至少${totalClassroom}名监考员（当前仅${invigilatorCount}名）`);
+        return false;
+      }
     }
 
-    //  封装参数（兜底格式）
+    // 封装参数（兜底格式）
     const submitForm = {
       ...form,
       theoryClassroomId: form.theoryClassroomId || [],
@@ -310,7 +310,7 @@ const save = async () => {
       invigilatorCount: invigilatorCount
     };
 
-    //  发送请求
+    // 发送请求
     if (isUpdate.value) {
       await updateExamPlan(submitForm, dataId.value);
       Message.success("修改成功");
