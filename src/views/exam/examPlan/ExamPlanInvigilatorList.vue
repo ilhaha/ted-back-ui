@@ -221,6 +221,8 @@ const getInvigilateStatusColor = (status: number) => {
       return "purple";    // 待监考人员确认
     case 5:
       return "red";       // 监考员拒绝监考
+    case 6:
+      return 'blue'  // 监控中
     default:
       return "default";
   }
@@ -241,6 +243,8 @@ const getInvigilateStatusText = (status: number) => {
       return "待监考员确认";
     case 5:
       return "无法参加";
+    case 6:
+      return "监考中";
     default:
       return "未知状态";
   }

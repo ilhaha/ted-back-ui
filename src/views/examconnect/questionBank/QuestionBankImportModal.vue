@@ -1,25 +1,25 @@
 <template>
   <a-modal v-model:visible="visible" title="题目导入" :mask-closable="false" :width="600" :footer="false">
     <div class="import-modal-content">
-      <a-alert>请先选择分类再下载模板，系统会自动填充分类信息到模板中</a-alert>
-      <div class="cascader-container">
+      <a-alert>下载模板后请严格按照模板规则填写</a-alert>
+      <!-- <div class="cascader-container">
         <a-form layout="vertical">
           <a-form-item label="题目分类" field="categoryIds">
             <a-cascader v-model="selectedCategory" :options="categoryOptions" placeholder="请选择分类" />
           </a-form-item>
         </a-form>
-      </div>
+      </div> -->
 
       <div class="action-buttons">
-        <a-button type="outline" @click="downloadTemplate">
+        <a-button type="dashed" @click="downloadTemplate">
           <template #icon>
             <icon-download />
           </template>
           下载模板
         </a-button>
         <a-upload :show-file-list="false" :before-upload="beforeUpload" :custom-request="customRequest"
-          :disabled="selectedCategory.length <= 0" accept=".xls,.xlsx">
-          <a-button type="primary">
+          accept=".xls,.xlsx">
+          <a-button type="outline">
             <template #icon>
               <icon-upload />
             </template>
@@ -53,10 +53,10 @@ const DEFAULT_EMPTY_CATEGORY = {
 
 const customRequest = async (options: any) => {
 
-  if (!selectedCategory.value.length) {
-    Message.error("请先选择分类");
-    return;
-  }
+  // if (!selectedCategory.value.length) {
+  //   Message.error("请先选择分类");
+  //   return;
+  // }
   const file = options.fileItem.file
 
   if (!beforeUpload(file)) return
@@ -97,47 +97,51 @@ const beforeUpload = (file: File) => {
 
 
 // 异步计算属性
-const parsedCategory = computedAsync(async () => {
-  if (!selectedCategory.value.length) return DEFAULT_EMPTY_CATEGORY;
-  try {
-    const { data } = await getAllPath(selectedCategory.value);
-    return data || DEFAULT_EMPTY_CATEGORY;
-  } catch (error) {
-    return DEFAULT_EMPTY_CATEGORY;
-  }
-}, DEFAULT_EMPTY_CATEGORY);
+// const parsedCategory = computedAsync(async () => {
+//   if (!selectedCategory.value.length) return DEFAULT_EMPTY_CATEGORY;
+//   try {
+//     const { data } = await getAllPath(selectedCategory.value);
+//     return data || DEFAULT_EMPTY_CATEGORY;
+//   } catch (error) {
+//     return DEFAULT_EMPTY_CATEGORY;
+//   }
+// }, DEFAULT_EMPTY_CATEGORY);
 
 // 获取分类选项
-const loadOptions = async () => {
-  const res = await getOptions();
-  categoryOptions.value = res.data || [];
-};
+// const loadOptions = async () => {
+//   const res = await getOptions();
+//   categoryOptions.value = res.data || [];
+// };
 
 // 生成模板文件
 const generateTemplate = () => {
   // 1. 分类信息（用于 sheet 名称）
-  const categoryInfo = [
-    parsedCategory.value.categoryId,
-    parsedCategory.value.projectId,
-    parsedCategory.value.knowledgeTypeId,
-  ].join(",");
+  // const categoryInfo = [
+  //   parsedCategory.value.categoryId,
+  //   parsedCategory.value.projectId,
+  //   parsedCategory.value.knowledgeTypeId,
+  // ].join(",");
 
   // 2. Excel 内容
   const templateData = [
     [
+      "项目代码",
+      "知识类型名称",
       "问题",
-      "题型（0单选，1判断，2多选）",
-      "考试人员类型（1-作业人员，2-检验人员）",
+      "题型\n（0 单选1 判断2 多选）",
+      "考试人员类型\n（1-作业人员2-检验人员）",
       "选项A",
       "选项B",
       "选项C",
       "选项D",
-      "答案（多选用英文逗号分隔，如：A,B）",
+      "答案\n（多选用英文逗号分隔如：A,B）",
     ],
     [
+      "AQGL",
+      "法规知识",
       "示例题目",
       "0",
-      "0",
+      "1",
       "答案A",
       "答案B",
       "答案C",
@@ -178,6 +182,7 @@ const generateTemplate = () => {
       cell.s.alignment = {
         horizontal: "center",
         vertical: "middle",
+        wrapText: true
       };
 
       // 第一行标题加粗
@@ -190,24 +195,44 @@ const generateTemplate = () => {
   }
 
   // 4. 添加到 workbook
-  XLSX.utils.book_append_sheet(workbook, worksheet, categoryInfo);
+  XLSX.utils.book_append_sheet(workbook, worksheet, "题目导入模板");
 
   return workbook;
 };
 
+// 下载最新项目及知识类型数据
+const downloadProjectData = async () => {
+  const link = document.createElement('a')
+  link.href = '/templates/最新项目及知识类型数据.xlsx'
+  link.download = '最新项目及知识类型数据.xlsx'
+  link.style.display = 'none'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
 // 下载模板
 const downloadTemplate = () => {
-  if (!selectedCategory.value.length) {
-    Message.error("请先选择分类");
-    return;
-  }
+  const link = document.createElement('a')
+  link.href = '/templates/题目导入模板.xlsx'
+  link.download = '题目导入模板.xlsx'
+  link.style.display = 'none'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
 
-  const workbook = generateTemplate();
-  XLSX.writeFile(
-    workbook,
-    `题目导入模板_${parsedCategory.value.categoryName}.xlsx`
-  );
-};
+// 下载模板
+// const downloadTemplate = () => {
+// if (!selectedCategory.value.length) {
+//   Message.error("请先选择分类");
+//   return;
+// }
+//   const workbook = generateTemplate();
+//   XLSX.writeFile(
+//     workbook,
+//     `题目导入模板.xlsx`
+//   );
+// };
 
 
 // 选择文件
@@ -256,7 +281,7 @@ const handleConfirmUpload = async () => {
 const onOpen = async () => {
   selectedCategory.value = []
   visible.value = true;
-  await loadOptions();
+  // await loadOptions();
 };
 
 // 工具函数：根据ID获取标签
@@ -290,6 +315,6 @@ defineExpose({ onOpen });
   display: flex;
   gap: 16px;
   justify-content: center;
-  margin-top: 24px;
+  margin: 15px;
 }
 </style>

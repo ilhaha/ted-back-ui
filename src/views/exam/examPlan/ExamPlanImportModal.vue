@@ -3,7 +3,7 @@
         <div class="import-modal-content">
             <a-alert>下载模板后请严格按照模板规则填写</a-alert>
             <div class="action-buttons">
-                <a-button type="outline" @click="downloadTemplate">
+                <a-button type="dashed" @click="downloadTemplate">
                     <template #icon>
                         <icon-download />
                     </template>
@@ -11,7 +11,7 @@
                 </a-button>
                 <a-upload :show-file-list="false" :before-upload="beforeUpload" :custom-request="customRequest"
                     accept=".xls,.xlsx">
-                    <a-button type="primary">
+                    <a-button type="outline">
                         <template #icon>
                             <icon-upload />
                         </template>
@@ -293,6 +293,6 @@ defineExpose({ onOpen })
     display: flex;
     gap: 16px;
     justify-content: center;
-    margin-top: 24px;
+    margin: 15px;
 }
 </style>
