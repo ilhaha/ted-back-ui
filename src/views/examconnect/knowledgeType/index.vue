@@ -108,8 +108,9 @@ const {
   immediate: true,
 });
 const columns = ref<TableInstanceColumns[]>([
-  { title: "项目名称", dataIndex: "projectName", slotName: "projectName" },
   { title: "知识类型名称", dataIndex: "name", slotName: "name" },
+  { title: "所属八大类", dataIndex: "categoryName", slotName: "categoryName" },
+  { title: "项目名称", dataIndex: "projectName", slotName: "projectName" },
   { title: "占比（百分比）", dataIndex: "proportion", slotName: "proportion" },
   {
     title: "操作",
