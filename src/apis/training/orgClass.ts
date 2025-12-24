@@ -34,7 +34,19 @@ export interface OrgClassQuery {
   className: string | undefined
   sort: Array<string>
 }
+
 export interface OrgClassPageQuery extends OrgClassQuery, PageQuery {}
+
+
+/**
+ * 根据项目类型和班级类型获取班级选择器
+ * @param id 
+ * @returns 
+ */
+export function getSelectClassByProject(projectId: string, classType: number) {
+  return http.get<any[]>(`${BASE_URL}/select/${projectId}/${classType}/0`)
+}
+
 
 /** @desc 查询培训机构班级列表 */
 export function listOrgClass(query: OrgClassPageQuery) {

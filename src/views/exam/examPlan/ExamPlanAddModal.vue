@@ -1,19 +1,9 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="currentColumns" />
     <template #footer>
-      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm"
-        >确认审核</a-button
-      >
+      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm">确认审核</a-button>
     </template>
   </a-modal>
 </template>
@@ -143,8 +133,7 @@ const columns: ColumnItem[] = reactive([
     props: {
       options: theoryClassRoomSelectList,
       allowSearch: true,
-      placeholder: "请选择理论考场（可多选）",
-      multiple: true,
+      placeholder: "请选择理论考场",
       virtualListProps: {
         height: 200,
         threshold: 30,
@@ -272,14 +261,11 @@ const save = async () => {
 
   try {
     // 表单实例校验
-    if (!formRef.value?.formRef) {
-      Message.error("表单未加载完成，请重试");
-      return false;
-    }
-    await formRef.value.formRef.validate();
+    const isInvalid = await formRef.value?.formRef?.validate()
+    if (isInvalid) return false
 
     // 计算考场总数
-    const theoryLen = form.theoryClassroomId?.length || 0;
+    const theoryLen = 1;
     const operationLen = form.operationClassroomId?.length || 0;
     const totalClassroom = theoryLen + operationLen;
 
@@ -302,10 +288,11 @@ const save = async () => {
       }
     }
 
+
     // 封装参数（兜底格式）
     const submitForm = {
       ...form,
-      theoryClassroomId: form.theoryClassroomId || [],
+      theoryClassroomId: Array.isArray(form.theoryClassroomId) ? form.theoryClassroomId : [form.theoryClassroomId],
       operationClassroomId: form.operationClassroomId || [],
       invigilatorCount: invigilatorCount
     };
@@ -313,8 +300,10 @@ const save = async () => {
     // 发送请求
     if (isUpdate.value) {
       await updateExamPlan(submitForm, dataId.value);
-      Message.success("修改成功");
+      Message.success("已确定");
     } else {
+      submitForm.enrollList = [submitForm.enrollList[0].slice(0, 10) + " 09:00:00", submitForm.enrollList[1].slice(0, 10) + " 17:00:00"]
+      submitForm.startTime = submitForm.startTime.slice(0, 10) + " 09:00:00"
       await customizAddExamPlan(submitForm);
       Message.success("新增成功");
     }
@@ -344,7 +333,7 @@ const onAuditConfirm = async () => {
     } else {
       Message.error(response.message || "审核失败");
     }
-  } catch (error) {}
+  } catch (error) { }
 };
 
 const getProjectList = async (planType: number) => {

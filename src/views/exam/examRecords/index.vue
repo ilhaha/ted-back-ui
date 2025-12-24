@@ -17,7 +17,7 @@
 
       <template #toolbar-left>
         <a-space>
-          <a-select v-model="queryForm.planId" placeholder="请选择计划名称" allow-clear style="width: 200px">
+          <a-select v-model="queryForm.planId" placeholder="请选择计划名称" allow-clear style="width: 200px" @change="search">
             <a-option v-for="item in plan_id_enum" :key="item.value" :value="item.value">
               {{ item.label }}
             </a-option>
@@ -36,10 +36,10 @@
           <!--              {{ item.label }} -->
           <!--            </a-option> -->
           <!--          </a-select> -->
-          <a-button type="primary" @click="search">
+          <!-- <a-button type="primary" @click="search">
             <template #icon><icon-search /></template>
             <template #default>搜索</template>
-          </a-button>
+          </a-button> -->
           <a-button @click="reset">
             <template #icon><icon-refresh /></template>
             <template #default>重置</template>
@@ -48,11 +48,11 @@
       </template>
       <template #toolbar-right>
         <a-space class="batch-actions">
-          <a-button v-permission="['exam:examRecords:audit']" :disabled="!selectedKeys.length" type="primary"
+          <!-- <a-button v-permission="['exam:examRecords:audit']" :disabled="!selectedKeys.length" type="primary"
             @click="handleBatchAudit">
             <template #icon><icon-check /></template>
             <template #default>批量审核</template>
-          </a-button>
+          </a-button> -->
           <!-- <a-button v-permission="['exam:examRecords:export']" @click="onExport">
             <template #icon><icon-download /></template>
             <template #default>导出</template>

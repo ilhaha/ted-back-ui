@@ -1,5 +1,5 @@
 <template>
-  <a-modal :visible="invigilateWindow" draggable width="60%" :closable="false" title="监考员列表">
+  <a-modal :visible="invigilateWindow" draggable width="60%" :closable="false" title="考试监考安排">
     <GiTable row-key="id" :data="tableData" :columns="columns" :loading="loading"
       @refresh="getInvigilateDate(currentPlanId)" :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="false"
       :disabled-tools="['size']" :disabled-column-keys="['name']">
@@ -87,6 +87,14 @@ const columns = [
     dataIndex: 'nickname',
   },
   {
+    title: '考点名称',
+    dataIndex: 'locationName',
+  },
+  {
+    title: '考点地址',
+    dataIndex: 'detailedAddress',
+  },
+  {
     title: '考场名称',
     dataIndex: 'classroomName',
   },
@@ -95,11 +103,11 @@ const columns = [
     dataIndex: 'examType',
     slotName: "examType",
   },
-  {
-    title: '开考密码',
-    dataIndex: 'examPassword',
-    slotName: "examPassword",
-  },
+  // {
+  //   title: '开考密码',
+  //   dataIndex: 'examPassword',
+  //   slotName: "examPassword",
+  // },
   {
     title: '状态',
     dataIndex: 'invigilateStatus',

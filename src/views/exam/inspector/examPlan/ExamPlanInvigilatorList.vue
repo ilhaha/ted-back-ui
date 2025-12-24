@@ -1,5 +1,5 @@
 <template>
-  <a-modal :visible="invigilateWindow" draggable width="60%" :closable="false" title="监考员列表">
+  <a-modal :visible="invigilateWindow" draggable width="60%" :closable="false" title="考试监考安排">
     <GiTable row-key="id" :data="tableData" :columns="columns" :loading="loading"
       @refresh="getInvigilateDate(currentPlanId)" :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="false"
       :disabled-tools="['size']" :disabled-column-keys="['name']">
@@ -19,10 +19,15 @@
           {{ getInvigilateStatusText(record.invigilateStatus) }}
         </a-tag>
       </template>
+      <template #examType="{ record }">
+        <a-tag :color="getStatusColor(record.examType)" bordered>{{
+          getStatusText(record.examType)
+        }}</a-tag>
+      </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['inspector:examPlan:updateInvigilator']" status="danger" @click="updateInvigilator(record)"
-            v-if="record.invigilateStatus == 5">
+          <a-link v-permission="['inspector:inspectorPlan:updateInvigilator']" status="danger"
+            @click="updateInvigilator(record)" v-if="record.invigilateStatus == 0">
             更改
           </a-link>
         </a-space>
@@ -78,12 +83,21 @@ const columns = [
     dataIndex: 'nickname',
   },
   {
+    title: '考点名称',
+    dataIndex: 'locationName',
+  },
+  {
+    title: '考点地址',
+    dataIndex: 'detailedAddress',
+  },
+  {
     title: '考场名称',
     dataIndex: 'classroomName',
   },
   {
-    title: '开考密码',
-    dataIndex: 'examPassword',
+    title: '考试类型',
+    dataIndex: 'examType',
+    slotName: "examType",
   },
   {
     title: '状态',
@@ -166,6 +180,27 @@ const reset = () => {
 };
 
 
+const getStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "理论考试";
+    case 1:
+      return "实操考试";
+    default:
+      return "未知";
+  }
+};
+
+const getStatusColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 理论考试
+    case 1:
+      return "orange"; // 实操考试
+    default:
+      return "default";
+  }
+};
 
 const getInvigilateStatusColor = (status: number) => {
   switch (status) {

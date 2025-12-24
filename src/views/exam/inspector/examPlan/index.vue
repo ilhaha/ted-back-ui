@@ -50,8 +50,8 @@
           <a-space class="ml-2">
             <!-- <a-button type="primary" @click="search">
               <template #icon><icon-search /></template>
-              搜索
-            </a-button> -->
+搜索
+</a-button> -->
             <a-button class="ml-2" @click="reset">
               <template #icon><icon-refresh /></template>
               重置
@@ -78,6 +78,10 @@
           {{ getStatusText(record.status) }}
         </a-tag>
       </template>
+      <template #examPassword="{ record }">
+        <span v-if="record.examPassword">{{ record.examPassword }}</span>
+        <span v-else>-</span>
+      </template>
       <template #isFinalConfirmed="{ record }">
         <a-tag :color="getIsFinalConfirmedColor(record.isFinalConfirmed)" bordered>
           {{ getIsFinalConfirmedText(record.isFinalConfirmed) }}
@@ -85,8 +89,9 @@
       </template>
       <template #examRoom="{ record }">
         <a-space>
-          <a-link title="查看考场" style="text-align: center" @click="showExamRoom(record)">
-            查看考场
+          <a-link v-permission="['inspector:inspectorPlan:queryInvigilator']" title="监考安排" style="text-align: center"
+            @click="onOptionInvigilateList(record.id, record.assignType)">
+            详情
           </a-link>
         </a-space>
       </template>
@@ -100,21 +105,26 @@
       </template> -->
       <template #action="{ record }">
         <a-space>
-          <!-- <a-link v-permission="['inspector:examPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
+          <!-- <a-link v-permission="['inspector:inspectorPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <div v-if="record.status == 1">
             <a-link v-permission="['inspector:examPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
               审核
             </a-link>
           </div>
           <div v-if="record.status == 2">
-            <a-link v-permission="['inspector:examPlan:sjjdgljreview']" title="审核" @click="onExamineA(record)">审核</a-link>
+            <a-link v-permission="['inspector:examPlan:sjjdgljreview']" title="审核"
+              @click="onExamineA(record)">审核</a-link>
           </div>
-          <div v-if="record.isFinalConfirmed > 0">
+          <div v-if="record.status == 3">
+            <a-link v-permission="['exam:plan:inspectorApplyList']" title="查看考生"
+              @click="openApplyList(record)">报考人员</a-link>
+          </div>
+          <!-- <div v-if="record.isFinalConfirmed > 0">
             <a-link v-permission="['inspector:examPlan:queryInvigilator']" title="查看监考员" style="text-align: center"
               @click="onOptionInvigilateList(record.id, record.assignType)">
               监考列表
             </a-link>
-          </div>
+          </div> -->
           <a-link v-permission="['inspector:examPlan:delete']" v-if="record.status == 1 || record.status == 4"
             status="danger" :disabled="record.disabled" :title="record.disabled ? '不可删除' : '删除'"
             @click="onDelete(record)">
@@ -129,7 +139,7 @@
               @click="onUpdate(record)">考试确认</a-link>
           </div>
           <div v-if="record.isFinalConfirmed == 1 && record.status == 3 && userInfo.id != 1">
-            <a-link v-permission="['inspector:examPlan:zxzrConfirmed']" title="中心主任确认考试"
+            <a-link v-permission="['inspector:inspectorPlan:zxzrConfirmed']" title="中心主任确认考试"
               @click="openConform(record)">考试确认</a-link>
           </div>
         </a-space>
@@ -161,6 +171,7 @@
     <ExamPlanLocaltionAndRoomModel ref="ExamPlanLocaltionAndRoomModelRef" />
     <ExamPlanImportModal ref="ExamPlanImportModalRef" @import-success="search" />
     <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" />
+    <ApplyList ref="ApplyListRef" />
   </div>
 </template>
 
@@ -171,6 +182,7 @@ import ExamPlanDetailDrawer from "./ExamPlanDetailDrawer.vue";
 import ExamPlanOptionModal from "./ExamPlanOptionModal.vue";
 import ExamPlanImportModal from "./ExamPlanImportModal.vue";
 import ExamPlanAdjustTimeSchedule from "./ExamPlanAdjustTimeSchedule.vue"
+import ApplyList from "./ApplyList.vue";
 import {
   type ExamPlanQuery,
   type ExamPlanResp,
@@ -231,19 +243,19 @@ const columns = ref<TableInstanceColumns[]>([
   { title: "计划名称", dataIndex: "examPlanName", slotName: "examPlanName" },
   { title: "考试项目", dataIndex: "projectName", slotName: "examProjectId" },
   {
-    title: "考场",
+    title: "监考安排",
     dataIndex: "examRoom",
     slotName: "examRoom",
-    width: 100,
     align: "center",
     show: true,
   },
   { title: "报名开始时间", dataIndex: "enrollStartTime", slotName: "enrollStartTime" },
-  { title: "报名截至时间", dataIndex: "enrollEndTime", slotName: "enrollEndTime" },
+  { title: "报名截止时间", dataIndex: "enrollEndTime", slotName: "enrollEndTime" },
   { title: "考试开始时间", dataIndex: "startTime", slotName: "startTime" },
   { title: "可容纳 / 已报名", dataIndex: "maxCandidates", slotName: "maxCandidates" },
+  { title: "开考密码", dataIndex: "examPassword", slotName: "examPassword" },
   { title: "计划状态", dataIndex: "status", slotName: "status" },
-  { title: "计划确认状态", dataIndex: "isFinalConfirmed", slotName: "isFinalConfirmed" },
+  { title: "确认状态", dataIndex: "isFinalConfirmed", slotName: "isFinalConfirmed" },
   { title: "审批人", dataIndex: "approvedUser", slotName: "approvedUser" },
   { title: "审批时间", dataIndex: "approvalTime", slotName: "approvalTime" },
   {
@@ -254,12 +266,19 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "inspector:examPlan:detail",
-      "inspector:examPlan:update",
-      "inspector:examPlan:delete",
+      "inspector:inspectorPlan:detail",
+      "inspector:inspectorPlan:update",
+      "inspector:inspectorPlan:delete",
     ]),
   },
 ]);
+
+const ApplyListRef = ref<InstanceType<typeof ApplyList>>();
+// 打开报考人员列表
+const openApplyList = (record: any) => {
+  ApplyListRef.value?.onOpen(record.id, record.examProjectId, record.isFinalConfirmed);
+};
+
 
 const formRef = ref()
 
@@ -275,7 +294,6 @@ const onImport = () => {
 const conformExam = async () => {
   try {
     await formRef.value?.validate()
-    Message.warning("正在处理，请耐心等待，可能需要一些时间...")
     const res = await centerDirectorConform(form.id, form.isFinalConfirmed)
     if (!res.data) return false
     Message.success("已确定")
