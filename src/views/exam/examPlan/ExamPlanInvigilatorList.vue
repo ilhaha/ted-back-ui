@@ -6,7 +6,7 @@
       <template #toolbar-right>
         <a-popconfirm content="重新随机分配监考员？此操作会清空当前未确认监考分配的监考员，是否继续？" ok-text="确定" cancel-text="取消" @ok="onReRandom">
           <a-button v-permission="['exam:examPlan:option']" type="primary" :disabled="noSecondRandom ||
-            tableData.length === 0
+            tableData.length === 0 || isFinalConfirmedFlag
             ">
             <template #icon><icon-sync /></template>
             重新随机分配
@@ -28,7 +28,7 @@
         </a-tag>
       </template>
       <template #action="{ record }">
-        <a-space>
+        <a-space v-if="!isFinalConfirmedFlag">
           <a-link v-permission="['exam:examPlan:updateInvigilator']" status="danger" @click="updateInvigilator(record)">
             更改
           </a-link>
@@ -67,6 +67,7 @@ const { width } = useWindowSize()
 const currentPlanId = ref()
 const invigilateWindow = ref(false)
 const noSecondRandom = ref(false)
+const isFinalConfirmedFlag = ref(false)
 const tableData = ref([])
 const loading = ref(false)
 // 是否显示“更改监考员”弹窗
@@ -270,10 +271,11 @@ const getInvigilateDate = async (planId: number) => {
 }
 
 // 打开监考查看窗口
-const onOption = (planId: number, assignType: number) => {
+const onOption = (planId: number, assignType: number, isFinalConfirmed: number) => {
   getInvigilateDate(planId);
   currentPlanId.value = planId
   noSecondRandom.value = (assignType && assignType == 2)
+  isFinalConfirmedFlag.value = isFinalConfirmed == 2 ? true : false
   invigilateWindow.value = true
 }
 

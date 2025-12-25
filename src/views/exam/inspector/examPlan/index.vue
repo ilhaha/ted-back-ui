@@ -90,7 +90,7 @@
       <template #examRoom="{ record }">
         <a-space>
           <a-link v-permission="['inspector:inspectorPlan:queryInvigilator']" title="监考安排" style="text-align: center"
-            @click="onOptionInvigilateList(record.id, record.assignType)">
+            @click="onOptionInvigilateList(record.id, record.assignType, record.isFinalConfirmed)">
             详情
           </a-link>
         </a-space>
@@ -115,7 +115,7 @@
             <a-link v-permission="['inspector:examPlan:sjjdgljreview']" title="审核"
               @click="onExamineA(record)">审核</a-link>
           </div>
-          <div v-if="record.status == 3">
+          <div v-if="record.status >= 3">
             <a-link v-permission="['exam:plan:inspectorApplyList']" title="查看考生"
               @click="openApplyList(record)">报考人员</a-link>
           </div>
@@ -466,10 +466,9 @@ const test = (selectedRows: ProjectResp[]) => {
 
 const ExamPlanInvigilatorListRef = ref<InstanceType<typeof ExamPlanInvigilatorList>>();
 // 查看监考员列表
-const onOptionInvigilateList = (planId: number, assignType: number) => {
-  ExamPlanInvigilatorListRef.value?.onOption(planId, assignType);
+const onOptionInvigilateList = (planId: number, assignType: number, isFinalConfirmed: number) => {
+  ExamPlanInvigilatorListRef.value?.onOption(planId, assignType, isFinalConfirmed);
 };
-
 const ExamPlanOptionModalRef = ref<InstanceType<typeof ExamPlanOptionModal>>();
 // 选择监考
 const onOptionInvigilate = (record: ExamPlanResp) => {

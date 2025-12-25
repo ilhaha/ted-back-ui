@@ -182,7 +182,7 @@ defineOptions({ name: "Project" });
 
 const queryForm = reactive<ProjectQuery>({
   projectType: 0,
-  sort: ["updateTime,desc", "createTime,desc", "id,desc"],
+  sort: ["id,desc"],
 });
 
 const {

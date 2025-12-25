@@ -104,6 +104,18 @@ export function getExamPlan(id: string) {
   return data
 }
 
+
+/**
+ * 根据计划考试人员类型获取项目-考试计划级联选择器
+ * @param id 
+ * @returns 
+ */
+export function getCascaderProjectPlan(planType: number) {
+  const res = http.get<[]>(`${BASE_URL}/project/cascader/${planType}`)
+  return res
+}
+
+
 /**
  * 获取当前计划可用监考员
  * @param id 

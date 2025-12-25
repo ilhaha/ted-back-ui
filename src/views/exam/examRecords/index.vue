@@ -2,8 +2,8 @@
   <div class="gi_table_page">
     <GiTable title="考试记录管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" :row-selection="rowSelection" :selected-keys="selectedKeys" @refresh="search"
-      @select="handleSelect" @select-all="handleSelectAll">
+      :disabled-column-keys="['name']" :row-selection="rowSelection" @refresh="search" @select="select"
+      @select-all="selectAll">
       <template #registrationProgress="{ record }">
         <a-tag :color="getProgressColor(Number(record.registrationProgress))">
           {{ getProgressText(Number(record.registrationProgress)) }}
@@ -15,13 +15,28 @@
         </a-tag>
       </template>
 
+      <template #isCertificateGenerated="{ record }">
+        <a-tag :color="getCertificateStatusColor(record.isCertificateGenerated)">
+          {{ getCertificateStatusText(record.isCertificateGenerated) }}
+        </a-tag>
+      </template>
+
       <template #toolbar-left>
         <a-space>
-          <a-select v-model="queryForm.planId" placeholder="请选择计划名称" allow-clear style="width: 200px" @change="search">
+          <a-cascader v-model="queryForm.planId" :options="projectPlanList" placeholder="选择考试计划" allow-clear
+            @change="onPlanChange" class="search-input ml-2" />
+          <a-input-search @search="search" v-model="queryForm.candidateName" placeholder="搜索考生姓名" allow-clear
+            class="search-input ml-2" />
+          <a-select v-model="queryForm.isCertificateGenerated" placeholder="请选择证书状态" allow-clear
+            class="search-input ml-2" @change="search">
+            <a-option key="0" :value="0">未生成</a-option>
+            <a-option key="1" :value="1">已生成</a-option>
+          </a-select>
+          <!-- <a-select v-model="queryForm.planId" placeholder="请选择计划" allow-clear style="width: 200px" @change="search">
             <a-option v-for="item in plan_id_enum" :key="item.value" :value="item.value">
               {{ item.label }}
             </a-option>
-          </a-select>
+          </a-select> -->
           <!--          <a-select -->
           <!--            v-model="queryForm.registrationProgress" -->
           <!--            placeholder="请选择报名进度" -->
@@ -38,8 +53,8 @@
           <!--          </a-select> -->
           <!-- <a-button type="primary" @click="search">
             <template #icon><icon-search /></template>
-            <template #default>搜索</template>
-          </a-button> -->
+<template #default>搜索</template>
+</a-button> -->
           <a-button @click="reset">
             <template #icon><icon-refresh /></template>
             <template #default>重置</template>
@@ -48,18 +63,42 @@
       </template>
       <template #toolbar-right>
         <a-space class="batch-actions">
-          <!-- <a-button v-permission="['exam:examRecords:audit']" :disabled="!selectedKeys.length" type="primary"
-            @click="handleBatchAudit">
+          <a-button v-permission="['exam:record:input']" :disabled="!(selectedKeys.length && queryForm.planId)"
+            type="primary" @click="handleBatchInput">
             <template #icon><icon-check /></template>
-            <template #default>批量审核</template>
-          </a-button> -->
+            <template #default>批量录入成绩</template>
+          </a-button>
           <!-- <a-button v-permission="['exam:examRecords:export']" @click="onExport">
             <template #icon><icon-download /></template>
             <template #default>导出</template>
           </a-button> -->
         </a-space>
       </template>
-      <template #action="{ record }">
+      <template #examPaper="{ record }">
+        <a-link @click="showFormattedExamPaper(record)">查阅</a-link>
+      </template>
+      <template #operScores="{ record }">
+        <a-space v-if="record.isOperation == 1 && record.isCertificateGenerated == 0">
+          <a-input-number v-model="record.operScores" :min="0" :max="100" :precision="0" placeholder="分数" />
+          <a-button type="dashed" size="mini" v-permission="['exam:record:input']" @click="saveScores(record, 1)"
+            :loading="saveScoresLoading">
+            录入
+          </a-button>
+        </a-space>
+        <a-space v-else>{{ record.operScores }}</a-space>
+      </template>
+      <template #roadScores="{ record }">
+        <a-space v-if="record.isRoad == 1 && record.isCertificateGenerated == 0">
+          <a-input-number v-model="record.roadScores" :min="0" :max="100" :precision="0" placeholder="分数" />
+          <a-button type="dashed" size="mini" v-permission="['exam:record:input']" @click="saveScores(record, 2)"
+            :loading="saveScoresLoading">
+            录入
+          </a-button>
+        </a-space>
+        <a-space v-else>{{ record.roadScores }}</a-space>
+      </template>
+
+      <!-- <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:examRecords:detail']" title="详情" @click="onDetail(record)">详情</a-link>
           <a-popconfirm v-permission="['exam:examRecords:audit']" :disabled="record.reviewStatus !== 0" position="br"
@@ -81,14 +120,12 @@
           :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
           删除
         </a-link>
-      </template>
-      <template #examPaper="{ record }">
-        <a-button @click="showFormattedExamPaper(record)">查看试卷</a-button>
-      </template>
+      </template> -->
+
     </GiTable>
 
     <!-- 修改弹窗内容为结构化展示 -->
-    <a-modal v-model:visible="examPaperVisible" title="考试试卷详情" width="800px" :footer="false">
+    <a-modal v-model:visible="examPaperVisible" title="理论考试答题情况" width="800px" :footer="false">
       <div class="exam-paper-container">
         <div class="exam-legend">
           <div class="legend-item">
@@ -166,22 +203,19 @@
           </div>
         </div>
       </div>
-      <!-- 自定义底部关闭按钮 -->
-      <div>
-        <a-button type="primary" style="float: right" @click="examPaperVisible = false">
-          关闭
-        </a-button>
-      </div>
     </a-modal>
     <!-- 新增批量审核弹窗 -->
-    <a-modal v-model:visible="batchAuditVisible" title="批量审核" @ok="handleBatchAuditSubmit"
-      @cancel="batchAuditVisible = false">
-      <a-form :model="batchAuditForm">
-        <a-form-item label="审核结果">
-          <a-radio-group v-model="batchAuditForm.reviewStatus">
-            <a-radio :value="1">通过</a-radio>
-            <a-radio :value="2">拒绝</a-radio>
+    <a-modal v-model:visible="batchInputVisible" title="批量录入成绩" @ok="handleBatchInputSubmit"
+      @cancel="batchInputVisible = false">
+      <a-form :model="inputScoresForm">
+        <a-form-item label="成绩类型">
+          <a-radio-group v-model="inputScoresForm.scoresType">
+            <a-radio :value="1">实操成绩</a-radio>
+            <a-radio :value="2">道路成绩</a-radio>
           </a-radio-group>
+        </a-form-item>
+        <a-form-item label="考试分数">
+          <a-input-number v-model="inputScoresForm.scores" :min="0" :max="100" :precision="0" placeholder="请输入分数" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -193,11 +227,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-
 import { Message } from '@arco-design/web-vue'
+import { getCascaderProjectPlan } from '@/apis/exam/examPlan'
 import ExamRecordsAddModal from './ExamRecordsAddModal.vue'
 import ExamRecordsDetailDrawer from './ExamRecordsDetailDrawer.vue'
-import { type ExamRecordsQuery, type ExamRecordsResp, deleteExamRecords, exportExamRecords, listExamRecords } from '@/apis/exam/examRecords'
+import { type ExamRecordsQuery, type ExamRecordsResp, deleteExamRecords, exportExamRecords, listExamRecords, inputScores } from '@/apis/exam/examRecords'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
 import { isMobile } from '@/utils'
@@ -207,12 +241,42 @@ import { submitReviewResult } from '@/apis/invigilate/planInvigilate'
 
 defineOptions({ name: 'ExamRecords' })
 
-const { plan_id_enum, registration_progress_enum, getPlanList } = useExamRecords()
 // 在script部分添加以下内容
 const examPaperVisible = ref(false)
 const formattedExamPaper = ref('')
-
+const projectPlanList = ref<any[]>([])
 type AnswerStatus = 'correct' | 'wrong-selected' | 'missed'
+
+const saveScoresLoading = ref(false)
+
+const inputScoresForm = ref<any>({
+  recordIds: [],
+  planIds: [],
+  scores: 0,
+  scoresType: 1
+})
+
+// 单个录入成绩
+const saveScores = async (record: ExamRecordsResp, scoresType: number) => {
+  inputScoresForm.value.recordIds = [record.id]
+  inputScoresForm.value.planIds = [record.planId]
+  inputScoresForm.value.scoresType = scoresType
+  inputScoresForm.value.scores = scoresType === 1 ? record.operScores : record.roadScores
+  try {
+    saveScoresLoading.value = true
+    await inputScores(inputScoresForm.value)
+    Message.success('已录入')
+    search()
+  } catch (error) {
+  } finally {
+    saveScoresLoading.value = false
+  }
+}
+
+const onPlanChange = (val: any) => {
+  selectedKeys.value = [];
+  search();
+};
 
 const getAnswerStatus = (
   options: Array<{ id: number, isCorrectAnswer: boolean }>,
@@ -323,84 +387,84 @@ const showFormattedExamPaper = (record: ExamRecordsResp) => {
   examPaperVisible.value = true
 }
 // 初始化获取计划列表
-onMounted(() => {
-  getPlanList()
+onMounted(async () => {
+  const res = await getCascaderProjectPlan(0);
+  projectPlanList.value = res.data || [];
 })
 
 const queryForm = reactive<ExamRecordsQuery>({
   planId: '',
+  candidateName: '',
+  isCertificateGenerated: '',
   registrationProgress: undefined,
-  sort: ['planId,asc'],
+  sort: ['planId,desc'],
 })
 
 // 批量审核相关状态
-const selectedKeys = ref<number[]>([]) // 改为数字数组
-const batchAuditVisible = ref(false)
+// const selectedKeys = ref<number[]>([]) // 改为数字数组
+const batchInputVisible = ref(false)
 const batchAuditForm = reactive({
   reviewStatus: 1,
 })
 
-// 表格多选配置
-const rowSelection = reactive({
-  type: 'checkbox',
-  showCheckedAll: false,
-  onlyCurrent: false,
-})
 
-// 处理选择事件
-const handleSelect = (keys: string[]) => {
-  selectedKeys.value = keys
-}
 
-// 修改后
-const handleSelectAll = (keys: any) => {
-  selectedKeys.value = Array.isArray(keys) ? keys : []
-}
+// // 处理选择事件
+// const handleSelect = (keys: string[]) => {
+//   selectedKeys.value = keys
+// }
+
+// // 修改后
+// const handleSelectAll = (keys: any) => {
+//   selectedKeys.value = Array.isArray(keys) ? keys : []
+// }
 
 // 批量审核按钮点击
-const handleBatchAudit = () => {
+const handleBatchInput = () => {
   if (selectedKeys.value.length === 0) {
-    Message.warning('请先选择要审核的记录')
+    Message.warning('请先选择要录入成绩的记录')
     return
   }
-  batchAuditVisible.value = true
+  inputScoresForm.value.recordIds = selectedKeys.value
+  inputScoresForm.value.planIds = []
+  inputScoresForm.value.scores = 0
+  inputScoresForm.value.scoresType = 1
+  batchInputVisible.value = true
 }
 
-// 提交批量审核
-const handleBatchAuditSubmit = async () => {
+// 批量录入成绩提交
+const handleBatchInputSubmit = async () => {
   try {
-    // 移除不必要的类型断言
-    // eslint-disable-next-line ts/no-use-before-define
-    const selectedRecords = dataList.value.filter((item) =>
-      selectedKeys.value.includes(item.id), // 直接比较数字ID
-    )
-    // 检查考试计划ID类型
-    const planIds = new Set(selectedRecords.map((item) => item.planId))
+    const selectedRecords = dataList.value.filter(item =>
+      selectedKeys.value.includes(item.id)
+    );
 
+    // 检查是否选择了同一考试计划
+    const planIds = new Set(selectedRecords.map(item => item.planId));
     if (planIds.size > 1) {
-      Message.error('请选择同一考试计划的记录进行批量审核')
-      return
+      Message.error('请选择同一考试计划的记录进行录入');
+      return;
+    }
+    // 找出已生成证书的记录
+    const certificateRecords = selectedRecords.filter(item => item.isCertificateGenerated == '1');
+
+    if (certificateRecords.length > 0) {
+      const names = certificateRecords.map(item => item.candidateName);
+      Message.error(`${names.join('、')} 已生成证书，无法再次录入成绩`);
+      return;
     }
 
-    // 提取考生ID
-    const candidateIds = selectedRecords.map((item) => String(item.candidateId))
-    const planId = String(selectedRecords[0].planId)
-
-    await submitReviewResult(planId, {
-      candidateIds,
-      reviewStatus: batchAuditForm.reviewStatus,
-    })
-
-    Message.success(`已批量审核 ${selectedKeys.value.length} 条记录`)
-    batchAuditVisible.value = false
-    selectedKeys.value = []
-    // eslint-disable-next-line ts/no-use-before-define
-    search()
-    // eslint-disable-next-line unused-imports/no-unused-vars
+    inputScoresForm.value.recordIds = selectedKeys.value;
+    inputScoresForm.value.planIds = Array.from(planIds);
+    await inputScores(inputScoresForm.value);
+    Message.success(`已录入 ${selectedKeys.value.length} 条记录成绩`);
+    batchInputVisible.value = false;
+    selectedKeys.value = [];
+    search();
   } catch (error) {
-    Message.error('批量审核失败')
   }
-}
+};
+
 
 const {
   tableData: dataList,
@@ -408,6 +472,9 @@ const {
   pagination,
   search,
   handleDelete,
+  selectedKeys,
+  select,
+  selectAll
 } = useTable(
   (page) => listExamRecords(
     { ...queryForm, ...page },
@@ -440,25 +507,26 @@ const getProgressText = (progress: number) => {
 }
 
 const columns = ref<TableInstanceColumns[]>([
-  { dataIndex: 'planName', title: '考试计划名称', width: 80, fixed: 'left' },
-  { dataIndex: 'candidateName', title: '考生名称', width: 150 },
+  { dataIndex: 'projectName', title: '考试项目' },
+  { dataIndex: 'planName', title: '考试计划' },
+  { dataIndex: 'candidateName', title: '考生姓名' },
+  { dataIndex: 'username', title: '考生身份证号' },
+  { dataIndex: 'className', title: '所属班级' },
   // { dataIndex: 'registrationProgress', title: '报名进度', slotName: 'registrationProgress', width: 120, align: 'center' },
-  { dataIndex: 'examScores', title: '考试得分', width: 150 },
+  { dataIndex: 'examScores', title: '理论成绩', align: 'center', },
+  { dataIndex: 'operScores', slotName: 'operScores', title: '实操成绩', align: 'center', width: 160 },
+  { dataIndex: 'roadScores', slotName: 'roadScores', title: '道路成绩', align: 'center', width: 160 },
   {
     dataIndex: 'examPaper',
-    title: '考试试卷',
-    width: 150,
-    slotName: 'examPaper', // 添加插槽名称
+    title: '理论考试答卷', slotName: 'examPaper', align: 'center' // 添加插槽名称
   },
-  { dataIndex: 'createUserString', title: '创建人', width: 120 },
-  { dataIndex: 'createTime', title: '创建时间', width: 180 },
-  {
-    dataIndex: 'reviewStatus',
-    title: '审核状态',
-    slotName: 'reviewStatus', // 添加插槽名称
-    width: 120,
-    align: 'center',
-  },
+  { dataIndex: 'isCertificateGenerated', slotName: 'isCertificateGenerated', title: '证书状态', align: 'center', },
+
+  // {
+  //   dataIndex: 'reviewStatus',
+  //   title: '审核状态',
+  //   slotName: 'reviewStatus', // 添加插槽名称
+  // },
   {
     dataIndex: 'action',
     title: '操作',
@@ -469,6 +537,35 @@ const columns = ref<TableInstanceColumns[]>([
     show: has.hasPermOr(['exam:examRecords:detail', 'exam:examRecords:update', 'exam:examRecords:delete']),
   },
 ])
+
+// 表格多选配置
+const rowSelection = reactive({
+  type: 'checkbox',
+  showCheckedAll: true,
+  onlyCurrent: false,
+  selectedRowKeys: selectedKeys,
+  onChange: (keys: string[]) => {
+    selectedKeys.value = keys
+  }
+})
+
+// 证书状态
+const getCertificateStatusColor = (status: number) => {
+  const colorMap: Record<number, string> = {
+    0: 'red', // 待审核
+    1: 'green', // 通过
+  }
+  return colorMap[status] || 'gray'
+}
+
+// 证书状态文本
+const getCertificateStatusText = (status: number) => {
+  const textMap: Record<number, string> = {
+    0: '未生成',
+    1: '已生成',
+  }
+  return textMap[status] || '未知状态'
+}
 
 // 获取审核状态颜色
 const getReviewStatusColor = (status: number) => {
@@ -494,8 +591,11 @@ const getReviewStatusText = (status: number) => {
 const reset = () => {
   queryForm.planId = ''
   queryForm.registrationProgress = undefined
+  queryForm.candidateName = ''
+  queryForm.isCertificateGenerated = ''
   search()
 }
+
 
 // 删除
 const onDelete = (record: ExamRecordsResp) => {

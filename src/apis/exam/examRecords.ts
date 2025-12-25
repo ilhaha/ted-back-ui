@@ -10,6 +10,8 @@ export interface ExamRecordsResp {
   candidateName: string
   registrationProgress: string
   examScores: string
+  operScores: string
+  roadScores: string
   createUser: string
   updateUser: string
   createTime: string
@@ -18,6 +20,7 @@ export interface ExamRecordsResp {
   reviewStatus: string
   createUserString: string
   updateUserString: string
+  isCertificateGenerated: string
   disabled: boolean
 }
 export interface ExamRecordsDetailResp {
@@ -39,10 +42,18 @@ export interface ExamRecordsDetailResp {
 }
 export interface ExamRecordsQuery {
   planId: string
+  candidateName: string
+  isCertificateGenerated: string
   registrationProgress: string | undefined
   sort: Array<string>
 }
-export interface ExamRecordsPageQuery extends ExamRecordsQuery, PageQuery {}
+export interface ExamRecordsPageQuery extends ExamRecordsQuery, PageQuery { }
+
+
+/** @desc 录入实操或道路成绩 */
+export function inputScores(data: any) {
+  return http.post(`${BASE_URL}/input`, data)
+}
 
 /** @desc 查询考试记录列表 */
 export function listExamRecords(query: ExamRecordsPageQuery) {
