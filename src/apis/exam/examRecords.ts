@@ -47,6 +47,7 @@ export interface ExamRecordsQuery {
   isCertificateGenerated: string
   registrationProgress: string | undefined
   sort: Array<string>
+  isOrgQuery: boolean
 }
 export interface ExamRecordsPageQuery extends ExamRecordsQuery, PageQuery { }
 

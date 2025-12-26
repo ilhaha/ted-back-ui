@@ -111,7 +111,7 @@ export function getExamPlan(id: string) {
  * @returns 
  */
 export function getCascaderProjectPlan(planType: number) {
-  const res = http.get<[]>(`${BASE_URL}/project/cascader/${planType}`)
+  const res = http.get<[]>(`${BASE_URL}/project/cascader/${planType}/0`)
   return res
 }
 

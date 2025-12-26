@@ -12,7 +12,7 @@
             @change="onPlanChange" class="search-input ml-2" />
           <a-input-search @search="search" v-model="queryForm.candidateName" placeholder="搜索考生姓名" allow-clear
             class="search-input ml-2" />
-            <a-input-search @search="search" v-model="queryForm.username" placeholder="搜索考生身份证" allow-clear
+          <a-input-search @search="search" v-model="queryForm.username" placeholder="搜索考生身份证" allow-clear
             class="search-input ml-2" />
           <a-select v-model="queryForm.isCertificateGenerated" placeholder="请选择证书状态" allow-clear
             class="search-input ml-2" @change="search">
@@ -36,7 +36,7 @@
             @ok="handleBatchGenerate">
             <a-button v-permission="['exam:certificate:generated']" :loading="generateing"
               :disabled="!(selectedKeys.length && queryForm.planId)" type="primary">
-              <template #icon><icon-to-top /></template>
+              <template #icon><icon-upload /></template>
               <template #default>批量生成资格证</template>
             </a-button>
           </a-popconfirm>
@@ -187,8 +187,8 @@
       </div>
     </a-modal>
     <!-- 新增批量录入弹窗 -->
-    <a-modal v-model:visible="batchInputVisible" title="批量录入成绩" @ok="handleBatchInputSubmit"
-      @cancel="batchInputVisible = false">
+    <a-modal v-model:visible="batchInputVisible" title="批量录入成绩" :mask-closable="false" :esc-to-close="false"
+      @before-ok="handleBatchInputSubmit" @close="closeInputVisible" draggable>
       <a-form :model="inputScoresForm">
         <a-form-item label="成绩类型">
           <a-radio-group v-model="inputScoresForm.scoresType">
@@ -246,6 +246,15 @@ const generateQualificationForm = ref<any>({
 const downloading = ref(false);
 
 const generateing = ref(false);
+
+const closeInputVisible = () => {
+  batchInputVisible.value = false
+  inputScoresForm.value = {
+    recordIds: [],
+    scores: 0,
+    scoresType: 1
+  }
+}
 
 // 下载资格证
 const downloadQualificationCertificate = async (record: any) => {
@@ -409,8 +418,9 @@ const queryForm = reactive<ExamRecordsQuery>({
   candidateName: '',
   isCertificateGenerated: '',
   registrationProgress: undefined,
-  username: undefined,
+  username: '',
   sort: ['planId,desc'],
+  isOrgQuery: false
 })
 
 // 批量下载资格证按钮点击
@@ -526,7 +536,7 @@ const handleBatchInputSubmit = async () => {
     const planIds = new Set(selectedRecords.map(item => item.planId));
     if (planIds.size > 1) {
       Message.error('请选择同一考试计划的记录进行录入');
-      return;
+      return false;
     }
     // 找出已生成证书的记录
     const certificateRecords = selectedRecords.filter(item => item.isCertificateGenerated == '1');
@@ -534,7 +544,7 @@ const handleBatchInputSubmit = async () => {
     if (certificateRecords.length > 0) {
       const names = certificateRecords.map(item => item.candidateName);
       Message.error(`${names.join('、')} 已生成证书，无法再次录入成绩`);
-      return;
+      return false;
     }
 
     inputScoresForm.value.recordIds = selectedKeys.value;
@@ -668,6 +678,7 @@ const reset = () => {
   queryForm.registrationProgress = undefined
   queryForm.candidateName = ''
   queryForm.isCertificateGenerated = ''
+  queryForm.username = ''
   search()
 }
 
