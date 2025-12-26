@@ -4,6 +4,52 @@
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" :row-selection="rowSelection" @refresh="search" @select="select"
       @select-all="selectAll">
+
+
+      <template #toolbar-left>
+        <a-space>
+          <a-cascader v-model="queryForm.planId" :options="projectPlanList" placeholder="选择考试计划" allow-clear
+            @change="onPlanChange" class="search-input ml-2" />
+          <a-input-search @search="search" v-model="queryForm.candidateName" placeholder="搜索考生姓名" allow-clear
+            class="search-input ml-2" />
+            <a-input-search @search="search" v-model="queryForm.username" placeholder="搜索考生身份证" allow-clear
+            class="search-input ml-2" />
+          <a-select v-model="queryForm.isCertificateGenerated" placeholder="请选择证书状态" allow-clear
+            class="search-input ml-2" @change="search">
+            <a-option key="0" :value="0">未生成</a-option>
+            <a-option key="1" :value="1">已生成</a-option>
+          </a-select>
+          <a-button @click="reset">
+            <template #icon><icon-refresh /></template>
+            <template #default>重置</template>
+          </a-button>
+        </a-space>
+      </template>
+      <template #toolbar-right>
+        <a-space class="batch-actions">
+          <a-button v-permission="['exam:record:input']" :disabled="!(selectedKeys.length && queryForm.planId)"
+            type="primary" @click="handleBatchInput">
+            <template #icon><icon-check /></template>
+            <template #default>批量录入成绩</template>
+          </a-button>
+          <a-popconfirm title="确认生成资格证？" content="生成资格证后，所选考生成绩将无法修改，请确认是否继续。" ok-text="确认生成" cancel-text="取消"
+            @ok="handleBatchGenerate">
+            <a-button v-permission="['exam:certificate:generated']" :loading="generateing"
+              :disabled="!(selectedKeys.length && queryForm.planId)" type="primary">
+              <template #icon><icon-to-top /></template>
+              <template #default>批量生成资格证</template>
+            </a-button>
+          </a-popconfirm>
+          <a-button v-permission="['exam:certificate:download']" :disabled="!(selectedKeys.length && queryForm.planId)"
+            :loading="downloading" type="primary" @click="handleBatchDownload">
+            <template #icon><icon-download /></template>
+            <template #default>批量下载资格证</template>
+          </a-button>
+        </a-space>
+      </template>
+      <template #examPaper="{ record }">
+        <a-link @click="showFormattedExamPaper(record)">查阅</a-link>
+      </template>
       <template #registrationProgress="{ record }">
         <a-tag :color="getProgressColor(Number(record.registrationProgress))">
           {{ getProgressText(Number(record.registrationProgress)) }}
@@ -19,63 +65,6 @@
         <a-tag :color="getCertificateStatusColor(record.isCertificateGenerated)">
           {{ getCertificateStatusText(record.isCertificateGenerated) }}
         </a-tag>
-      </template>
-
-      <template #toolbar-left>
-        <a-space>
-          <a-cascader v-model="queryForm.planId" :options="projectPlanList" placeholder="选择考试计划" allow-clear
-            @change="onPlanChange" class="search-input ml-2" />
-          <a-input-search @search="search" v-model="queryForm.candidateName" placeholder="搜索考生姓名" allow-clear
-            class="search-input ml-2" />
-          <a-select v-model="queryForm.isCertificateGenerated" placeholder="请选择证书状态" allow-clear
-            class="search-input ml-2" @change="search">
-            <a-option key="0" :value="0">未生成</a-option>
-            <a-option key="1" :value="1">已生成</a-option>
-          </a-select>
-          <!-- <a-select v-model="queryForm.planId" placeholder="请选择计划" allow-clear style="width: 200px" @change="search">
-            <a-option v-for="item in plan_id_enum" :key="item.value" :value="item.value">
-              {{ item.label }}
-            </a-option>
-          </a-select> -->
-          <!--          <a-select -->
-          <!--            v-model="queryForm.registrationProgress" -->
-          <!--            placeholder="请选择报名进度" -->
-          <!--            allow-clear -->
-          <!--            style="width: 200px" -->
-          <!--          > -->
-          <!--            <a-option -->
-          <!--              v-for="item in registration_progress_enum" -->
-          <!--              :key="item.value" -->
-          <!--              :value="item.value" -->
-          <!--            > -->
-          <!--              {{ item.label }} -->
-          <!--            </a-option> -->
-          <!--          </a-select> -->
-          <!-- <a-button type="primary" @click="search">
-            <template #icon><icon-search /></template>
-<template #default>搜索</template>
-</a-button> -->
-          <a-button @click="reset">
-            <template #icon><icon-refresh /></template>
-            <template #default>重置</template>
-          </a-button>
-        </a-space>
-      </template>
-      <template #toolbar-right>
-        <a-space class="batch-actions">
-          <a-button v-permission="['exam:record:input']" :disabled="!(selectedKeys.length && queryForm.planId)"
-            type="primary" @click="handleBatchInput">
-            <template #icon><icon-check /></template>
-            <template #default>批量录入成绩</template>
-          </a-button>
-          <!-- <a-button v-permission="['exam:examRecords:export']" @click="onExport">
-            <template #icon><icon-download /></template>
-            <template #default>导出</template>
-          </a-button> -->
-        </a-space>
-      </template>
-      <template #examPaper="{ record }">
-        <a-link @click="showFormattedExamPaper(record)">查阅</a-link>
       </template>
       <template #operScores="{ record }">
         <a-space v-if="record.isOperation == 1 && record.isCertificateGenerated == 0">
@@ -98,30 +87,23 @@
         <a-space v-else>{{ record.roadScores }}</a-space>
       </template>
 
-      <!-- <template #action="{ record }">
-        <a-space>
-          <a-link v-permission="['exam:examRecords:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-          <a-popconfirm v-permission="['exam:examRecords:audit']" :disabled="record.reviewStatus !== 0" position="br"
-            @ok="handleQuickAudit(record, 1)">
-            <a-link status="warning" :disabled="record.reviewStatus !== 0" content="点击快速审核">
-              审核
+      <template #action="{ record }">
+        <a-space v-if="canGenerateCertificate(record)">
+          <a-popconfirm title="确认生成资格证？" content="生成资格证后，该考生成绩将无法修改，请确认是否继续。" ok-text="确认生成" cancel-text="取消"
+            @ok="generateQualificationCertificate(record)">
+            <a-link v-permission="['exam:certificate:generated']" title="生成资格证" :loading="generateing">
+              生成资格证
             </a-link>
-            <template #content>
-              <div style="padding: 8px; width: 300px">
-                <a-radio-group v-model="tempReviewStatus" type="button">
-                  <a-radio :value="1">通过</a-radio>
-                  <a-radio :value="2">拒绝</a-radio>
-                </a-radio-group>
-              </div>
-            </template>
           </a-popconfirm>
         </a-space>
-        <a-link v-permission="['exam:examRecords:delete']" status="danger" :disabled="record.disabled"
-          :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
-          删除
-        </a-link>
-      </template> -->
 
+        <a-space v-if="record.isCertificateGenerated == 1">
+          <a-link v-permission="['exam:certificate:download']" title="下载资格证" :loading="downloading"
+            @click="downloadQualificationCertificate(record)">
+            下载资格证
+          </a-link>
+        </a-space>
+      </template>
     </GiTable>
 
     <!-- 修改弹窗内容为结构化展示 -->
@@ -204,7 +186,7 @@
         </div>
       </div>
     </a-modal>
-    <!-- 新增批量审核弹窗 -->
+    <!-- 新增批量录入弹窗 -->
     <a-modal v-model:visible="batchInputVisible" title="批量录入成绩" @ok="handleBatchInputSubmit"
       @cancel="batchInputVisible = false">
       <a-form :model="inputScoresForm">
@@ -231,13 +213,15 @@ import { Message } from '@arco-design/web-vue'
 import { getCascaderProjectPlan } from '@/apis/exam/examPlan'
 import ExamRecordsAddModal from './ExamRecordsAddModal.vue'
 import ExamRecordsDetailDrawer from './ExamRecordsDetailDrawer.vue'
-import { type ExamRecordsQuery, type ExamRecordsResp, deleteExamRecords, exportExamRecords, listExamRecords, inputScores } from '@/apis/exam/examRecords'
+import {
+  type ExamRecordsQuery, type ExamRecordsResp, deleteExamRecords, exportExamRecords, listExamRecords, inputScores,
+  generateQualificationCertificate as generateQualificationCertificateApi,
+  downloadQualificationCertificate as downloadQualificationCertificateApi,
+} from '@/apis/exam/examRecords'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
-import { useExamRecords } from '@/hooks/exam/useExamRecords'
-import { submitReviewResult } from '@/apis/invigilate/planInvigilate'
 
 defineOptions({ name: 'ExamRecords' })
 
@@ -245,21 +229,95 @@ defineOptions({ name: 'ExamRecords' })
 const examPaperVisible = ref(false)
 const formattedExamPaper = ref('')
 const projectPlanList = ref<any[]>([])
-type AnswerStatus = 'correct' | 'wrong-selected' | 'missed'
 
 const saveScoresLoading = ref(false)
 
 const inputScoresForm = ref<any>({
   recordIds: [],
-  planIds: [],
   scores: 0,
   scoresType: 1
 })
 
+const generateQualificationForm = ref<any>({
+  recordIds: [],
+  planType: 0,
+})
+
+const downloading = ref(false);
+
+const generateing = ref(false);
+
+// 下载资格证
+const downloadQualificationCertificate = async (record: any) => {
+  if (record.isCertificateGenerated !== 1) {
+    Message.warning('该记录未生成资格证，无法下载');
+    return;
+  }
+  try {
+    downloading.value = true;
+    const res = await downloadQualificationCertificateApi([record.id], 0);
+    const blob = new Blob([res], { type: "application/octet-stream" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const filename = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_资格证.zip`;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+  } finally {
+    downloading.value = false;
+  }
+};
+
+// 生成资格证
+const generateQualificationCertificate = async (record: any) => {
+  if (record.isCertificateGenerated !== 0) {
+    Message.warning('该记录已生成资格证，无法再次生成');
+    return;
+  }
+  if (record.examScores < 70) {
+    Message.warning('理论成绩未达标，无法生成资格证');
+    return;
+  }
+  if (record.isOperation === 1 && record.operScores < 70) {
+    Message.warning('实操成绩未达标，无法生成资格证');
+    return;
+  }
+  if (record.isRoad === 1 && record.roadScores < 70) {
+    Message.warning('道路成绩未达标，无法生成资格证');
+    return;
+  }
+  try {
+    generateing.value = true;
+    generateQualificationForm.value.recordIds = [record.id]
+    await generateQualificationCertificateApi(generateQualificationForm.value)
+    Message.success('资格证生成成功');
+    search();
+  } catch (error) {
+  } finally {
+    generateing.value = false;
+  }
+
+};
+
+// 判断是否可以生成资格证
+const canGenerateCertificate = (record: any) => {
+  if (record.isCertificateGenerated !== 0) return false;
+  if (record.examScores < 70) return false;
+  if (record.isOperation === 1 && record.operScores < 70) return false;
+  if (record.isRoad === 1 && record.roadScores < 70) return false;
+  return true;
+};
+
 // 单个录入成绩
 const saveScores = async (record: ExamRecordsResp, scoresType: number) => {
   inputScoresForm.value.recordIds = [record.id]
-  inputScoresForm.value.planIds = [record.planId]
   inputScoresForm.value.scoresType = scoresType
   inputScoresForm.value.scores = scoresType === 1 ? record.operScores : record.roadScores
   try {
@@ -278,27 +336,6 @@ const onPlanChange = (val: any) => {
   search();
 };
 
-const getAnswerStatus = (
-  options: Array<{ id: number, isCorrectAnswer: boolean }>,
-  userAnswer: number[],
-): AnswerStatus[] => {
-  // 1. 提取所有正确答案的ID集合
-  const correctIds = new Set(
-    options.filter((opt) => opt.isCorrectAnswer).map((opt) => opt.id),
-  )
-
-  // 2. 用户选择的ID集合
-  const userSelected = new Set(userAnswer)
-
-  // 3. 计算每个选项的状态
-  return options.map((opt) => {
-    if (userSelected.has(opt.id)) {
-      return opt.isCorrectAnswer ? 'correct' : 'wrong-selected'
-    } else {
-      return opt.isCorrectAnswer ? 'missed' : 'neutral'
-    }
-  }).filter((status) => status !== 'neutral') // 过滤无关选项的状态
-}
 // 修改现有的formatExamPaper方法
 const formatExamPaper = (jsonStr: string) => {
   try {
@@ -355,31 +392,6 @@ const getOptionChar = (index: number) => {
   return String.fromCharCode(65 + index)
 }
 
-const isTrue = (
-  value: Array<{
-    id: number
-    question: string
-    questionBankId: number
-    isCorrectAnswer: boolean
-  }>,
-  userAnswer: number[],
-): '对' | '错' => { // 改为返回字符串 "对" 或 "错"
-  // 提取正确答案ID并排序
-  const correctIds = value
-    .filter((item) => item.isCorrectAnswer)
-    .map((item) => item.id)
-    .sort((a, b) => a - b)
-
-  // 处理用户答案
-  const processedUserAnswer = [...userAnswer].sort((a, b) => a - b)
-
-  // 判断结果并返回对应字符串
-  const isCorrect
-    = correctIds.length === processedUserAnswer.length
-    && correctIds.every((id, index) => id === processedUserAnswer[index])
-
-  return isCorrect ? '对' : '错' // 根据布尔值返回中文
-}
 
 // 显示格式化JSON弹窗
 const showFormattedExamPaper = (record: ExamRecordsResp) => {
@@ -397,36 +409,107 @@ const queryForm = reactive<ExamRecordsQuery>({
   candidateName: '',
   isCertificateGenerated: '',
   registrationProgress: undefined,
+  username: undefined,
   sort: ['planId,desc'],
 })
 
-// 批量审核相关状态
-// const selectedKeys = ref<number[]>([]) // 改为数字数组
+// 批量下载资格证按钮点击
+const handleBatchDownload = async () => {
+  if (selectedKeys.value.length === 0) {
+    Message.warning('请先选择要下载资格证的记录')
+    return
+  }
+  try {
+    const selectedRecords = dataList.value.filter(item =>
+      selectedKeys.value.includes(item.id)
+    );
+    // 检查是否选择了同一考试计划
+    const planIds = new Set(selectedRecords.map(item => item.planId));
+    if (planIds.size > 1) {
+      Message.error('请选择同一考试计划的记录进行下载');
+      return;
+    }
+    // 找出未生成证书的记录
+    const noCertificateRecords = selectedRecords.filter(item => item.isCertificateGenerated == '0');
+
+    if (noCertificateRecords.length > 0) {
+      const names = noCertificateRecords.map(item => item.candidateName);
+      Message.error(`${names.join('、')} 未生成证书，无法下载`);
+      return;
+    }
+    downloading.value = true;
+    const res = await downloadQualificationCertificateApi(selectedKeys.value, 0);
+    const blob = new Blob([res], { type: "application/octet-stream" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const filename = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_资格证.zip`;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    selectedKeys.value = [];
+  } catch (error) {
+  } finally {
+    downloading.value = false;
+  }
+}
+// 批量生成资格证按钮点击
+const handleBatchGenerate = async () => {
+  if (selectedKeys.value.length === 0) {
+    Message.warning('请先选择要生成资格证的记录')
+    return
+  }
+  try {
+    const selectedRecords = dataList.value.filter(item =>
+      selectedKeys.value.includes(item.id)
+    );
+
+    // 检查是否选择了同一考试计划
+    const planIds = new Set(selectedRecords.map(item => item.planId));
+    if (planIds.size > 1) {
+      Message.error('请选择同一考试计划的记录进行录入');
+      return;
+    }
+    // 找出已生成证书的记录
+    const certificateRecords = selectedRecords.filter(item => item.isCertificateGenerated == '1');
+
+    if (certificateRecords.length > 0) {
+      const names = certificateRecords.map(item => item.candidateName);
+      Message.error(`${names.join('、')} 已生成证书，无法再次生成`);
+      return;
+    }
+    generateing.value = true;
+    generateQualificationForm.value.recordIds = selectedKeys.value
+    await generateQualificationCertificateApi(generateQualificationForm.value);
+    Message.success(`已生成 ${selectedKeys.value.length} 条记录资格证`);
+    selectedKeys.value = [];
+    generateQualificationForm.value = {
+      recordIds: [],
+      planIds: [],
+      planType: 0,
+    }
+    search();
+  } catch (error) {
+  } finally {
+    generateing.value = false;
+  }
+}
+
+
 const batchInputVisible = ref(false)
-const batchAuditForm = reactive({
-  reviewStatus: 1,
-})
 
-
-
-// // 处理选择事件
-// const handleSelect = (keys: string[]) => {
-//   selectedKeys.value = keys
-// }
-
-// // 修改后
-// const handleSelectAll = (keys: any) => {
-//   selectedKeys.value = Array.isArray(keys) ? keys : []
-// }
-
-// 批量审核按钮点击
+// 批量录入按钮点击
 const handleBatchInput = () => {
   if (selectedKeys.value.length === 0) {
     Message.warning('请先选择要录入成绩的记录')
     return
   }
   inputScoresForm.value.recordIds = selectedKeys.value
-  inputScoresForm.value.planIds = []
   inputScoresForm.value.scores = 0
   inputScoresForm.value.scoresType = 1
   batchInputVisible.value = true
@@ -455,7 +538,6 @@ const handleBatchInputSubmit = async () => {
     }
 
     inputScoresForm.value.recordIds = selectedKeys.value;
-    inputScoresForm.value.planIds = Array.from(planIds);
     await inputScores(inputScoresForm.value);
     Message.success(`已录入 ${selectedKeys.value.length} 条记录成绩`);
     batchInputVisible.value = false;
@@ -471,7 +553,6 @@ const {
   loading,
   pagination,
   search,
-  handleDelete,
   selectedKeys,
   select,
   selectAll
@@ -521,12 +602,6 @@ const columns = ref<TableInstanceColumns[]>([
     title: '理论考试答卷', slotName: 'examPaper', align: 'center' // 添加插槽名称
   },
   { dataIndex: 'isCertificateGenerated', slotName: 'isCertificateGenerated', title: '证书状态', align: 'center', },
-
-  // {
-  //   dataIndex: 'reviewStatus',
-  //   title: '审核状态',
-  //   slotName: 'reviewStatus', // 添加插槽名称
-  // },
   {
     dataIndex: 'action',
     title: '操作',
@@ -597,58 +672,6 @@ const reset = () => {
 }
 
 
-// 删除
-const onDelete = (record: ExamRecordsResp) => {
-  return handleDelete(() => deleteExamRecords(record.id), {
-    content: `是否确定删除该条数据？`,
-    showModal: true,
-  })
-}
-
-// 导出
-const onExport = () => {
-  useDownload(() => exportExamRecords(queryForm))
-}
-
-const ExamRecordsAddModalRef = ref<InstanceType<typeof ExamRecordsAddModal>>()
-
-// // 新增
-// const onAdd = () => {
-//   ExamRecordsAddModalRef.value?.onAdd()
-// }
-
-// // 修改
-// const onUpdate = (record: ExamRecordsResp) => {
-//   ExamRecordsAddModalRef.value?.onUpdate(record.id)
-// }
-
-const ExamRecordsDetailDrawerRef = ref<InstanceType<typeof ExamRecordsDetailDrawer>>()
-// 详情
-const onDetail = (record: ExamRecordsResp) => {
-  ExamRecordsDetailDrawerRef.value?.onOpen(record.id)
-}
-
-// 在script中添加
-const tempReviewStatus = ref(1)
-const tempReviewComment = ref('')
-
-// 提交审核逻辑
-const handleQuickAudit = async (record: ExamRecordsResp) => {
-  try {
-    await submitReviewResult(record.planId, {
-      candidateIds: [record.candidateId], // 保持数组格式
-      reviewStatus: tempReviewStatus.value,
-    })
-    Message.success('审核提交成功')
-    search()
-    // eslint-disable-next-line unused-imports/no-unused-vars
-  } catch (error) {
-    Message.error('审核提交失败')
-  } finally {
-    tempReviewStatus.value = 1
-    tempReviewComment.value = ''
-  }
-}
 </script>
 
 <style scoped lang="scss">

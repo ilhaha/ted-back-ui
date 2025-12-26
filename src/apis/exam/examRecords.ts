@@ -43,12 +43,24 @@ export interface ExamRecordsDetailResp {
 export interface ExamRecordsQuery {
   planId: string
   candidateName: string
+  username: string
   isCertificateGenerated: string
   registrationProgress: string | undefined
   sort: Array<string>
 }
 export interface ExamRecordsPageQuery extends ExamRecordsQuery, PageQuery { }
 
+
+/** @desc 下载资格证 */
+export function downloadQualificationCertificate(data: any, planType: number) {
+  return http.post(`${BASE_URL}/download/${planType}`, data, { responseType: 'blob', timeout: 30000 })
+}
+
+
+/** @desc 生成资格证 */
+export function generateQualificationCertificate(data: any) {
+  return http.post(`${BASE_URL}/generate`, data)
+}
 
 /** @desc 录入实操或道路成绩 */
 export function inputScores(data: any) {
