@@ -1,0 +1,74 @@
+import http from '@/utils/http'
+
+const BASE_URL = '/exam/personQualification'
+
+export interface PersonQualificationResp {
+  id: string
+  name: string
+  idCard: string
+  education: string
+  phone: string
+  employer: string
+  qualificationCategoryCode: string
+  createUser: string
+  updateUser: string
+  createTime: string
+  updateTime: string
+  isDeleted: string
+  createUserString: string
+  updateUserString: string
+  disabled: boolean
+}
+export interface PersonQualificationDetailResp {
+  id: string
+  name: string
+  idCard: string
+  education: string
+  phone: string
+  employer: string
+  qualificationCategoryCode: string
+  createUser: string
+  updateUser: string
+  createTime: string
+  updateTime: string
+  isDeleted: string
+  createUserString: string
+  updateUserString: string
+}
+export interface PersonQualificationQuery {
+  name: string | undefined
+  idCard: string | undefined
+  createUser: string | undefined
+  sort: Array<string>
+}
+export interface PersonQualificationPageQuery extends PersonQualificationQuery, PageQuery {}
+
+/** @desc 查询人员复审信息表列表 */
+export function listPersonQualification(query: PersonQualificationPageQuery) {
+  return http.get<PageRes<PersonQualificationResp[]>>(`${BASE_URL}`, query)
+}
+
+/** @desc 查询人员复审信息表详情 */
+export function getPersonQualification(id: string) {
+  return http.get<PersonQualificationDetailResp>(`${BASE_URL}/${id}`)
+}
+
+/** @desc 新增人员复审信息表 */
+export function addPersonQualification(data: any) {
+  return http.post(`${BASE_URL}`, data)
+}
+
+/** @desc 修改人员复审信息表 */
+export function updatePersonQualification(data: any, id: string) {
+  return http.put(`${BASE_URL}/${id}`, data)
+}
+
+/** @desc 删除人员复审信息表 */
+export function deletePersonQualification(id: string) {
+  return http.del(`${BASE_URL}/${id}`)
+}
+
+/** @desc 导出人员复审信息表 */
+export function exportPersonQualification(query: PersonQualificationQuery) {
+  return http.download(`${BASE_URL}/export`, query)
+}
