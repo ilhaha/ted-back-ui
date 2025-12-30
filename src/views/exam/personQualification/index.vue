@@ -81,7 +81,6 @@ const {
   handleDelete
 } = useTable((page) => listPersonQualification({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
-  { title: '主键ID', dataIndex: 'id', slotName: 'id' },
   { title: '姓名', dataIndex: 'name', slotName: 'name' },
   { title: '身份证号', dataIndex: 'idCard', slotName: 'idCard' },
   { title: '文化程度', dataIndex: 'education', slotName: 'education' },
@@ -92,7 +91,6 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '更新人ID', dataIndex: 'updateUserString', slotName: 'updateUser' },
   { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
   { title: '更新时间', dataIndex: 'updateTime', slotName: 'updateTime' },
-  { title: '是否删除（0-未删除，1-已删除）', dataIndex: 'isDeleted', slotName: 'isDeleted' },
   {
     title: '操作',
     dataIndex: 'action',
