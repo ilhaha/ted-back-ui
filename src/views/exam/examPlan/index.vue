@@ -20,7 +20,6 @@
       <template #maxCandidates="{ record }">
         {{ record.maxCandidates }} / {{ record.enrolledCount }}
       </template>
-
       <template #toolbar-right>
         <a-button v-permission="['exam:examPlan:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>

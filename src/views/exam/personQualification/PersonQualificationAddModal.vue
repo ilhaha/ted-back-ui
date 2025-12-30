@@ -39,7 +39,9 @@ const title = computed(() =>
   isUpdate.value ? "修改人员复审信息表" : "新增人员复审信息表"
 );
 const formRef = ref<InstanceType<typeof GiForm>>();
-
+const categoryDisabled = computed(() => {
+  return isUpdate.value;
+});
 const [form, resetForm] = useResetReactive({
   name: "",
   idCard: "",
@@ -69,6 +71,9 @@ const columns: ColumnItem[] = reactive([
     type: "input",
     span: 24,
     rules: [{ required: true, message: "请输入姓名" }],
+    props: {
+      disabled: categoryDisabled,
+    },
   },
   {
     label: "身份证号",
@@ -85,6 +90,7 @@ const columns: ColumnItem[] = reactive([
     props: {
       maxlength: 18,
       placeholder: "请输入身份证号",
+      disabled: categoryDisabled,
       onInput: (val: string) => {
         form.idCard = val.toUpperCase().replace(/[^0-9X]/g, ""); // 实时限制
       },
@@ -132,6 +138,9 @@ const columns: ColumnItem[] = reactive([
     type: "input",
     span: 24,
     rules: [{ required: true, message: "请输入资格项目代码" }],
+    props: {
+      disabled: categoryDisabled,
+    },
   },
 ]);
 // 重置
