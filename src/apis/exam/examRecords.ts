@@ -22,6 +22,7 @@ export interface ExamRecordsResp {
   updateUserString: string
   isCertificateGenerated: string
   disabled: boolean
+  examResultStatus:string
 }
 export interface ExamRecordsDetailResp {
   id: string

@@ -40,11 +40,11 @@
               <template #default>批量生成资格证</template>
             </a-button>
           </a-popconfirm>
-          <a-button v-permission="['exam:certificate:download']" :disabled="!(selectedKeys.length && queryForm.planId)"
+          <!-- <a-button v-permission="['exam:certificate:download']" :disabled="!(selectedKeys.length && queryForm.planId)"
             :loading="downloading" type="primary" @click="handleBatchDownload">
             <template #icon><icon-download /></template>
             <template #default>批量下载资格证</template>
-          </a-button>
+          </a-button> -->
         </a-space>
       </template>
       <template #examPaper="{ record }">
@@ -53,6 +53,11 @@
       <template #registrationProgress="{ record }">
         <a-tag :color="getProgressColor(Number(record.registrationProgress))">
           {{ getProgressText(Number(record.registrationProgress)) }}
+        </a-tag>
+      </template>
+      <template #examResultStatus="{ record }">
+        <a-tag :color="getExamResultStatusColor(Number(record.examResultStatus))">
+          {{ getExamResultStatusText(Number(record.examResultStatus)) }}
         </a-tag>
       </template>
       <template #reviewStatus="{ record }">
@@ -97,12 +102,12 @@
           </a-popconfirm>
         </a-space>
 
-        <a-space v-if="record.isCertificateGenerated == 1">
+        <!-- <a-space v-if="record.isCertificateGenerated == 1">
           <a-link v-permission="['exam:certificate:download']" title="下载资格证" :loading="downloading"
             @click="downloadQualificationCertificate(record)">
             下载资格证
           </a-link>
-        </a-space>
+        </a-space> -->
       </template>
     </GiTable>
 
@@ -419,7 +424,7 @@ const queryForm = reactive<ExamRecordsQuery>({
   isCertificateGenerated: '',
   registrationProgress: undefined,
   username: '',
-  sort: ['planId,desc'],
+  sort: ['id,desc'],
   isOrgQuery: false
 })
 
@@ -611,6 +616,10 @@ const columns = ref<TableInstanceColumns[]>([
     dataIndex: 'examPaper',
     title: '理论考试答卷', slotName: 'examPaper', align: 'center' // 添加插槽名称
   },
+  {
+    dataIndex: 'examResultStatus',
+    title: '总评', slotName: 'examResultStatus', align: 'center' // 添加插槽名称
+  },
   { dataIndex: 'isCertificateGenerated', slotName: 'isCertificateGenerated', title: '证书状态', align: 'center', },
   {
     dataIndex: 'action',
@@ -648,6 +657,25 @@ const getCertificateStatusText = (status: number) => {
   const textMap: Record<number, string> = {
     0: '未生成',
     1: '已生成',
+  }
+  return textMap[status] || '未知状态'
+}
+
+const getExamResultStatusColor = (status: number) => {
+  const colorMap: Record<number, string> = {
+    0: 'red', // 不及格
+    1: 'green', // 及格
+    2: 'blue', // 待录入
+  }
+  return colorMap[status] || 'gray'
+}
+
+// 获取审核状态文本
+const getExamResultStatusText = (status: number) => {
+  const textMap: Record<number, string> = {
+    0: '不合格',
+    1: '合格',
+    2: '待录入',
   }
   return textMap[status] || '未知状态'
 }

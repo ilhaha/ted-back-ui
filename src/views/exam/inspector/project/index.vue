@@ -317,7 +317,7 @@ const getStatusText = (status: number) => {
     case 0:
       return "未上架";
     case 1:
-      return "已上架";
+      return "待审核";
     case 2:
       return "进行中";
     case 3:
