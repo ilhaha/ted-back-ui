@@ -49,7 +49,10 @@
           <template #icon><icon-download /></template>
           <template #default>导出</template>
         </a-button> -->
-        <a-button @click="onImport" v-permission="['exam:personQualification:import']">
+        <a-button
+          @click="onImport"
+          v-permission="['exam:personQualification:import']"
+        >
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
         </a-button>
@@ -57,10 +60,20 @@
       <template #action="{ record }">
         <a-space>
           <!-- <a-link v-permission="['exam:personQualification:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
+          <!-- 审核 -->
+          <a-link
+            v-if="record.auditStatus === 0"
+            v-permission="['exam:personQualification:audit']"
+            title="审核"
+            @click="onAudit(record)"
+          >
+            审核
+          </a-link>
           <a-link
             v-permission="['exam:personQualification:update']"
             title="修改"
             @click="onUpdate(record)"
+            v-if="record.auditStatus === 0"
             >修改</a-link
           >
           <a-link
@@ -74,6 +87,11 @@
           </a-link>
         </a-space>
       </template>
+      <template #auditStatus="{ record }">
+        <a-tag :color="getStatusColor(record.auditStatus)">{{
+          getStatusText(record.auditStatus)
+        }}</a-tag>
+      </template>
     </GiTable>
 
     <PersonQualificationAddModal
@@ -81,13 +99,21 @@
       @save-success="search"
     />
     <PersonQualificationDetailDrawer ref="PersonQualificationDetailDrawerRef" />
-    <PersonQualificationImportModal ref="PersonQualificationImportModalRef" @import-success="search" />
+    <PersonQualificationImportModal
+      ref="PersonQualificationImportModalRef"
+      @import-success="search"
+    />
+    <PersonQualificationAuditModal
+      ref="PersonQualificationAuditModalRef"
+      @audit-success="search"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import PersonQualificationAddModal from "./PersonQualificationAddModal.vue";
 import PersonQualificationDetailDrawer from "./PersonQualificationDetailDrawer.vue";
+import PersonQualificationAuditModal from "./PersonQualificationAuditModal.vue";
 import {
   type PersonQualificationResp,
   type PersonQualificationQuery,
@@ -131,6 +157,7 @@ const columns = ref<TableInstanceColumns[]>([
     dataIndex: "qualificationCategoryCode",
     slotName: "qualificationCategoryCode",
   },
+  { title: "复审状态", dataIndex: "auditStatus", slotName: "auditStatus" },
   { title: "创建时间", dataIndex: "createTime", slotName: "createTime" },
   { title: "更新时间", dataIndex: "updateTime", slotName: "updateTime" },
   {
@@ -147,6 +174,30 @@ const columns = ref<TableInstanceColumns[]>([
     ]),
   },
 ]);
+const getStatusText = (auditStatus: number) => {
+  switch (auditStatus) {
+    case 0:
+      return "待审核";
+    case 1:
+      return "审核通过";
+    case 2:
+      return "不通过";
+    default:
+      return "";
+  }
+};
+const getStatusColor = (auditStatus: number) => {
+  switch (auditStatus) {
+    case 0:
+      return "orange";
+    case 1:
+      return "green";
+    case 2:
+      return "red";
+    default:
+      return "default";
+  }
+};
 
 // 重置
 const reset = () => {
@@ -186,7 +237,7 @@ const onUpdate = (record: PersonQualificationResp) => {
 // const onDetail = (record: PersonQualificationResp) => {
 //   PersonQualificationDetailDrawerRef.value?.onOpen(record.id)
 // }
-
+//导入
 const PersonQualificationImportModalRef =
   ref<InstanceType<typeof PersonQualificationImportModal>>();
 
@@ -194,6 +245,13 @@ const onImport = () => {
   PersonQualificationImportModalRef.value?.onOpen();
 };
 
+//审核
+const PersonQualificationAuditModalRef =
+  ref<InstanceType<typeof PersonQualificationAuditModal>>();
+
+const onAudit = (record: PersonQualificationResp) => {
+  PersonQualificationAuditModalRef.value?.onOpen(record.id);
+};
 </script>
 
 <style scoped lang="scss"></style>
