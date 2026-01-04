@@ -9,7 +9,7 @@
       <a-form-item label="审核结果">
         <a-radio-group v-model="form.auditStatus">
           <a-radio :value="1">通过</a-radio>
-          <a-radio :value="2">不通过</a-radio>
+          <!-- <a-radio :value="2">不通过</a-radio> -->
         </a-radio-group>
       </a-form-item>
       <!-- <a-form-item
