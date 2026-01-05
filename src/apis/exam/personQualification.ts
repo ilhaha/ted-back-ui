@@ -74,6 +74,10 @@ export function deletePersonQualification(id: string) {
 export function exportPersonQualification(query: PersonQualificationQuery) {
   return http.download(`${BASE_URL}/export`, query)
 }
+/** @desc 解析上传的Excel */
+export function analysisExcel(file: any) {
+  return http.post(`${BASE_URL}/analysis/excel`, file)
+}
 /** @desc 校验导入复审人员信息导入Excel文件是否正确 */
 export function importExcel(file: any) {
   return http.post(`${BASE_URL}/import/excel`, file)
@@ -83,4 +87,19 @@ export function auditPersonQualification(
   data: PersonQualificationQuery
 ) {
   return http.post(`${BASE_URL}/audit`, data)
+}
+
+/** @desc 批量审核人员复审信息 */
+export function batchAuditPersonQualification(
+  data: any[]
+) {
+  return http.post(`${BASE_URL}/batch/audit`, data)
+}
+
+
+/** @desc 批量添加复审信息 */
+export function batchAdd(
+  data: any[]
+) {
+  return http.post(`${BASE_URL}/batch/add`, data)
 }

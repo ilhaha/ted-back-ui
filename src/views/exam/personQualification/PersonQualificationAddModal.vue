@@ -1,14 +1,6 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns" />
   </a-modal>
 </template>
@@ -36,7 +28,7 @@ const dataId = ref("");
 const visible = ref(false);
 const isUpdate = computed(() => !!dataId.value);
 const title = computed(() =>
-  isUpdate.value ? "修改人员复审信息表" : "新增人员复审信息表"
+  isUpdate.value ? "修改人员复审信息" : "新增人员复审信息"
 );
 const formRef = ref<InstanceType<typeof GiForm>>();
 const categoryDisabled = computed(() => {
@@ -84,7 +76,7 @@ const columns: ColumnItem[] = reactive([
       { required: true, message: "请输入身份证号" },
       {
         pattern: /(^\d{15}$)|(^\d{17}(\d|X)$)/,
-        message: "请输入正确的身份证号",
+        message: "请输入正确的身份证号"
       },
     ],
     props: {
@@ -92,7 +84,7 @@ const columns: ColumnItem[] = reactive([
       placeholder: "请输入身份证号",
       disabled: categoryDisabled,
       onInput: (val: string) => {
-        form.idCard = val.toUpperCase().replace(/[^0-9X]/g, ""); // 实时限制
+        form.idCard = val.toUpperCase().replace(/[^0-9X]/g, "");
       },
     },
   },
@@ -151,10 +143,16 @@ const reset = () => {
 
 // 保存
 const save = async () => {
+  let idCardBack = "";
   try {
     const isInvalid = await formRef.value?.formRef?.validate();
     if (isInvalid) return false;
+
+    if (!validateExtra()) return false;
+
+    idCardBack = form.idCard;
     form.idCard = encryptByRsa(form.idCard);
+
     if (isUpdate.value) {
       await updatePersonQualification(form, dataId.value);
       Message.success("修改成功");
@@ -165,9 +163,26 @@ const save = async () => {
     emit("save-success");
     return true;
   } catch (error) {
+    form.idCard = idCardBack;
     return false;
+  } finally {
+
   }
 };
+
+
+const validateExtra = () => {
+  if (!/(^\d{15}$)|(^\d{17}(\d|X)$)/.test(form.idCard)) {
+    Message.error("身份证号格式不正确");
+    return false;
+  }
+  if (!/^1[3-9]\d{9}$/.test(form.phone)) {
+    Message.error("手机号格式不正确");
+    return false;
+  }
+  return true;
+};
+
 
 // 新增
 const onAdd = async () => {
