@@ -15,7 +15,7 @@
                 </a-button>
             </template>
             <!-- <template #toolbar-right>
-                <a-button v-permission="['worker:examineePaymentAudit:download']" @click="batchDownloadAuditNotice"
+                <a-button v-permission="['exam:examineePaymentAudit:download']" @click="batchDownloadAuditNotice"
                     :disabled="!queryForm.classId || !dataList || dataList.length === 0"
                     :loading="batchDownloadLodding">
                     <template #icon><icon-download /></template>
@@ -43,8 +43,8 @@
             </template>
             <template #auditNoticeUrl="{ record }">
                 <a-link @click="getPreviewUrl(record.auditNoticeUrl)"
-                    v-permission="['worker:examineePaymentAudit:download']">预览</a-link>
-                <a-link v-permission="['worker:examineePaymentAudit:download']"
+                    v-permission="['exam:examineePaymentAudit:download']">预览</a-link>
+                <a-link v-permission="['exam:examineePaymentAudit:download']"
                     @click.prevent="downloadAuditNotice(record)" :loading="downloadLodding">下载</a-link>
             </template>
             <template #ticketUrl="{ record }">
@@ -127,17 +127,17 @@ const columns = ref<TableInstanceColumns[]>([
     // { title: "缴费时间", dataIndex: "paymentTime", slotName: "paymentTime" },
     { title: "缴费状态", dataIndex: "auditStatus", slotName: "auditStatus" },
     // { title: "准考证", dataIndex: "ticketUrl", slotName: "ticketUrl" },
-    {
-        title: "操作",
-        dataIndex: "action",
-        slotName: "action",
-        width: 160,
-        align: "center",
-        fixed: !isMobile() ? "right" : undefined,
-        show: has.hasPermOr([
-            "exam:enroll:delete",
-        ]),
-    },
+    // {
+    //     title: "操作",
+    //     dataIndex: "action",
+    //     slotName: "action",
+    //     width: 160,
+    //     align: "center",
+    //     fixed: !isMobile() ? "right" : undefined,
+    //     show: has.hasPermOr([
+    //         "exam:enroll:delete",
+    //     ]),
+    // },
 ]);
 
 // 重置

@@ -81,8 +81,8 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '描述', dataIndex: 'redeme', slotName: 'redeme' },
   { title: '创建人ID', dataIndex: 'createUserString', slotName: 'createUser' },
   { title: '更新人ID', dataIndex: 'updateUserString', slotName: 'updateUser' },
-  { title: '创建时间戳', dataIndex: 'createTime', slotName: 'createTime' },
-  { title: '更新时间戳', dataIndex: 'updateTime', slotName: 'updateTime' },
+  { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
+  { title: '更新时间', dataIndex: 'updateTime', slotName: 'updateTime' },
   { title: '删除标记', dataIndex: 'isDeleted', slotName: 'isDeleted' },
   {
     title: '操作',

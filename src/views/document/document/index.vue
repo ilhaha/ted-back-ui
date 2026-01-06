@@ -1,30 +1,12 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="检验人员报名资料管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable title="检验人员报名资料管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
       <template #previewImage="{ record }">
         <a-space v-if="record.docPath">
-          <a-image
-            v-for="(path, index) in record.docPath.split(',')"
-            :key="index"
-            width="80"
-            height="60"
-            :src="path"
-            :preview-props="{ zoomRate: 1.5 }"
-            class="preview-image"
-            fit="cover"
-            @error="handleImageError"
-          />
+          <a-image v-for="(path, index) in record.docPath.split(',')" :key="index" width="80" height="60" :src="path"
+            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" @error="handleImageError" />
         </a-space>
         <span v-else>-</span>
       </template>
@@ -32,27 +14,9 @@
         <!-- <a-input-search v-model="queryForm.docPath" placeholder="请输入存储路径(如/img/身份证正面.jpg)" allow-clear @search="search" /> -->
         <!-- <a-input-search v-model="queryForm.typeId" placeholder="请输入关联资料类型ID" allow-clear @search="search" /> -->
         <!-- <a-input-search v-model="queryForm.createUser" placeholder="请输入创建人ID" allow-clear @search="search" /> -->
-        <GiForm
-          :style="''"
-          v-model="queryForm"
-          search
-          :columns="searchForm"
-          size="medium"
-          @search="search"
-          @reset="reset"
-        />
+        <GiForm :style="''" v-model="queryForm" search :columns="searchForm" size="medium" @search="search"
+          @reset="reset" />
       </template>
-
-      <!--      <template #toolbar-right>-->
-      <!--        &lt;!&ndash; <a-button v-permission="['document:document:add']" type="primary" @click="onAdd">-->
-      <!--          <template #icon><icon-plus /></template>-->
-      <!--          <template #default>新增</template>-->
-      <!--        </a-button> &ndash;&gt;-->
-      <!--        &lt;!&ndash; <a-button v-permission="['document:document:export']" @click="onExport">-->
-      <!--          <template #icon><icon-download /></template>-->
-      <!--          <template #default>导出</template>-->
-      <!--        </a-button> &ndash;&gt;-->
-      <!--      </template>-->
       <template #status="{ record }">
         <template>
           <a-space size="large">
@@ -70,29 +34,24 @@
           getStatusText(record.status)
         }}</a-tag>
       </template>
-<template #pendingCount="{ record }">
-  {{ record.documents.filter(d => d.status === 1).length }}
-  /
-  {{ record.documents.filter(d => d.status === 0).length }}
-</template>
-<template #fixCount="{ record }">
-  {{ record.documents.filter(d => d.status === 2).length }}
-  /
-  {{ record.documents.filter(d => d.status === 3).length }}
-</template>
+      <template #pendingCount="{ record }">
+        {{record.documents.filter(d => d.status === 1).length}}
+        /
+        {{record.documents.filter(d => d.status === 0).length}}
+      </template>
+      <template #fixCount="{ record }">
+        {{record.documents.filter(d => d.status === 2).length}}
+        /
+        {{record.documents.filter(d => d.status === 3).length}}
+      </template>
 
       <template #action="{ record }">
         <a-space>
-          <!-- <a-link v-permission="['document:document:detail']" title="审核" @click="onExamine(record)">审核</a-link> -->
-          <a-link title="查看" @click="onViewDocuments(record)">查看</a-link>
+          <a-link title="查看" @click="onViewDocuments(record)" v-permission="['document:document:detail']">查看资料</a-link>
         </a-space>
       </template>
     </GiTable>
-    <DocumentAddModal
-      ref="DocumentAddModalRef" 
-      @save-success="search"
-      @审核成功="search"
-    />
+    <DocumentAddModal ref="DocumentAddModalRef" @save-success="search" @审核成功="search" />
     <DocumentDetailDrawer ref="DocumentDetailDrawerRef" />
     <DocumentListModal ref="DocumentListModalRef" />
   </div>
@@ -180,12 +139,12 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "documentsCount",
     align: "center",
   },
-{
-  title: "已生效 / 待审核",
-  dataIndex: "pendingCount",
-  slotName: "pendingCount",
-  align: "center",
-},
+  {
+    title: "已生效 / 待审核",
+    dataIndex: "pendingCount",
+    slotName: "pendingCount",
+    align: "center",
+  },
   {
     title: "待补正 / 补正审核",
     dataIndex: "fixCount",
@@ -216,8 +175,6 @@ const columns = ref<TableInstanceColumns[]>([
     show: has.hasPermOr([
       "document:document:examine",
       "document:document:detail",
-      "document:document:update",
-      "document:document:delete",
     ]),
   },
 ]);

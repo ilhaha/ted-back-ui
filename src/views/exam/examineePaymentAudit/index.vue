@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="缴费审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="检验人员缴费审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
       @select-all="selectAll">
@@ -46,14 +46,6 @@
           <template #icon><icon-check /></template>
           <template #default>批量审核</template>
         </a-button>
-        <!-- <a-button v-permission="['exam:examineePaymentAudit:add']" type="primary" @click="onAdd">
-          <template #icon><icon-plus /></template>
-<template #default>新增</template>
-</a-button>
-<a-button v-permission="['exam:examineePaymentAudit:export']" @click="onExport">
-  <template #icon><icon-download /></template>
-  <template #default>导出</template>
-</a-button> -->
       </template>
       <template #action="{ record }">
         <a-space>
@@ -219,9 +211,7 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:examineePaymentAudit:detail",
-      "exam:examineePaymentAudit:update",
-      "exam:examineePaymentAudit:delete",
+      'exam:examineePaymentAudit:review'
     ]),
   },
 ]);

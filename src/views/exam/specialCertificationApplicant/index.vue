@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="检验人员资格申请表管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="检验人员报名审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" :row-selection="{ type: 'checkbox', showCheckedAll: true }" @select="select"
       @select-all="selectAll" @refresh="search">
@@ -57,16 +57,6 @@
         <a-space>
           <a-link v-permission="['exam:specialCertificationApplicant:detail']" title="详情"
             @click="onDetail(record)">详情</a-link>
-          <!-- <a-link
-            v-permission="['exam:specialCertificationApplicant:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
-          
-            删除
-          </a-link> -->
           <a-link v-if="record.status === 0 || record.status === 4"
             v-permission="['exam:specialCertificationApplicant:audit']" status="success" title="审核"
             @click="onAudit(record)">
@@ -80,8 +70,7 @@
     <SpecialCertificationApplicantDetailDrawer ref="SpecialCertificationApplicantDetailDrawerRef"
       :candidate-name-map="{}" />
 
-    <a-modal v-permission="['exam:specialCertificationApplicant:mutyaudit']" v-model:visible="batchAuditVisible"
-      title="批量审核" :mask-closable="false" :closable="false" :footer="false">
+    <a-modal v-model:visible="batchAuditVisible" title="批量审核" :mask-closable="false" :closable="false" :footer="false">
       <a-form layout="vertical">
         <a-form-item label="审核结果">
           <a-radio-group v-model="batchAuditStatus">
@@ -114,7 +103,6 @@ import {
   deleteSpecialCertificationApplicant,
   exportSpecialCertificationApplicant,
   listSpecialCertificationApplicant,
-  updateSpecialCertificationApplicant,
   batchAuditSpecialCertificationApplicant,
 } from "@/apis/exam/specialCertificationApplicant";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
@@ -124,8 +112,6 @@ import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import { ref, reactive, onMounted } from "vue";
 import { Message } from "@arco-design/web-vue";
-// import { getSpecialCertificationApplicant,getCandidateNameById } from '@/apis/exam/specialCertificationApplicant'
-import { getUser } from "@/apis/system/user";
 
 defineOptions({ name: "SpecialCertificationApplicant" });
 
@@ -204,7 +190,7 @@ const columns = ref<TableInstanceColumns[]>([
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
       "exam:specialCertificationApplicant:detail",
-      "exam:specialCertificationApplicant:delete",
+      "exam:specialCertificationApplicant:audit",
     ]),
   },
 ]);

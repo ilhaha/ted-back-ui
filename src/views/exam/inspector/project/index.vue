@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="项目管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="检验人员项目管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #isOperation="{ record }">

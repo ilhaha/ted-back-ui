@@ -17,10 +17,6 @@
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
-        <!-- <a-button v-permission="['exam:personQualification:export']" @click="onExport">
-          <template #icon><icon-download /></template>
-          <template #default>导出</template>
-        </a-button> -->
         <a-button @click="onImport" v-permission="['exam:personQualification:import']">
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
@@ -33,7 +29,6 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <!-- <a-link v-permission="['exam:personQualification:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <!-- 审核 -->
           <a-link v-if="record.auditStatus === 0" v-permission="['exam:personQualification:audit']" title="审核"
             @click="onAudit(record)" :reviewLoading="reviewLoading">
@@ -132,7 +127,6 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:personQualification:detail",
       "exam:personQualification:update",
       "exam:personQualification:delete",
     ]),

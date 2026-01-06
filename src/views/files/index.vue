@@ -71,13 +71,13 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link
+          <!-- <a-link
             v-permission="['exam:examRecords:detail']"
             title="详情"
             @click="onDetail(record)"
             >详情</a-link
-          >
-          <a-link
+          > -->
+          <!-- <a-link
             v-permission="['exam:examRecords:update']"
             title="修改"
             @click="onUpdate(record)"
@@ -91,7 +91,7 @@
             @click="onDelete(record)"
           >
             删除
-          </a-link>
+          </a-link> -->
         </a-space>
       </template>
     </GiTable>

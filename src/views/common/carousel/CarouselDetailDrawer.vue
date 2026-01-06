@@ -10,8 +10,8 @@
       <a-descriptions-item label="创建人">{{ dataDetail?.createUserString }}</a-descriptions-item>
 <!--      <a-descriptions-item label="更新人ID">{{ dataDetail?.updateUser }}</a-descriptions-item>-->
       <a-descriptions-item label="修改人">{{ dataDetail?.updateUserString }}</a-descriptions-item>
-      <a-descriptions-item label="创建时间戳">{{ dataDetail?.createTime }}</a-descriptions-item>
-      <a-descriptions-item label="更新时间戳">{{ dataDetail?.updateTime }}</a-descriptions-item>
+      <a-descriptions-item label="创建时间">{{ dataDetail?.createTime }}</a-descriptions-item>
+      <a-descriptions-item label="更新时间">{{ dataDetail?.updateTime }}</a-descriptions-item>
       <a-descriptions-item label="绑定公告">{{ dataDetail?.announcementTitle }}</a-descriptions-item>
     </a-descriptions>
     <a-descriptions-item label="图片地址">

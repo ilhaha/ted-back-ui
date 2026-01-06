@@ -31,9 +31,10 @@ export interface ClassroomDetailResp {
   examLocation: string
 }
 export interface ClassroomQuery {
+  classroomName: string
   sort: Array<string>
 }
-export interface ClassroomPageQuery extends ClassroomQuery, PageQuery {}
+export interface ClassroomPageQuery extends ClassroomQuery, PageQuery { }
 
 /** @desc 查询考场列表 */
 export function listClassroom(query: ClassroomPageQuery) {

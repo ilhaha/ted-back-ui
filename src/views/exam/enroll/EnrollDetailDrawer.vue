@@ -5,8 +5,8 @@
       <a-descriptions-item label="考生id">{{ dataDetail?.userId }}</a-descriptions-item>
       <a-descriptions-item label="考试计划id">{{ dataDetail?.examPlanId }}</a-descriptions-item>
 <!--      <a-descriptions-item label="考试状态（0：未报名，1：已报名：2：已完成，3：已过期）">{{ dataDetail?.enrollStatus }}</a-descriptions-item>-->
-<!--      <a-descriptions-item label="创建时间戳">{{ dataDetail?.createTime }}</a-descriptions-item>-->
-<!--      <a-descriptions-item label="更新时间戳">{{ dataDetail?.updateTime }}</a-descriptions-item>-->
+<!--      <a-descriptions-item label="创建时间">{{ dataDetail?.createTime }}</a-descriptions-item>-->
+<!--      <a-descriptions-item label="更新时间">{{ dataDetail?.updateTime }}</a-descriptions-item>-->
 <!--      <a-descriptions-item label="删除标记">{{ dataDetail?.isDeleted }}</a-descriptions-item>-->
 <!--      <a-descriptions-item label="创建人">{{ dataDetail?.createUser }}</a-descriptions-item>-->
 <!--      <a-descriptions-item label="创建人">{{ dataDetail?.createUserString }}</a-descriptions-item>-->

@@ -127,17 +127,17 @@ const columns = ref<TableInstanceColumns[]>([
     // { title: "缴费时间", dataIndex: "paymentTime", slotName: "paymentTime" },
     { title: "缴费状态", dataIndex: "auditStatus", slotName: "auditStatus" },
     // { title: "准考证", dataIndex: "ticketUrl", slotName: "ticketUrl" },
-    {
-        title: "操作",
-        dataIndex: "action",
-        slotName: "action",
-        width: 160,
-        align: "center",
-        fixed: !isMobile() ? "right" : undefined,
-        show: has.hasPermOr([
-            "exam:enroll:delete",
-        ]),
-    },
+    // {
+    //     title: "操作",
+    //     dataIndex: "action",
+    //     slotName: "action",
+    //     width: 160,
+    //     align: "center",
+    //     fixed: !isMobile() ? "right" : undefined,
+    //     show: has.hasPermOr([
+    //         "exam:enroll:delete",
+    //     ]),
+    // },
 ]);
 
 // 重置

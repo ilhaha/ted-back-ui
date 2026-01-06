@@ -38,12 +38,6 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <!--          <a-link
-            v-permission="['exam:category:detail']"
-            title="详情"
-            @click="onDetail(record)"
-            >详情</a-link
-          >-->
           <a-link v-permission="['exam:category:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <a-link v-permission="['exam:category:delete']" status="danger" :disabled="record.disabled"
             :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
@@ -116,7 +110,6 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      // "exam:category:detail",
       "exam:category:update",
       "exam:category:delete",
     ]),

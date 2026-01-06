@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="考试计划管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="作业人员考试计划管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search" @select="test">
       <template #examType="{ record }">
@@ -120,7 +120,6 @@
       </template> -->
       <template #action="{ record }">
         <a-space>
-          <!-- <a-link v-permission="['exam:examPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <div v-if="record.status == 1">
             <a-link v-permission="['exam:examPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
               审核
@@ -279,7 +278,6 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:examPlan:detail",
       "exam:examPlan:update",
       "exam:examPlan:delete",
     ]),

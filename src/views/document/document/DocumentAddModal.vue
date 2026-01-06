@@ -45,7 +45,7 @@ const formRef = ref<InstanceType<typeof GiForm>>()
 
 //  表单数据
 const [form, resetForm] = useResetReactive({
-  status: undefined, // 审核状态
+  status: 1, // 审核状态
   auditRemark: '', // 审核备注
 })
 

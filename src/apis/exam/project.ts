@@ -55,6 +55,7 @@ export interface ProjectDetailResp {
   createUserString: string
   updateUserString: string
   categoryId: string
+  projectStatus: number
 }
 
 export interface ProjectSearchQuery {
@@ -80,6 +81,7 @@ export interface ProjectDocumentList {
 
 export interface ProjectQuery {
   sort: Array<string>
+  projectType: number
 }
 export interface ProjectPageQuery extends ProjectQuery, PageQuery { }
 

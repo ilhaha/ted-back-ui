@@ -1,7 +1,7 @@
 <template>
   <a-drawer
     v-model:visible="visible"
-    title="特种设备人员资格申请详情"
+    title="检验人员报名审核详情"
     :width="width >= 600 ? 600 : '100%'"
     :footer="false"
   >

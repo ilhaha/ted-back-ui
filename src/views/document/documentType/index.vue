@@ -1,7 +1,7 @@
 <template>
   <div class="gi_table_page">
     <GiTable
-      title="资料类型主管理"
+      title="资料类型管理"
       row-key="id"
       :data="dataList"
       :columns="columns"
@@ -35,7 +35,6 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <!-- <a-link v-permission="['document:documentType:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <a-link v-permission="['document:documentType:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <a-link
             v-permission="['document:documentType:delete']"
@@ -91,7 +90,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['document:documentType:detail', 'document:documentType:update', 'document:documentType:delete'])
+    show: has.hasPermOr(['document:documentType:update', 'document:documentType:delete'])
   }
 ]);
 

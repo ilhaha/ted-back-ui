@@ -60,7 +60,6 @@
       </template>
       <template #action="{ record }">
         <a-space>
-<!--          <a-link v-permission="['exam:examLocation:detail']" title="详情" @click="onDetail(record)">考场管理</a-link>-->
           <a-link v-permission="['exam:examLocation:update']" title="修改" @click="onUpdate(record)">修改</a-link>
  <!-- <a-link
             v-permission="['exam:examLocation:delete']"
@@ -133,8 +132,8 @@ const columns = ref<TableInstanceColumns[]>([
   // { title: '描述', dataIndex: 'redeme', slotName: 'redeme' },
   // { title: '创建人ID', dataIndex: 'createUserString', slotName: 'createUser' },
   // { title: '更新人ID', dataIndex: 'updateUserString', slotName: 'updateUser' },
-  // { title: '创建时间戳', dataIndex: 'createTime', slotName: 'createTime' },
-  // { title: '更新时间戳', dataIndex: 'updateTime', slotName: 'updateTime' },
+  // { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
+  // { title: '更新时间', dataIndex: 'updateTime', slotName: 'updateTime' },
   // { title: '删除标记', dataIndex: 'isDeleted', slotName: 'isDeleted' },
   {
     title: '操作',
@@ -143,7 +142,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 200,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['exam:examLocation:detail', 'exam:examLocation:update', 'exam:examLocation:delete'])
+    show: has.hasPermOr(['exam:examLocation:update', 'exam:examLocation:delete'])
   }
 ])
 

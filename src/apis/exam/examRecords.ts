@@ -71,7 +71,7 @@ export function inputScores(data: any) {
 
 /** @desc 查询考试记录列表 */
 export function listExamRecords(query: ExamRecordsPageQuery) {
-  return http.get<PageRes<ExamRecordsResp[]>>(`${BASE_URL}/examRecords`, query)
+  return http.get<PageRes<ExamRecordsResp[]>>(`${BASE_URL}`, query)
 }
 
 /** @desc 查询考试记录详情 */

@@ -8,21 +8,11 @@
         </GiForm>
       </template>
       <template #toolbar-left>
-        <a-button v-permission="['system:user:add']" type="primary" @click="onAdd">
+        <a-button v-permission="['examAffair:invigilation:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
-        <!-- <a-button v-permission="['system:user:import']" @click="onImport">
-              <template #icon><icon-upload /></template>
-              <template #default>导入</template>
-            </a-button> -->
       </template>
-      <!-- <template #toolbar-right>
-            <a-button v-permission="['system:user:export']" @click="onExport">
-              <template #icon><icon-download /></template>
-              <template #default>导出</template>
-            </a-button>
-          </template> -->
       <template #nickname="{ record }">
         <GiCellAvatar :avatar="record.avatar" :name="record.nickname" />
       </template>
@@ -41,20 +31,19 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <!-- <a-link v-permission="['system:user:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
-          <a-link v-permission="['system:user:addQualification']" title="资质列表" @click="onAddQualification(record)">
+          <a-link v-permission="['examAffair:invigilation:addQualification']" title="资质列表"
+            @click="onAddQualification(record)">
             资质
           </a-link>
-          <a-link v-permission="['system:user:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-          <a-link v-permission="['system:user:delete']" status="danger" :disabled="record.isSystem"
+          <a-link v-permission="['examAffair:invigilation:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+          <a-link v-permission="['examAffair:invigilation:delete']" status="danger" :disabled="record.isSystem"
             :title="record.isSystem ? '系统内置数据不能删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>
           <a-dropdown>
             <a-button v-if="
               has.hasPermOr([
-                'system:user:resetPwd',
-                'system:user:updateRole',
+                'examAffair:invigilation:resetPwd'
               ])
             " type="text" size="mini" title="更多">
               <template #icon>
@@ -62,10 +51,8 @@
               </template>
             </a-button>
             <template #content>
-              <a-doption v-permission="['system:user:resetPwd']" title="重置密码"
+              <a-doption v-permission="['examAffair:invigilation:resetPwd']" title="重置密码"
                 @click="onResetPwd(record)">重置密码</a-doption>
-              <!-- <a-doption v-permission="['system:user:updateRole']" title="分配角色"
-                    @click="onUpdateRole(record)">分配角色</a-doption> -->
             </template>
           </a-dropdown>
         </a-space>
@@ -244,11 +231,10 @@ const columns: TableInstanceColumns[] = [
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "system:user:detail",
-      "system:user:update",
-      "system:user:delete",
-      "system:user:resetPwd",
-      "system:user:updateRole",
+      "examAffair:invigilation:resetPwd",
+      "examAffair:invigilation:delete",
+      "examAffair:invigilation:update",
+      "examAffair:invigilation:addQualification",
     ]),
   },
 ];

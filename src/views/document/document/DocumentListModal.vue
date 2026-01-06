@@ -3,7 +3,7 @@
     v-model:visible="visible"
     title="考生资料"
     :footer="null"
-    width="80%"
+    width="75%"
   >
     <a-table :data="documents" :columns="columns" row-key="id">
       <!-- 资料图片 -->
@@ -36,9 +36,9 @@
 
       <!-- 操作列 -->
       <template #action="{ record }">
-        <a-button type="primary" size="small" @click="onExamine(record)">
-          审核
-        </a-button>
+        <a-space>
+          <a-link title="审核" @click="onExamine(record)" v-permission="['document:document:examine']">审核</a-link>
+        </a-space>
       </template>
     </a-table>
 

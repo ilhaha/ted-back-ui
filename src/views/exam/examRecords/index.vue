@@ -628,7 +628,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['exam:examRecords:detail', 'exam:examRecords:update', 'exam:examRecords:delete']),
+    show: has.hasPermOr(['exam:certificate:generated']),
   },
 ])
 

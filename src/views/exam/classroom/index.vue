@@ -13,6 +13,17 @@
           getClassroomTypeText(record.classroomType)
         }}</a-tag>
       </template>
+      <template #toolbar-left>
+        <a-input-search v-model="queryForm.classroomName" placeholder="请输入考场名称" allow-clear @search="search" />
+        <a-button type="primary" class="ml-2" @click="search">
+          <template #icon><icon-search /></template>
+          搜索
+        </a-button>
+        <a-button @click="reset">
+          <template #icon><icon-refresh /></template>
+          <template #default>重置</template>
+        </a-button>
+      </template>
       <template #toolbar-right>
         <a-button v-permission="['exam:classroom:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
@@ -26,12 +37,6 @@
 
       <template #action="{ record }">
         <a-space>
-          <!--          <a-link
-            v-permission="['exam:classroom:detail']"
-            title="详情"
-            @click="onDetail(record)"
-            >详情</a-link
-          >-->
           <a-link v-permission="['exam:classroom:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <!--          <a-link-->
           <!--            v-permission="['exam:classroom:delete']"-->
@@ -70,6 +75,7 @@ import has from "@/utils/has";
 defineOptions({ name: "Classroom" });
 
 const queryForm = reactive<ClassroomQuery>({
+  classroomName: '',
   sort: ["tc.id,desc"],
 });
 
@@ -107,7 +113,6 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      // "exam:classroom:detail",
       "exam:classroom:update",
       "exam:classroom:delete",
     ]),
@@ -116,6 +121,7 @@ const columns = ref<TableInstanceColumns[]>([
 
 // 重置
 const reset = () => {
+  queryForm.classroomName = ''
   search();
 };
 

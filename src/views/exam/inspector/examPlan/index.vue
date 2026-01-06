@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="考试计划管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="检验人员考试计划管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search" @select="test">
       <template #examType="{ record }">
@@ -22,11 +22,11 @@
       </template>
 
       <template #toolbar-right>
-        <a-button v-permission="['inspector:examPlan:add']" type="primary" @click="onAdd">
+        <a-button v-permission="['inspector:inspectorPlan:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           新增
         </a-button>
-        <a-button @click="onImport" v-permission="['inspector:examPlan:import']">
+        <a-button @click="onImport" v-permission="['inspector:inspectorPlan:import']">
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
         </a-button>
@@ -105,14 +105,13 @@
       </template> -->
       <template #action="{ record }">
         <a-space>
-          <!-- <a-link v-permission="['inspector:inspectorPlan:detail']" title="详情" @click="onDetail(record)">详情</a-link> -->
           <div v-if="record.status == 1">
-            <a-link v-permission="['inspector:examPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
+            <a-link v-permission="['inspector:inspectorPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
               审核
             </a-link>
           </div>
           <div v-if="record.status == 2">
-            <a-link v-permission="['inspector:examPlan:sjjdgljreview']" title="审核"
+            <a-link v-permission="['inspector:inspectorPlan:sjjdgljreview']" title="审核"
               @click="onExamineA(record)">审核</a-link>
           </div>
           <div v-if="record.status >= 3">
@@ -131,11 +130,11 @@
             删除
           </a-link>
           <div v-if="record.isFinalConfirmed == 0 && record.status == 3">
-            <a-link v-permission="['inspector:examPlan:updateTime']" title="修改"
+            <a-link v-permission="['inspector:inspectorPlan:updateTime']" title="调整时间安排"
               @click="adjustTimeSchedule(record)">调整时间安排</a-link>
           </div>
           <div v-if="(record.isFinalConfirmed == 0 || record.isFinalConfirmed == 3) && record.status == 3">
-            <a-link v-permission="['inspector:examPlan:adminconfirmed']" title="管理员确认考试"
+            <a-link v-permission="['inspector:inspectorPlan:adminconfirmed']" title="管理员确认考试"
               @click="onUpdate(record)">考试确认</a-link>
           </div>
           <div v-if="record.isFinalConfirmed == 1 && record.status == 3 && userInfo.id != 1">
@@ -266,7 +265,6 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "inspector:inspectorPlan:detail",
       "inspector:inspectorPlan:update",
       "inspector:inspectorPlan:delete",
     ]),

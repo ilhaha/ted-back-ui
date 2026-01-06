@@ -37,7 +37,7 @@
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
-        <a-button @click="onImport" v-permission="['examconnect:questionBank:add']">
+        <a-button @click="onImport" v-permission="['examconnect:questionBank:import']">
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
         </a-button>

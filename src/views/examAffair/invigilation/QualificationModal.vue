@@ -1,75 +1,47 @@
 <template>
   <!-- 用户资质弹窗 -->
-  <a-modal
-    :visible="visible"
-    width="70%"
-    @cancel="close"
-    title="用户资质"
-    :footer="null"
-  >
+  <a-modal :visible="visible" width="70%" @cancel="close" title="用户资质" :footer="null">
     <template #title>
-      <span>用户资质</span>
-      <a-button
-        @click="handleUploadClick"
-        style="margin-left: auto; margin-right: 30px"
-      >
+      <span>监考员资质</span>
+      <a-button v-permission="['examAffair:invigilation:addQualification']" @click="handleUploadClick"
+        style="margin-left: auto; margin-right: 30px">
         <icon-file />
         上传资质
       </a-button>
     </template>
 
-    <a-table
-      :columns="columns"
-      :data="tableData"
-      :pagination="false"
-      row-key="id"
-    >
+    <a-table :columns="columns" :data="tableData" :pagination="false" row-key="id">
       <!-- 资质图片 -->
       <template #qualificationUrl="{ record }">
         <div class="image-list">
-          <a-image
-            v-for="(url, index) in record.qualificationUrls"
-            :key="index"
-            width="100"
-            :src="url"
-            :preview="true"
-            :preview-props="{
+          <a-image v-for="(url, index) in record.qualificationUrls" :key="index" width="80" height="60" :src="url"
+            :preview="true" :preview-props="{
               actions: ['rotateRight', 'zoomIn', 'zoomOut', 'originalSize'],
-            }"
-          />
+            }" />
         </div>
       </template>
 
       <!-- 操作列：删除 -->
       <template #actions="{ record }">
-        <a-popconfirm
-          content="确认删除该资质吗？"
-          type="warning"
-          @ok="handleDelete(record.id)"
-        >
-          <a-button size="small" status="danger">删除</a-button>
-        </a-popconfirm>
+        <a-space>
+          <a-popconfirm content="确认删除该资质吗？" type="warning" @ok="handleDelete(record.id)">
+            <a-link v-permission="['invigilate:userQualification:delete']" status="danger">
+              删除
+            </a-link>
+          </a-popconfirm>
+        </a-space>
       </template>
+
+
     </a-table>
 
     <div class="pagination-wrapper">
-      <a-pagination
-        :total="total"
-        :page-size="pageSize"
-        v-model:current="currentPage"
-        size="small"
-        show-total
-        :hide-on-single-page="false"
-        @change="loadQualification"
-      />
+      <a-pagination :total="total" :page-size="pageSize" v-model:current="currentPage" size="small" show-total
+        :hide-on-single-page="false" @change="loadQualification" />
     </div>
 
     <!-- 上传组件 -->
-    <DocumentUpload
-      ref="documentUploadRef"
-      title="上传资质"
-      @upload-success="handleUploadSuccess"
-    />
+    <DocumentUpload ref="documentUploadRef" title="上传资质" @upload-success="handleUploadSuccess" />
   </a-modal>
 </template>
 
@@ -99,7 +71,7 @@ const documentUploadRef = ref();
 
 // 表格列
 const columns = [
-  
+
   { title: "资质类别", dataIndex: "categoryName" },
   {
     title: "资质证明",
@@ -175,7 +147,7 @@ const handleUploadSuccess = async (data: {
 // ======== 删除资质 ========
 const handleDelete = async (qualificationId: number) => {
   try {
-    await deleteQualification(qualificationId); 
+    await deleteQualification(qualificationId);
     Message.success("删除成功");
     loadQualification(); // 刷新资质列表
   } catch (error) {
@@ -191,15 +163,23 @@ defineExpose({
 </script>
 
 <style scoped>
+/deep/ .arco-pagination {
+  justify-self: flex-end;
+}
+
 .pagination-wrapper {
   margin-top: 16px;
   text-align: right;
 }
 
 .image-list {
-  display: flex; /* 使用 flex 布局 */
-  gap: 8px; /* 图片之间的间距 */
-  flex-wrap: wrap; /* 如果图片过多，自动换行 */
-  align-items: center; /* 垂直居中图片 */
+  display: flex;
+  /* 使用 flex 布局 */
+  gap: 8px;
+  /* 图片之间的间距 */
+  flex-wrap: wrap;
+  /* 如果图片过多，自动换行 */
+  align-items: center;
+  /* 垂直居中图片 */
 }
 </style>

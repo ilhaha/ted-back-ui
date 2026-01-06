@@ -21,6 +21,10 @@ export interface EnrollResp {
   createUserString: string
   updateUserString: string
   disabled: boolean
+  paymentProofUrl: string
+  auditStatus: number
+  ticketUrl: string
+  auditNoticeUrl: string
 }
 export interface EnrollDetailResp {
   id: string

@@ -10,18 +10,19 @@
       <a-descriptions-item label="创建人">{{ dataDetail?.createUserString }}</a-descriptions-item>
       <!--      <a-descriptions-item label="更新人ID">{{ dataDetail?.updateUser }}</a-descriptions-item>-->
       <a-descriptions-item label="修改人">{{ dataDetail?.updateUserString }}</a-descriptions-item>
-      <a-descriptions-item label="创建时间戳">{{ dataDetail?.createTime }}</a-descriptions-item>
-      <a-descriptions-item label="更新时间戳">{{ dataDetail?.updateTime }}</a-descriptions-item>
+      <a-descriptions-item label="创建时间">{{ dataDetail?.createTime }}</a-descriptions-item>
+      <a-descriptions-item label="更新时间">{{ dataDetail?.updateTime }}</a-descriptions-item>
       <!--      <a-descriptions-item label="删除标记">{{ dataDetail?.isDeleted }}</a-descriptions-item>-->
     </a-descriptions>
 
     <a-space style="margin-bottom: 16px;">
       <!-- <a-button type="primary" @click="onAddress">绑定地址</a-button> -->
-      <a-button type="primary" @click="onDocument" v-permission="['exam:project:bindDocument']">绑定资料</a-button>
+      <a-button type="primary" @click="onDocument" v-permission="['exam:project:bindDocument']"
+        v-if="dataDetail?.projectStatus == 2">绑定资料</a-button>
     </a-space>
 
     <!--  地址相关  -->
-    <a-table v-if="locationDetail.length > 0" :columns="columns" :data="locationDetail" :pagination="false">
+    <!-- <a-table v-if="locationDetail.length > 0" :columns="columns" :data="locationDetail" :pagination="false">
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:project:delete']" status="danger" :disabled="record.disabled"
@@ -30,7 +31,7 @@
           </a-link>
         </a-space>
       </template>
-    </a-table>
+</a-table> -->
 
     <a-descriptions-item>&nbsp;</a-descriptions-item>
 

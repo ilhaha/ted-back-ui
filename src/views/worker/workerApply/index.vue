@@ -80,7 +80,7 @@
             v-if="record.status == 0">审核</a-link>
         </a-space>
         <a-space>
-          <a-link v-permission="['worker:workerApply:detail']" title="审核" @click="openDetail(record.id)">详情</a-link>
+          <a-link v-permission="['worker:workerApply:detail']" title="详情" @click="openDetail(record.id)">详情</a-link>
         </a-space>
       </template>
     </GiTable>
@@ -176,7 +176,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['worker:workerApply:detail', 'worker:workerApply:update', 'worker:workerApply:delete', 'worker:workerApply:review'])
+    show: has.hasPermOr(['worker:workerApply:detail', 'worker:workerApply:review'])
   }
 ]);
 

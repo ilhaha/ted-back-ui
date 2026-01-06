@@ -120,7 +120,7 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "examconnect:knowledgeType:detail",
+      // "examconnect:knowledgeType:detail",
       "examconnect:knowledgeType:update",
       "examconnect:knowledgeType:delete",
     ]),
