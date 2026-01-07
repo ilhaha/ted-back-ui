@@ -115,3 +115,7 @@ export function verifyInvigilate(invigilateList: any) {
 export function deleteExamStaff(id: string) {
   return http.del(`${BASE_URL}/examStaff/${id}`);
 }
+/** @desc 导出监考人员劳务费 */
+export function exportExamStaffFee(params: { userId: string }) {
+  return http.download(`${BASE_URL}/examStaff/exportFee`, params)
+}
