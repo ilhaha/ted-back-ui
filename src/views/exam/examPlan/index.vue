@@ -280,6 +280,7 @@ const columns = ref<TableInstanceColumns[]>([
     show: has.hasPermOr([
       "exam:examPlan:update",
       "exam:examPlan:delete",
+      "exam:examPlan:detail"
     ]),
   },
 ]);

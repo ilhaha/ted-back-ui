@@ -37,10 +37,20 @@ export interface QuestionBankDetailResp {
   updateUserString: string
 }
 export interface QuestionBankQuery {
-  categoryId: string | undefined
   sort: Array<string>
+  categoryName: string | undefined
+  knowledgeTypeName: string | undefined
+  projectName: string | undefined
+  question: string | undefined
 }
-export interface QuestionBankPageQuery extends QuestionBankQuery, PageQuery {}
+export interface QuestionBankPageQuery extends QuestionBankQuery, PageQuery { }
+
+
+/** @desc 根据项目id删除题目 */
+export function batchDeleteQuestionBank(data: any[]) {
+  return http.post(`${BASE_URL}/projects/delete`, data)
+}
+
 
 /** @desc 获取级联菜单 */
 export function getOptions() {

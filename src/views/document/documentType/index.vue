@@ -1,27 +1,23 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="资料类型管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable title="资料类型管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
-	    <a-input-search v-model="queryForm.typeName" placeholder="请输入资料类型名称" allow-clear @search="search" />
-      <a-button type="primary" class="ml-2" @click="search">
-            <template #icon><icon-search /></template>
-            搜索
-          </a-button>
+        <a-input-search v-model="queryForm.typeName" placeholder="请输入资料类型名称" allow-clear @search="search" />
+        <a-button type="primary" class="ml-2" @click="search">
+          <template #icon><icon-search /></template>
+          搜索
+        </a-button>
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
         </a-button>
+      </template>
+      <template #needUploadPerson="{ record }">
+        <a-tag :color="getNeedUploadPersonColor(record.needUploadPerson)" bordered>{{
+          getNeedUploadPersonText(record.needUploadPerson)
+        }}</a-tag>
       </template>
       <template #toolbar-right>
         <a-button v-permission="['document:documentType:add']" type="primary" @click="onAdd">
@@ -36,13 +32,8 @@
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['document:documentType:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-          <a-link
-            v-permission="['document:documentType:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
+          <a-link v-permission="['document:documentType:delete']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>
         </a-space>
@@ -82,6 +73,7 @@ const {
 } = useTable((page) => listDocumentType({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
   { title: '类型名称', dataIndex: 'typeName', slotName: 'typeName' },
+  { title: '资料上传适用人员', dataIndex: 'needUploadPerson', slotName: 'needUploadPerson' },
   { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
   {
     title: '操作',
@@ -90,7 +82,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['document:documentType:update', 'document:documentType:delete'])
+    show: has.hasPermOr(['document:documentType:update', 'document:documentType:delete', 'document:documentType:detail']),
   }
 ]);
 
@@ -130,6 +122,32 @@ const DocumentTypeDetailDrawerRef = ref<InstanceType<typeof DocumentTypeDetailDr
 const onDetail = (record: DocumentTypeResp) => {
   DocumentTypeDetailDrawerRef.value?.onOpen(record.id)
 }
+
+const getNeedUploadPersonText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "京籍与非京籍均需上传";
+    case 1:
+      return "仅京籍人员需上传";
+    case 2:
+      return "仅非京籍人员需上传";
+    default:
+      return "未知人员";
+  }
+};
+
+const getNeedUploadPersonColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "red";
+    case 1:
+      return "blue";
+    case 2:
+      return "orange";
+    default:
+      return "default";
+  }
+};
 </script>
 
 <style scoped lang="scss"></style>

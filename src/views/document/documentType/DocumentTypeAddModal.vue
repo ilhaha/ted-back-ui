@@ -1,15 +1,15 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
-    <GiForm ref="formRef" v-model="form" :columns="columns" />
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
+    <GiForm ref="formRef" v-model="form" :columns="columns">
+      <template #needUploadPerson>
+        <a-radio-group v-model="form.needUploadPerson">
+          <a-radio :value="2">仅非京籍人员需上传</a-radio>
+          <a-radio :value="1">仅京籍人员需上传</a-radio>
+          <a-radio :value="0">京籍与非京籍均需上传</a-radio>
+        </a-radio-group>
+      </template>
+    </GiForm>
   </a-modal>
 </template>
 
@@ -35,6 +35,8 @@ const formRef = ref<InstanceType<typeof GiForm>>()
 
 const [form, resetForm] = useResetReactive({
   // todo 待补充
+  needUploadPerson: 2,
+  typeName: '',
 })
 
 const columns: ColumnItem[] = reactive([
@@ -45,6 +47,15 @@ const columns: ColumnItem[] = reactive([
     span: 24,
     rules: [{ required: true, message: '请输入资料类型名称' }]
   },
+  {
+    label: '资料上传适用人员',
+    field: 'needUploadPerson',
+    type: 'radio',
+    span: 24,
+    soltName: 'needUploadPerson',
+    rules: [{ required: true, message: '请选择是否需要上传' }]
+  }
+
 
 ])
 

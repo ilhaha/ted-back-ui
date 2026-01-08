@@ -24,7 +24,7 @@
 
             <WokerApplyNeedUpload ref="WokerApplyNeedUploadRef" :projectNeedUploadDocs="projectNeedUploadDocs"
                 :classId="classId" @isAllUploaded="handIsAllUploaded" @switchPhoneVerify="handSwitchPhoneVerify"
-                @updateIdCardLast6="hanldUpdateIdCardLast6" @submitAfter="handSubmitAfter"
+                @updateIdCard="hanldUpdateIdCard" @submitAfter="handSubmitAfter"
                 v-if="!workerUploadedDocs && projectInfo" />
 
             <WokerApplyUploaded ref="WokerApplyUploadedRef" :workerUploadedDocs="workerUploadedDocs"
@@ -104,7 +104,7 @@ const captchaType = ref('blockPuzzle')
 const captchaMode = ref('pop')
 const captchaBtnName = ref('获取验证码')
 const phoneVerifiedRef = ref(null)
-const idLast6 = ref('')
+const idCard = ref('')
 const isRestUpload = ref(false)
 const candidateName = ref('')
 // 手机号验证数据
@@ -211,7 +211,7 @@ const phoneVerifiedSubmit = async ({ values, errors }) => {
             Message.error('验证码错误')
             return
         }
-        WokerApplyNeedUploadRef.value?.submitUpload(phoneVerifiedForm.phone, idLast6.value, isRestUpload.value)
+        WokerApplyNeedUploadRef.value?.submitUpload(phoneVerifiedForm.phone, idCard.value, isRestUpload.value)
     } finally {
         loading.value = false
     }
@@ -221,12 +221,12 @@ const openPhoneVerifiedModel = () => {
 }
 
 const handSubmitAfter = (res: any) => {
-    workerApplySearchRef.value?.setIdLast6(res, false)
+    workerApplySearchRef.value?.setIdCard(res, false)
 }
 
-const hanldUpdateIdCardLast6 = (res: any) => {
-    idLast6.value = res
-    workerApplySearchRef.value?.setIdLast6(res, true)
+const hanldUpdateIdCard = (res: any) => {
+    idCard.value = res
+    workerApplySearchRef.value?.setIdCard(res, true)
 }
 
 const handSwitchPhoneVerify = (res: any) => {
@@ -242,7 +242,7 @@ const handVerifiedResult = (res: any) => {
     workerUploadedDocs.value = res.workerUploadedDocs
     projectInfo.value = res.projectInfo
     candidateName.value = res.workerUploadedDocs ? res.workerUploadedDocs.candidateName : ''
-    idLast6.value = res.idLast6
+    idCard.value = res.idCard
 }
 
 

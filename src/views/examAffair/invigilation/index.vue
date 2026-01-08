@@ -1,33 +1,14 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['nickname']"
-      @refresh="search"
-    >
+    <GiTable row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['nickname']" @refresh="search">
       <template #top>
-        <GiForm
-          v-model="queryForm"
-          search
-          :columns="queryFormColumns"
-          size="medium"
-          @search="search"
-          @reset="reset"
-        >
+        <GiForm v-model="queryForm" search :columns="queryFormColumns" size="medium" @search="search" @reset="reset">
         </GiForm>
       </template>
       <template #toolbar-left>
-        <a-button
-          v-permission="['examAffair:invigilation:add']"
-          type="primary"
-          @click="onAdd"
-        >
+        <a-button v-permission="['examAffair:invigilation:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
@@ -50,52 +31,28 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link
-            v-permission="['examAffair:invigilation:addQualification']"
-            title="资质列表"
-            @click="onAddQualification(record)"
-          >
-            资质
+          <a-link v-permission="['examAffair:invigilation:addQualification']" title="资质列表"
+            @click="onAddQualification(record)">
+            资质上传
           </a-link>
-          <a-link
-            v-permission="['examAffair:invigilation:exportFee']"
-            @click="onExportFee(record)"
-          >
-            导出劳务费
-          </a-link>
-          <a-link
-            v-permission="['examAffair:invigilation:update']"
-            title="修改"
-            @click="onUpdate(record)"
-            >修改</a-link
-          >
-          <a-link
-            v-permission="['examAffair:invigilation:delete']"
-            status="danger"
-            :disabled="record.isSystem"
-            :title="record.isSystem ? '系统内置数据不能删除' : '删除'"
-            @click="onDelete(record)"
-          >
-            删除
+          <a-link v-permission="['examAffair:invigilation:exportFee']" @click="onExportFee(record)">
+            劳务费导出
           </a-link>
           <a-dropdown>
             <a-button
-              v-if="has.hasPermOr(['examAffair:invigilation:resetPwd'])"
-              type="text"
-              size="mini"
-              title="更多"
-            >
+              v-if="has.hasPermOr(['examAffair:invigilation:resetPwd', 'examAffair:invigilation:delete', 'examAffair:invigilation:update'])"
+              type="text" size="mini" title="更多">
               <template #icon>
                 <icon-more :size="16" />
               </template>
             </a-button>
             <template #content>
-              <a-doption
-                v-permission="['examAffair:invigilation:resetPwd']"
-                title="重置密码"
-                @click="onResetPwd(record)"
-                >重置密码</a-doption
-              >
+              <a-doption v-permission="['examAffair:invigilation:update']" :disabled="record.isSystem" title="修改"
+                @click="onUpdate(record)">修改</a-doption>
+              <a-doption v-permission="['examAffair:invigilation:delete']" :disabled="record.isSystem"
+                :title="record.isSystem ? '系统内置数据不能删除' : '删除'" @click="onDelete(record)">删除</a-doption>
+              <a-doption v-permission="['examAffair:invigilation:resetPwd']" title="重置密码"
+                @click="onResetPwd(record)">重置密码</a-doption>
             </template>
           </a-dropdown>
         </a-space>
@@ -271,10 +228,12 @@ const columns: TableInstanceColumns[] = [
     title: "操作",
     dataIndex: "action",
     slotName: "action",
-    width: 190,
+    width: 220,
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
+      "examAffair:invigilation:exportFee",
+      "examAffair:invigilation:detail",
       "examAffair:invigilation:resetPwd",
       "examAffair:invigilation:delete",
       "examAffair:invigilation:update",

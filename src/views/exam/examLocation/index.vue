@@ -1,21 +1,11 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="考试地点管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable title="考试地点管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
       <template #operationalStatus="{ record }">
-        <a-tag
-            :color="getStatusColor(record.operationalStatus)" bordered
-        >{{ getStatusText(record.operationalStatus) }}</a-tag>
+        <a-tag :color="getStatusColor(record.operationalStatus)" bordered>{{ getStatusText(record.operationalStatus)
+          }}</a-tag>
       </template>
       <template #toolbar-right>
         <a-button v-permission="['exam:examLocation:add']" type="primary" @click="onAdd">
@@ -23,7 +13,7 @@
           <template #default>新增</template>
         </a-button>
         <!-- <a-button v-permission="['exam:classroom:export']" @click="onExport"> -->
-          <!-- <template #icon><icon-download /></template>
+        <!-- <template #icon><icon-download /></template>
           <template #default>导出</template>
         </a-button> -->
       </template>
@@ -61,7 +51,7 @@
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:examLocation:update']" title="修改" @click="onUpdate(record)">修改</a-link>
- <!-- <a-link
+          <!-- <a-link
             v-permission="['exam:examLocation:delete']"
             status="danger"
             :disabled="record.disabled"
@@ -89,8 +79,8 @@ import { useDict } from '@/hooks/app'
 import { useDept, useRole } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
-import type {ColumnItem} from "@/components/GiForm";
-import {DisEnableStatusList} from "@/constant/common";
+import type { ColumnItem } from "@/components/GiForm";
+import { DisEnableStatusList } from "@/constant/common";
 
 defineOptions({ name: 'ExamLocation' })
 
@@ -142,7 +132,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 200,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['exam:examLocation:update', 'exam:examLocation:delete'])
+    show: has.hasPermOr(['exam:examLocation:update', 'exam:examLocation:delete', 'exam:examLocation:detail'])
   }
 ])
 
@@ -256,10 +246,10 @@ const getStatusText = (status: string) => {
   display: flex;
   align-items: center;
   width: 100%;
-  
-  > .arco-input-wrapper,
-  > .arco-select {
-    width: 200px;  // 两个搜索框统一宽度
+
+  >.arco-input-wrapper,
+  >.arco-select {
+    width: 200px; // 两个搜索框统一宽度
   }
 
   .operation-btns {

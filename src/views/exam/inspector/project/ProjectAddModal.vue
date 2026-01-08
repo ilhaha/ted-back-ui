@@ -1,19 +1,9 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="currentColumns" />
     <template #footer>
-      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm"
-        >确认审核</a-button
-      >
+      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm">确认审核</a-button>
     </template>
   </a-modal>
 </template>
@@ -56,7 +46,7 @@ const [form, resetForm] = useResetReactive({
   projectCode: "",
   examDuration: "",
   imageUrl: "",
-  auditStatus: undefined,
+  auditStatus: "2",
   projectStatus: "",
   categoryId: undefined,
   projectType: 1,
@@ -92,9 +82,9 @@ const handleUpload = (options: RequestOption) => {
 
 const categorySelect = ref<LabelValueState[]>([]);
 //计算属性，判断所属八大类是否禁用
-const categoryDisabled = computed(() => {
-  return isUpdate.value && form.projectStatus === "2";
-});
+// const categoryDisabled = computed(() => {
+//   return isUpdate.value && form.projectStatus === "2";
+// });
 const columns: ColumnItem[] = reactive([
   {
     label: "项目名称",
@@ -130,7 +120,7 @@ const columns: ColumnItem[] = reactive([
     props: {
       allowSearch: true,
       options: categorySelect,
-      disabled: categoryDisabled,
+      // disabled: categoryDisabled,
     },
   },
   {

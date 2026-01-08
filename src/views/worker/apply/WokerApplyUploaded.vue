@@ -31,6 +31,14 @@
             </div>
         </div>
 
+        <div class="tips-card warning-tips" v-if="workerUploadedDocs.status == 5">
+            <div class="tips-icon">ℹ️</div>
+            <div class="tips-text">
+                您的报考资料已成功提交，请耐心等待机构提交资料进行审核。
+            </div>
+        </div>
+
+
         <div class="doc-card-id">
             <div class="upload-item">
                 <div class="doc-info">

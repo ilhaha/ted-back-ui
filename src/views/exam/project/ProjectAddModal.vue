@@ -56,7 +56,7 @@ const [form, resetForm] = useResetReactive({
   projectCode: "",
   examDuration: "",
   imageUrl: "",
-  auditStatus: undefined,
+  auditStatus: "2",
   projectStatus: "",
   categoryId: undefined,
   projectType: 0,
@@ -92,9 +92,9 @@ const handleUpload = (options: RequestOption) => {
 
 const categorySelect = ref<LabelValueState[]>([]);
 //计算属性，判断所属八大类是否禁用
-const categoryDisabled = computed(() => {
-  return isUpdate.value && form.projectStatus === "2";
-});
+// const categoryDisabled = computed(() => {
+//   return isUpdate.value && form.projectStatus === "2";
+// });
 
 const columns: ColumnItem[] = reactive([
   {
@@ -131,7 +131,7 @@ const columns: ColumnItem[] = reactive([
     props: {
       allowSearch: true,
       options: categorySelect,
-      disabled: categoryDisabled,
+      // disabled: categoryDisabled,
     },
   },
   {

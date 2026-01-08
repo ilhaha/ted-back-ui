@@ -105,7 +105,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 200,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['training:org:resetPwd', 'training:org:update', 'training:org:delete'])
+    show: has.hasPermOr(['training:org:resetPwd', 'training:org:update', 'training:org:delete', "training:org:detail"])
   }
 ]);
 const UserResetPwdModalRef = ref<InstanceType<typeof UserResetPwdModal>>()

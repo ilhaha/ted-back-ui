@@ -100,9 +100,7 @@
                 </a-upload>
             </div>
         </div>
-        <div v-if="projectNeedUploadDocs.length > 0">
-
-
+        <div v-if="projectNeedUploadDocs.length > 0 && form.idCardNumber">
             <div class="tips-card">
                 <div class="tips-icon">💡</div>
                 <div class="tips-text">
@@ -113,7 +111,10 @@
             <div class="doc-card" v-for="item in projectNeedUploadDocs" :key="item.id"
                 @mouseenter="cardHovered = item.id" @mouseleave="cardHovered = ''">
                 <div class="doc-info">
-                    <span class="doc-name">{{ item.typeName }}</span>
+                    <span class="doc-name">
+                        {{ item.typeName }}
+                        <span v-if="isUploadRequired(item.needUploadPerson, isBeijing)" class="required-star">*</span>
+                    </span>
                     <span class="upload-count">
                         {{ (fileListMap[item.id] || []).length }}/3
                     </span>
@@ -137,11 +138,11 @@
                 </div>
             </div>
         </div>
-        <a-modal v-model:visible="showDialog" title="身份验证" :mask-closable="false" :footer="false" width="400px"
+        <a-modal v-model:visible="showDialog" title="身份验证" :mask-closable="false" :footer="false" width="90%"
             @close="verifyIdCardClose">
             <div style="text-align:center;">
-                <a-input-password v-model="idLast6" placeholder="请输入身份证后六位" :max-length="6" allow-clear
-                    style="width: 250px" />
+                <a-input-password v-model="idCard" placeholder="请输入身份证" :max-length="18" allow-clear
+                    style="width: 90%" />
             </div>
             <div style="text-align:right; margin-top: 20px;">
                 <a-button type="dashed" status="danger" @click="restUploadIdCard">重新上传身份证</a-button>
@@ -168,7 +169,7 @@ const emit = defineEmits<{
     (e: 'isAllUploaded', payload: any): void
     (e: 'submitAfter', payload: string): void
     (e: 'switchPhoneVerify', payload: boolean): void
-    (e: 'updateIdCardLast6', payload: string): void
+    (e: 'updateIdCard', payload: string): void
 }>()
 
 const uploadUrl = `${import.meta.env.VITE_API_PREFIX}/upload/file/idCard/`
@@ -181,12 +182,13 @@ const cardHovered = ref('')
 const frontFileList = ref<any[]>([])
 const backFileList = ref<any[]>([])
 const faceFileList = ref<any[]>([])
-const idLast6 = ref('')
-const parentIdLast6 = ref('')
+const idCard = ref('')
+const parentIdCard = ref('')
 const flag = ref(true)
 const form = ref({
     realName: '',
     gender: '',
+    idCardAddress: '',
     idCardNumber: '',
     idCardPhotoFront: '',
     idCardPhotoBack: '',
@@ -198,11 +200,13 @@ const form = ref({
     qualificationName: ''
 })
 const temporary = ref('')
+const isBeijing = ref(false)
+
 // 提交上传
-const submitUpload = async (phone: string, idLast6: string, isRestUpload: boolean) => {
-    if (!checkIdCardLast6(form.value.idCardNumber, idLast6)) {
-        Message.error("上传的身份证与填写的身份证后六位不匹配，请选择操作方式。");
-        parentIdLast6.value = idLast6;
+const submitUpload = async (phone: string, idCard: string, isRestUpload: boolean) => {
+    if (!checkIdCard(form.value.idCardNumber, idCard)) {
+        Message.error("上传的身份证与填写的身份证不匹配，请选择操作方式。");
+        parentIdCard.value = idCard;
         // if (isRestUpload) {
         showDialog.value = true;
         // }
@@ -222,12 +226,12 @@ const submitUpload = async (phone: string, idLast6: string, isRestUpload: boolea
         if (res.data) {
             Message.success("提交成功")
             emit('switchPhoneVerify', false)
-            emit('submitAfter', temporary.value.slice(-6))
+            emit('submitAfter', temporary.value)
             temporary.value = ''
         }
     } catch (error) {
         if (error.message == '您已提交过报名，请勿重复提交！') {
-            emit('submitAfter', temporary.value.slice(-6))
+            emit('submitAfter', temporary.value)
             emit('switchPhoneVerify', false)
         }
     } finally {
@@ -235,18 +239,20 @@ const submitUpload = async (phone: string, idLast6: string, isRestUpload: boolea
     }
 }
 
+const ID_CARD_REGEX = /^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[0-9X]?$/;
+
 // 校验两个身份证是否是一个
 const verifyIdCard = async () => {
-    if (idLast6.value.length < 6) {
-        Message.error("请输入身份证后六位！");
+    if (!ID_CARD_REGEX.test(idCard.value)) {
+        Message.warning("身份证格式不正确2")
         return
     }
-    if (!checkIdCardLast6(form.value.idCardNumber, idLast6.value)) {
-        Message.error("上传的身份证与填写的身份证后六位不匹配，请选择操作方式。");
+    if (!checkIdCard(form.value.idCardNumber, idCard.value)) {
+        Message.error("上传的身份证与填写的身份证不匹配，请选择操作方式。");
     } else {
         showDialog.value = false;
         emit('switchPhoneVerify', true)
-        emit("updateIdCardLast6", idLast6.value)
+        emit("updateIdCard", idCard.value)
     }
 }
 
@@ -265,27 +271,66 @@ const restUploadIdCard = () => {
 
 
 const verifyIdCardClose = () => {
-    idLast6.value = ""
+    idCard.value = ""
     showDialog.value = false;
     emit('switchPhoneVerify', (true && flag.value))
 }
-const checkIdCardLast6 = (uploadedId: string | undefined, inputLast6: string) => {
-    const uploadedIdLast6 = uploadedId?.slice(-6);
-    let checkRes = uploadedIdLast6 == inputLast6;
+const checkIdCard = (uploadedId: string | undefined, inputIdCard: string) => {
+    let checkRes = uploadedId == inputIdCard;
     return checkRes;
 }
 
-// 计算是否所有资料（图片类+申请表）都已上传
 const isAllUploaded = computed(() => {
-    const isImageAllUploaded = props.projectNeedUploadDocs.every(item =>
-        (fileListMap[item.id] || []).length >= 1
-    )
-    const isFormUploaded = formFileList.value.length >= 1
-    const isIdCardUploaded = frontFileList.value.length >= 1
-    const isBackFileList = backFileList.value.length >= 1
-    const isFaceUploaded = faceFileList.value.length >= 1
-    return isImageAllUploaded && isFormUploaded && isIdCardUploaded && isFaceUploaded && isBackFileList
-})
+    // 1. 项目资料：逐个判断是否需要上传
+    const isImageAllUploaded = props.projectNeedUploadDocs.every(item => {
+        const needUpload = isUploadRequired(item.needUploadPerson, isBeijing.value);
+
+        // 不需要上传，直接通过
+        if (!needUpload) return true;
+
+        // 需要上传，必须至少 1 个文件
+        return (fileListMap[item.id] || []).length >= 1;
+    });
+
+    // 2. 其他通用必传资料
+    const isFormUploaded = formFileList.value.length >= 1;
+    const isIdCardUploaded = frontFileList.value.length >= 1;
+    const isBackUploaded = backFileList.value.length >= 1;
+    const isFaceUploaded = faceFileList.value.length >= 1;
+    return (
+        isImageAllUploaded &&
+        isFormUploaded &&
+        isIdCardUploaded &&
+        isBackUploaded &&
+        isFaceUploaded
+    );
+});
+
+const isUploadRequired = (needUploadPerson: number, isBeijing: boolean) => {
+    switch (needUploadPerson) {
+        case 0: // 全部需要
+            return true;
+        case 1: // 仅京籍
+            return isBeijing;
+        case 2: // 仅非京籍
+            return !isBeijing;
+        default:
+            return false;
+    }
+};
+
+
+// 计算是否所有资料（图片类+申请表）都已上传
+// const isAllUploaded = computed(() => {
+//     const isImageAllUploaded = props.projectNeedUploadDocs.every(item =>
+//         (fileListMap[item.id] || []).length >= 1
+//     )
+//     const isFormUploaded = formFileList.value.length >= 1
+//     const isIdCardUploaded = frontFileList.value.length >= 1
+//     const isBackFileList = backFileList.value.length >= 1
+//     const isFaceUploaded = faceFileList.value.length >= 1
+//     return isImageAllUploaded && isFormUploaded && isIdCardUploaded && isFaceUploaded && isBackFileList
+// })
 
 // 报名资格申请表上传（单独处理）
 const handleFormUpload = async (options: any) => {
@@ -346,6 +391,8 @@ const handleFrontSuccess = (file: any) => {
     form.value.realName = data.realName || ''
     form.value.gender = data.gender || ''
     form.value.idCardNumber = data.idCardNumber || ''
+    form.value.idCardAddress = data.address || ''
+    isBeijing.value = data.address?.startsWith('北京市');
     Message.success('身份证正面 上传成功')
 }
 
@@ -728,6 +775,11 @@ defineExpose({ submitUpload, getFormIdcard })
     border-color: #c9d1e0;
     color: #fff;
     cursor: not-allowed;
+}
+
+.required-star {
+    color: red;
+    margin-left: 2px;
 }
 
 /* 小屏手机适配 */

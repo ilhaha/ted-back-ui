@@ -29,7 +29,8 @@
 
       <!-- 是否启用列 -->
       <template #isEnabled="{ record }">
-        <a-switch v-model="record.isEnabled" @change="(val) => onToggleEnabled(record, val)" :disabled="!has.hasPerm('invigilate:laborFee:ruleToggle')">
+        <a-switch v-model="record.isEnabled" @change="(val) => onToggleEnabled(record, val)"
+          :disabled="!has.hasPerm('invigilate:laborFee:ruleToggle')">
           <template #checked>启用</template>
           <template #un-checked>禁用</template>
         </a-switch>
@@ -115,6 +116,7 @@ const columns = ref([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
+      "invigilate:laborFee:detail",
       "invigilate:laborFee:update",
       "invigilate:laborFee:delete",
     ]),

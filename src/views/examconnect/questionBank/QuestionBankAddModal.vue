@@ -91,31 +91,11 @@ const [form, resetForm] = useResetReactive({
   examType: 1,
 })
 
-const findPath = (
-  options: any[],
-  targetId: string | number,
-  path: any[] = []
-): any[] | null => {
-  for (const item of options) {
-    const newPath = [...path, item.value];
-    if (String(item.value) === String(targetId)) {
-      return newPath;
-    }
-    if (item.children && item.children.length > 0) {
-      const result = findPath(item.children, targetId, newPath);
-      if (result) return result;
-    }
-  }
-  return null;
-};
-
 // 修改保存方法中的相关部分
 const save = async () => {
   try {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
-    const categoryIds = findPath(categoryOptions.value, form.categoryIds)
-
     if (!options.value || options.value.length < 2) {
       Message.warning('题目必须包含两个选项');
       return false;
@@ -142,7 +122,7 @@ const save = async () => {
       question: form.question,
       imageMinUrl: form.imageMinUrl,
       imageUrl: form.imageUrl,
-      categoryId: categoryIds,
+      categoryId: [form.categoryIds],
       options: options.value,
       correctAnswers: correctAnswers.value,
       examType: form.examType,
@@ -293,25 +273,25 @@ const reset = () => {
 const onAdd = async () => {
   reset()
   dataId.value = ''
+  visible.value = true
   const res = await getOptions()
   categoryOptions.value = res.data || []
-  visible.value = true
+
 }
 
 // 修改
 const onUpdate = async (id: string) => {
   reset()
   dataId.value = id
+  visible.value = true
   const res = await getOptions()
   categoryOptions.value = res.data || []
   const { data } = await getQuestionBank(id)
   Object.assign(form, data)
-
-  visible.value = true
   form.categoryIds = form.categoryId
   form.imageMinUrl = form.attachment
   form.imageUrl = form.attachment
-  form.examType = data.examType || 0 // 兜底默认值 0，避免 undefined
+  form.examType = data.examType || 0
   options.value = form.options
   if (form.questionType !== 2) {
     correctAnswers.value = form.correctAnswers[0]

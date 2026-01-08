@@ -68,10 +68,7 @@
             <a-link v-permission="['exam:project:examine']" title="审核" @click="onExamineA(record)">审核</a-link>
             <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
             <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-            <a-link v-permission="['exam:project:delete']" status="danger" :disabled="record.disabled"
-              :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
-              删除
-            </a-link>
+
           </div>
           <!-- 状态2：仅显示详情 + 删除 -->
           <div v-else-if="record.projectStatus === 2">
@@ -92,6 +89,10 @@
             <!--              删除-->
             <!--            </a-link>-->
           </div>
+          <a-link v-permission="['exam:project:delete']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
+            删除
+          </a-link>
         </a-space>
       </template>
     </GiTable>

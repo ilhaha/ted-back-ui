@@ -41,6 +41,10 @@
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
         </a-button>
+        <a-button @click="openBatchDelete" v-permission="['examconnect:questionBank:delete']" status="danger">
+          <template #icon><icon-delete /></template>
+          <template #default>批量删除</template>
+        </a-button>
         <!-- <a-button @click="onExportExcel">
           <template #icon><icon-download /></template>
           <template #default>导出</template>
@@ -62,6 +66,14 @@
     <QuestionBankDetailDrawer ref="QuestionBankDetailDrawerRef" />
     <QuestionBankImportModal ref="QuestionBankImportModalRef" @import-success="search" />
     <ExportQuestionsExcel ref="ExportQuestionsExcelRef" />
+
+    <a-modal v-model:visible="batchDeleteVisible" title="项目题目批量删除" :mask-closable="false" :esc-to-close="false"
+      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="batchDelete" @close="search">
+      <GiForm ref="formRef" v-model="batchDeleteForm" :columns="batchDeleteColumns" />
+      <template #footer>
+        <a-button type="primary" @click="batchDelete" :loading="batchDeleteLoading">确认删除</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
@@ -70,20 +82,40 @@ import QuestionBankAddModal from "./QuestionBankAddModal.vue";
 import QuestionBankDetailDrawer from "./QuestionBankDetailDrawer.vue";
 import QuestionBankImportModal from "./QuestionBankImportModal.vue";
 import ExportQuestionsExcel from "./ExportQuestionsExcel.vue";
+import { useExamPlanProject, useResetReactive } from "@/hooks";
+import { useWindowSize } from "@vueuse/core";
+import { Message } from '@arco-design/web-vue'
+
 import {
   type QuestionBankResp,
   type QuestionBankQuery,
   deleteQuestionBank,
   exportQuestionBank,
   listQuestionBank,
+  batchDeleteQuestionBank
 } from "@/apis/examconnect/questionBank";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
 import { useDict } from "@/hooks/app";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
+import { type ColumnItem, GiForm } from "@/components/GiForm";
+
+const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
+
 
 defineOptions({ name: "QuestionBank" });
+
+const { width } = useWindowSize();
+
+const batchDeleteVisible = ref(false);
+
+const [batchDeleteForm] = useResetReactive({
+  examProjectId: [],
+});
+
+const formRef = ref<InstanceType<typeof GiForm>>();
+const batchDeleteLoading = ref(false);
 
 const queryForm = reactive<QuestionBankQuery>({
   categoryName: undefined,
@@ -122,12 +154,45 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "examconnect:questionBank:detail",
       "examconnect:questionBank:update",
       "examconnect:questionBank:delete",
+      "examconnect:questionBank:detail"
     ]),
   },
 ]);
+
+
+const batchDeleteColumns: ColumnItem[] = reactive([
+  {
+    label: "考试项目",
+    field: "examProjectId",
+    type: "cascader",
+    required: true,
+    span: 24,
+    rules: [
+      { required: true, message: "请选择考试项目", trigger: "change" }
+    ],
+    props: computed(() => ({
+      options: examProjectOptions.value,
+      allowSearch: true,
+      multiple: true,
+    })),
+  },
+]);
+
+const batchDelete = async () => {
+  // 表单实例校验
+  const isInvalid = await formRef.value?.formRef?.validate()
+  if (isInvalid) return false
+  batchDeleteLoading.value = true;
+  try {
+    await batchDeleteQuestionBank(batchDeleteForm.examProjectId);
+    Message.success("已删除");
+    batchDeleteVisible.value = false;
+  } finally {
+    batchDeleteLoading.value = false;
+  }
+};
 
 const getAttachment = (str: string) => {
   if (str) return "有附件";
@@ -150,10 +215,20 @@ const getQuestionType = (str: string | number) => {
   }
 };
 
+// 打开批量删除窗口
+const openBatchDelete = async () => {
+  batchDeleteVisible.value = true;
+  batchDeleteForm.examProjectId = [];
+  await getExamProjectOptions(2);
+};
+
 // 重置
 const reset = () => {
-  queryForm.categoryId = undefined;
-  search();
+  queryForm.categoryName = undefined
+  queryForm.knowledgeTypeName = undefined
+  queryForm.knowledgeTypeName = undefined
+  queryForm.question = undefined
+  search()
 };
 
 // 删除

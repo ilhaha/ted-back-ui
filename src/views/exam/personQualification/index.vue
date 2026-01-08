@@ -127,8 +127,10 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
+      "exam:personQualification:audit",
       "exam:personQualification:update",
       "exam:personQualification:delete",
+      "exam:personQualification:detail"
     ]),
   },
 ]);
@@ -167,7 +169,7 @@ const handleBatchReview = async () => {
   const alreadyReviewed = dataList.value
     .filter(item => selectedKeys.value.includes(item.id)) // 只看选中的记录
     .filter(item => item.auditStatus === 1); // 已审核通过的记录
-    
+
   if (alreadyReviewed.length > 0) {
     const names = alreadyReviewed.map(item => item.name);
     Message.error(`${names.join('、')} 已完成审核，无法重复操作`);

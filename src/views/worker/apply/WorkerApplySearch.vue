@@ -2,10 +2,9 @@
     <div class="page-container">
         <!-- 身份验证弹窗 -->
         <a-modal v-model:visible="showDialog" title="身份验证" :closable="false" :mask-closable="false" :footer="false"
-            width="400px">
+            width="90%">
             <div style="text-align:center;">
-                <a-input-password v-model="idLast6" placeholder="请输入身份证后六位" :max-length="6" allow-clear
-                    style="width: 250px" />
+                <a-input v-model="idCard" placeholder="请输入身份证" :max-length="18" allow-clear style="width: 90%" />
             </div>
 
             <div style="text-align:center; margin-top: 20px;">
@@ -19,6 +18,8 @@
 import { ref, onMounted } from 'vue'
 import { verify } from '@/apis/worker/workerApply'
 import { Message } from '@arco-design/web-vue'
+import { encryptByRsa } from '@/utils/encrypt'
+
 const loading = ref(false)
 const props = defineProps<{
     classId: string | number
@@ -27,18 +28,20 @@ const emit = defineEmits<{
     (e: 'verifiedResult', payload: any): void
     (e: 'switchPhoneVerify', payload: boolean): void
 }>()
+const ID_CARD_REGEX = /^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[0-9X]?$/;
 
 const showDialog = ref(true)
-const idLast6 = ref('')
+const idCard = ref('')
 const isUploadedFlag = ref(false)
 const verifyAndGet = async () => {
     if (loading.value) return
-    if (idLast6.value.trim().length !== 6) {
-        Message.warning("请输入完整的身份证后六位")
+    if (!ID_CARD_REGEX.test(idCard.value)) {
+        Message.warning("身份证格式不正确")
         return
     }
     try {
-        const res = await verify({ idLast6: idLast6.value, classId: props.classId })
+        const encryptIdCard = encryptByRsa((idCard.value) || '')
+        const res = await verify({ idCard: encryptIdCard, classId: props.classId })
         const projectNeedUploadDocs = res.data.projectNeedUploadDocs;
         const workerUploadedDocs = res.data.workerUploadedDocs
         const projectInfo = res.data.projectInfo
@@ -47,7 +50,7 @@ const verifyAndGet = async () => {
             Message.warning("您已提交过报名，不可重复提交！")
             emit('switchPhoneVerify', false)
         }
-        emit('verifiedResult', { projectNeedUploadDocs, idLast6: idLast6.value, workerUploadedDocs, projectInfo })
+        emit('verifiedResult', { projectNeedUploadDocs, idCard: idCard.value, workerUploadedDocs, projectInfo })
         showDialog.value = false
     } catch (e) {
 
@@ -56,8 +59,8 @@ const verifyAndGet = async () => {
     }
 }
 
-const setIdLast6 = (val: string, isUploaded: boolean) => {
-    idLast6.value = val
+const setIdCard = (val: string, isUploaded: boolean) => {
+    idCard.value = val
     isUploadedFlag.value = isUploaded
     verifyAndGet()
 }
@@ -68,7 +71,7 @@ onMounted(() => {
 })
 
 defineExpose({
-    setIdLast6
+    setIdCard
 })
 </script>
 
