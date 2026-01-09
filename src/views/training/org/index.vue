@@ -5,7 +5,7 @@
       :disabled-column-keys="['name']" @refresh="search">
       <template #previewImage="{ record }">
         <a-image v-if="record.businessLicense" width="80" height="60" :src="record.businessLicense"
-          :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" @error="handleImageError" />
+          :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover"  />
         <span v-else>-</span>
       </template>
       <template #toolbar-left>
@@ -165,11 +165,7 @@ const onDetail = (record: OrgResp) => {
   OrgDetailDrawerRef.value?.onOpen(record.id)
 }
 
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement
-  img.src = '/images/ce853a5576cd3913a87d709a354cdef.png' // 你的默认图片路径
-  img.onerror = null // 防止默认图片也加载失败时无限循环
-}
+
 </script>
 
 <style scoped lang="scss"></style>

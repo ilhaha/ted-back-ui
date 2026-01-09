@@ -26,7 +26,7 @@
 
               <!-- 图片预览 -->
               <a-image v-if="isImage(url)" width="80" height="60" :src="url" fit="cover"
-                :preview-props="{ zoomRate: 1.5 }" class="preview-image" @error="handleImageError" />
+                :preview-props="{ zoomRate: 1.5 }" class="preview-image"  />
 
               <!-- PDF 预览 -->
               <div v-else>
@@ -310,11 +310,7 @@ const getPreviewUrl = (url: string) => {
   }
 };
 
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // 你的默认图片路径
-  img.onerror = null; // 防止默认图片也加载失败时无限循环
-};
+
 </script>
 
 <style scoped lang="scss">

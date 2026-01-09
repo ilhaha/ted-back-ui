@@ -6,7 +6,7 @@
       <template #docPath="{ record }">
         <a-space v-if="record.docPath">
           <a-image v-for="(path, index) in record.docPath.split(',')" :key="index" width="80" height="60" :src="path"
-            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" @error="handleImageError" />
+            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover"  />
         </a-space>
         <span v-else>-</span>
       </template>
@@ -47,13 +47,6 @@ const onOpen = async (id: string) => {
   queryForm.workerApplyId = id
   search()
 }
-
-
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // 你的默认图片路径
-  img.onerror = null; // 防止默认图片也加载失败时无限循环
-};
 
 defineExpose({ onOpen })
 </script>

@@ -10,7 +10,7 @@
         <template v-if="record.imageUrl">
           <!-- 图片显示缩略图 -->
           <a-image v-if="isImage(record.imageUrl)" width="80" height="60" :src="record.imageUrl"
-            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" @error="handleImageError" />
+            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover"  />
           <!-- PDF 显示预览按钮 -->
           <a-link v-else v-permission="['worker:workerApply:detail']" title="预览报名资格申请表"
             @click="getPreviewUrl(record.imageUrl)">
@@ -302,11 +302,7 @@ const handleBatchAudit = async () => {
   }
 };
 
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // Replace this with your default image URL
-  img.onerror = null; // Prevent the default image from also failing and causing an infinite loop
-};
+
 
 
 const getPreviewUrl = (url: string) => {

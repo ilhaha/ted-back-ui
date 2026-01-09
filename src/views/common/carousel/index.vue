@@ -1,122 +1,71 @@
   <template>
-  <div class="gi_table_page">
-    <GiTable
-      title="轮播图管理管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
-      <template #previewImage="{ record }">
-        <a-image
-          v-if="record.imageMinUrl"
-          width="80"
-          height="60"
-          :src="record.imageMinUrl"
-          :preview-props="{ zoomRate: 1.5 }"
-          class="preview-image"
-          fit="cover"
-          @error="handleImageError"
-        />
-        <span v-else>-</span>
-      </template>
-      <template #imageMinUrl="{ record }">
-        <a-image width="100" height="100" :src="record.imageUrl">
-          <template #loader>
-            <img
-              width="200"
-              src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb051163646151a4a5083b.png~tplv-uwbnlip3yd-webp.webp"
-              style="filter: blur(5px)"
-            />
-          </template>
-        </a-image>
-      </template>
-      <template #toolbar-left>
-        <a-select
-          v-model="queryForm.status"
-          :options="status"
-          placeholder="请选择轮播图状态"
-          allow-clear
-          style="width: 150px"
-          @change="search"
-        />
-        <a-button type="primary" class="ml-2" @click="search">
-          <template #icon><icon-search /></template>
-          搜索
-        </a-button>
-        <a-button @click="reset">
-          <template #icon><icon-refresh /></template>
-          <template #default>重置</template>
-        </a-button>
-      </template>
-      <template #toolbar-right>
-        <a-button
-          v-permission="['common:carousel:add']"
-          type="primary"
-          @click="onAdd"
-        >
-          <template #icon><icon-plus /></template>
-          <template #default>新增</template>
-        </a-button>
-        <!-- <a-button v-permission="['common:carousel:export']" @click="onExport">
+    <div class="gi_table_page">
+      <GiTable title="轮播图管理管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+        :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+        :disabled-column-keys="['name']" @refresh="search">
+        <template #previewImage="{ record }">
+          <a-image v-if="record.imageMinUrl" width="80" height="60" :src="record.imageMinUrl"
+            :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" />
+          <span v-else>-</span>
+        </template>
+        <template #imageMinUrl="{ record }">
+          <a-image width="100" height="100" :src="record.imageUrl">
+            <template #loader>
+              <img width="200"
+                src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb051163646151a4a5083b.png~tplv-uwbnlip3yd-webp.webp"
+                style="filter: blur(5px)" />
+            </template>
+          </a-image>
+        </template>
+        <template #toolbar-left>
+          <a-select v-model="queryForm.status" :options="status" placeholder="请选择轮播图状态" allow-clear style="width: 150px"
+            @change="search" />
+          <a-button type="primary" class="ml-2" @click="search">
+            <template #icon><icon-search /></template>
+            搜索
+          </a-button>
+          <a-button @click="reset">
+            <template #icon><icon-refresh /></template>
+            <template #default>重置</template>
+          </a-button>
+        </template>
+        <template #toolbar-right>
+          <a-button v-permission="['common:carousel:add']" type="primary" @click="onAdd">
+            <template #icon><icon-plus /></template>
+            <template #default>新增</template>
+          </a-button>
+          <!-- <a-button v-permission="['common:carousel:export']" @click="onExport">
           <template #icon><icon-download /></template>
           <template #default>导出</template>
         </a-button> -->
-      </template>
-      <template #action="{ record }">
-        <a-space>
-          <a-link
-            v-permission="['common:carousel:detail']"
-            title="详情"
-            @click="onDetail(record)"
-            >详情</a-link
-          >
-          <a-link
-            v-permission="['common:carousel:update']"
-            title="修改"
-            @click="onUpdate(record)"
-            >修改</a-link
-          >
-          <a-link
-            v-permission="['common:carousel:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
-            删除
-          </a-link>
-        </a-space>
-      </template>
-      <template #imageUrl="{ record }">
-        <img
-          :src="record.imageUrl"
-          style="width: 70px; height: auto; border-radius: 8px"
-        />
-      </template>
-      <template #status="{ record }">
-        <a-space>
-          <a-tag :color="getStatusColor(record.status)" bordered>{{
-            getStatusText(record.status)
-          }}</a-tag>
-          <a-switch
-            v-model="record.status"
-            :checked-value="1"
-            :unchecked-value="0"
-            @change="(newStatus) => handleStatusChange(record, newStatus)"
-          />
-        </a-space>
-      </template>
-    </GiTable>
-    <CarouselAddModal ref="CarouselAddModalRef" @save-success="search" />
-    <CarouselDetailDrawer ref="CarouselDetailDrawerRef" />
-  </div>
-</template>
+        </template>
+        <template #action="{ record }">
+          <a-space>
+            <a-link v-permission="['common:carousel:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+            <a-link v-permission="['common:carousel:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+            <a-link v-permission="['common:carousel:delete']" status="danger" :disabled="record.disabled"
+              :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
+              删除
+            </a-link>
+          </a-space>
+        </template>
+        <template #imageUrl="{ record }">
+          <img :src="record.imageUrl" style="width: 70px; height: auto; border-radius: 8px" />
+        </template>
+        <template #status="{ record }">
+          <a-space>
+            <a-tag :color="getStatusColor(record.status)" bordered>{{
+              getStatusText(record.status)
+              }}</a-tag>
+            <a-switch v-model="record.status" :checked-value="1" :unchecked-value="0"
+              @change="(newStatus) => handleStatusChange(record, newStatus)" />
+          </a-space>
+        </template>
+      </GiTable>
+      <CarouselAddModal ref="CarouselAddModalRef" @save-success="search" />
+      <CarouselDetailDrawer ref="CarouselDetailDrawerRef" />
+    </div>
+  </template>
 
 <script setup lang="ts">
 import CarouselAddModal from "./CarouselAddModal.vue";
@@ -252,11 +201,7 @@ const onDetail = (record: CarouselResp) => {
   CarouselDetailDrawerRef.value?.onOpen(record.id);
 };
 
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // 你的默认图片路径
-  img.onerror = null; // 防止默认图片也加载失败时无限循环
-};
+
 </script>
 
 <style scoped lang="scss"></style>

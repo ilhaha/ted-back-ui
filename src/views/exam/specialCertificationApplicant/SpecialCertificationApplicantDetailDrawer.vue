@@ -76,11 +76,7 @@ const dataId = ref("");
 const dataDetail = ref<SpecialCertificationApplicantDetailResp>();
 const visible = ref(false);
 
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png";
-  img.onerror = null;
-};
+
 
 const getStatusColor = (status?: number) => {
   switch (status) {

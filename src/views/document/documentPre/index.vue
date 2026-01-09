@@ -6,7 +6,7 @@
       <template #previewImage="{ record }">
         <a-space v-if="record.docPath">
           <a-image width="80" height="60" :src="record.docPath" :preview-props="{ zoomRate: 1.5 }" class="preview-image"
-            fit="cover" @error="handleImageError" />
+            fit="cover"  />
         </a-space>
         <span v-else>-</span>
       </template>
@@ -47,11 +47,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '资料类型', dataIndex: 'typeName', slotName: 'enrollPreUploadId',width: "100px" },
   { title: '上传内容', dataIndex: 'docPath', slotName: 'previewImage',width: "100px" },
 ]);
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // 你的默认图片路径
-  img.onerror = null; // 防止默认图片也加载失败时无限循环
-};
+
 defineExpose({ onOpen })
 </script>
 

@@ -32,7 +32,7 @@
                 <div v-if="record.paymentProofUrl" class="image-list">
                     <a-image v-for="(path, index) in record.paymentProofUrl.split(',')" :key="index" width="80"
                         height="60" :src="path" :preview-props="{ zoomRate: 1.5 }" fit="cover"
-                        @error="handleImageError" />
+                         />
                 </div>
                 <span v-else>-</span>
             </template>
@@ -182,11 +182,6 @@ const getPreviewUrl = (url: string) => {
     } else {
         Message.warning("暂不支持此文件类型预览");
     }
-};
-const handleImageError = (e: Event) => {
-    const img = e.target as HTMLImageElement;
-    img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // 你的默认图片路径
-    img.onerror = null; // 防止默认图片也加载失败时无限循环
 };
 
 const getStatusText = (auditStatus: number) => {

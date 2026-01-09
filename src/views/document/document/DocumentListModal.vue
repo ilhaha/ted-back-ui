@@ -16,7 +16,7 @@
             height="60"
             :src="path"
             fit="cover"
-            @error="handleImageError"
+            
           />
         </a-space>
         <span v-else>-</span>
@@ -135,12 +135,7 @@ const getStatusColor = (status: number) => {
   }
 };
 
-// 图片加载错误处理
-const handleImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement;
-  img.src = "/images/ce853a5576cd3913a87d709a354cdef.png"; // 默认图片
-  img.onerror = null;
-};
+
 
 defineExpose({ open });
 </script>

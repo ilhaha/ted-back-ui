@@ -30,12 +30,12 @@ export interface OrgClassDetailResp {
   updateUserString: string
 }
 export interface OrgClassQuery {
-  projectId: string | undefined
   className: string | undefined
-  sort: Array<string>
+  classId: string | undefined
+  isOrgQuery: boolean
 }
 
-export interface OrgClassPageQuery extends OrgClassQuery, PageQuery {}
+export interface OrgClassPageQuery extends OrgClassQuery, PageQuery { }
 
 
 /**
