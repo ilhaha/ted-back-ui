@@ -38,8 +38,8 @@
       </template>
     </GiTable>
 
-    <a-modal v-model:visible="showDocListVisible" title="考生报考资料" :mask-closable="false" :esc-to-close="false" width="95%"
-      draggable :footer="null" modal-class="no-padding-modal" @close="search">
+    <a-modal v-model:visible="showDocListVisible" title="考生报考资料" :mask-closable="false" :esc-to-close="false"
+      width="95%" draggable :footer="null" modal-class="no-padding-modal" @close="search">
       <SubmitDocList ref="submitDocListRef" />
     </a-modal>
   </div>
@@ -59,7 +59,8 @@ defineOptions({ name: 'ClassApplyMaterials' })
 const queryForm = reactive<OrgClassQuery>({
   className: undefined,
   classId: undefined,
-  isOrgQuery: false
+  isOrgQuery: false,
+  flag: 1
 })
 const {
   tableData: dataList,
@@ -73,7 +74,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '班级编号', dataIndex: 'className', slotName: 'className', },
   { title: '报考项目', dataIndex: 'projectName', slotName: 'projectName' },
   { title: '总提交 / 待审 / 通过 / 补正', dataIndex: 'approvedCount', slotName: 'approvedCount' },
-  { title: '提交时间', dataIndex: 'docSubmitTime', slotName: 'docSubmitTime' },
+  { title: '提交时间', dataIndex: 'paySubmitTime', slotName: 'paySubmitTime' },
   {
     title: '操作',
     dataIndex: 'action',

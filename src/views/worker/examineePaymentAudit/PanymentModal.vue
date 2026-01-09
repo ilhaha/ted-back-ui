@@ -9,14 +9,14 @@
 import { Message } from "@arco-design/web-vue";
 import { useWindowSize } from "@vueuse/core";
 import { reactive, ref, computed, watch } from "vue";
-import { reviewPayment } from "@/apis/exam/examineePaymentAudit";
+import { reviewPayment } from "@/apis/training/orgClass";
 import { type ColumnItem, GiForm } from "@/components/GiForm";
 import { useResetReactive } from "@/hooks";
 
 //  审核状态常量
 const AUDIT_STATUS = {
   PASSED: 2, // 审核通过
-  REJECTED: 3, // 补正
+  REJECTED: 4, // 补正
 } as const;
 
 const reviewIds = ref<any[]>([]);

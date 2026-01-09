@@ -15,6 +15,10 @@ export interface OrgClassResp {
   createUserString: string
   updateUserString: string
   disabled: boolean
+  payNoticeUrl: string
+  payProofUrl: string
+  payStatus: number
+  candidateCount:number
 }
 export interface OrgClassDetailResp {
   id: string
@@ -28,14 +32,25 @@ export interface OrgClassDetailResp {
   isDeleted: string
   createUserString: string
   updateUserString: string
+  payNoticeUrl: string
+  payProofUrl: string
+  payStatus: number
+  candidateCount:number
 }
 export interface OrgClassQuery {
   className: string | undefined
   classId: string | undefined
   isOrgQuery: boolean
+  flag: number
 }
 
 export interface OrgClassPageQuery extends OrgClassQuery, PageQuery { }
+
+
+/** @desc 缴费审核 */
+export function reviewPayment(data: any) {
+  return http.post(`${BASE_URL}/review/pay/proof`, data)
+}
 
 
 /**
