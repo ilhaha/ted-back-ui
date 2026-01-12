@@ -31,22 +31,21 @@
             <template #paymentProofUrl="{ record }">
                 <div v-if="record.paymentProofUrl" class="image-list">
                     <a-image v-for="(path, index) in record.paymentProofUrl.split(',')" :key="index" width="80"
-                        height="60" :src="path" :preview-props="{ zoomRate: 1.5 }" fit="cover"
-                         />
+                        height="60" :src="path" :preview-props="{ zoomRate: 1.5 }" fit="cover" />
                 </div>
                 <span v-else>-</span>
             </template>
             <template #auditStatus="{ record }">
                 <a-tag :color="getStatusColor(record.auditStatus)">{{
                     getStatusText(record.auditStatus)
-                }}</a-tag>
+                    }}</a-tag>
             </template>
-            <template #auditNoticeUrl="{ record }">
+            <!-- <template #auditNoticeUrl="{ record }">
                 <a-link @click="getPreviewUrl(record.auditNoticeUrl)"
                     v-permission="['worker:examineePaymentAudit:download']">预览</a-link>
                 <a-link v-permission="['worker:examineePaymentAudit:download']"
                     @click.prevent="downloadAuditNotice(record)" :loading="downloadLodding">下载</a-link>
-            </template>
+            </template> -->
             <template #ticketUrl="{ record }">
                 <div v-if="record.ticketUrl">
                     <a-link @click="getPreviewUrl(record.ticketUrl)" v-permission="['exam:download:ticket']">预览</a-link>
@@ -54,6 +53,13 @@
                         :loading="downloadTicketLodding">下载</a-link>
                 </div>
                 <div v-else>-</div>
+            </template>
+            <template #facePhoto="{ record }">
+                <template v-if="record.facePhoto">
+                    <a-image width="80" height="60" :src="record.facePhoto" fit="cover"
+                        :preview-props="{ zoomRate: 1.5 }" class="preview-image" />
+                </template>
+                <span v-else>-</span>
             </template>
             <!-- <template #action="{ record }">
                 <a-space>
@@ -72,7 +78,7 @@ import {
     type EnrollResp,
     type EnrollQuery,
     deleteEnroll,
-    listEnroll,
+    listEnrollAdminQuery,
     downloadAuditNoticeSingle,
     downloadTicketSingle,
     downloadBatchAuditNotice,
@@ -113,19 +119,22 @@ const {
     pagination,
     search,
     handleDelete,
-} = useTable((page) => listEnroll({ ...queryForm, ...page }), {
+} = useTable((page) => listEnrollAdminQuery({ ...queryForm, ...page }), {
     immediate: false,
 });
 
 const columns = ref<TableInstanceColumns[]>([
+    { title: "机构名称", dataIndex: "orgName", slotName: "orgName" },
     { title: "所属班级", dataIndex: "className", slotName: "className" },
     { title: "考生姓名", dataIndex: "nickName", slotName: "nickName" },
     { title: "报名时间", dataIndex: "createTime", slotName: "createTime" },
+    { title: "照片", dataIndex: "facePhoto", slotName: "facePhoto" },
+
     // { title: "缴费通知单编号", dataIndex: "noticeNo", slotName: "noticeNo" },
     // { title: "缴费通知单", dataIndex: "auditNoticeUrl", slotName: "auditNoticeUrl" },
     // { title: "缴费凭证", dataIndex: "paymentProofUrl", slotName: "paymentProofUrl" },
     // { title: "缴费时间", dataIndex: "paymentTime", slotName: "paymentTime" },
-    { title: "缴费状态", dataIndex: "auditStatus", slotName: "auditStatus" },
+    // { title: "缴费状态", dataIndex: "auditStatus", slotName: "auditStatus" },
     // { title: "准考证", dataIndex: "ticketUrl", slotName: "ticketUrl" },
     // {
     //     title: "操作",

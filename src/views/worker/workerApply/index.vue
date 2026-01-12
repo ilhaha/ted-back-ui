@@ -12,21 +12,9 @@
           <template #default>重置</template>
         </a-button>
       </template>
-      <template #approvedCount="{ record }">
+      <template #pendingReviewCount="{ record }">
         <a-tag color="blue">
-          {{ record.pendingReviewCount + record.approvedCount + record.rejectedCount }}
-        </a-tag>
-        <a-divider direction="vertical" />
-        <a-tag color="orange">
           {{ record.pendingReviewCount }}
-        </a-tag>
-        <a-divider direction="vertical" />
-        <a-tag color="green">
-          {{ record.approvedCount }}
-        </a-tag>
-        <a-divider direction="vertical" />
-        <a-tag color="red">
-          {{ record.rejectedCount }}
         </a-tag>
       </template>
       <template #action="{ record }">
@@ -46,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { type OrgClassResp, type OrgClassQuery, listOrgClass } from '@/apis/training/orgClass'
+import { type OrgClassResp, type OrgClassQuery, listOrgClassWorker } from '@/apis/training/orgClass'
 import { getSelectOrgProjectClass } from '@/apis/training/org'
 import SubmitDocList from './SubmitDocList.vue'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
@@ -67,14 +55,14 @@ const {
   loading,
   pagination,
   search,
-} = useTable((page) => listOrgClass({ ...queryForm, ...page }), { immediate: true })
+} = useTable((page) => listOrgClassWorker({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
   { title: '机构代号', dataIndex: 'orgCode', slotName: 'orgCode' },
   { title: '机构名称', dataIndex: 'orgName', slotName: 'orgName' },
   { title: '班级编号', dataIndex: 'className', slotName: 'className', },
   { title: '报考项目', dataIndex: 'projectName', slotName: 'projectName' },
-  { title: '总提交 / 待审 / 通过 / 补正', dataIndex: 'approvedCount', slotName: 'approvedCount' },
-  { title: '提交时间', dataIndex: 'paySubmitTime', slotName: 'paySubmitTime' },
+  { title: '待审核数', dataIndex: 'pendingReviewCount', slotName: 'pendingReviewCount' },
+  { title: '提交时间', dataIndex: 'docSubmitTime', slotName: 'docSubmitTime' },
   {
     title: '操作',
     dataIndex: 'action',

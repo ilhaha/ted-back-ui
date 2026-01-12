@@ -5,7 +5,7 @@
       :disabled-column-keys="['name']" @refresh="search">
       <template #previewImage="{ record }">
         <a-image v-if="record.businessLicense" width="80" height="60" :src="record.businessLicense"
-          :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover"  />
+          :preview-props="{ zoomRate: 1.5 }" class="preview-image" fit="cover" />
         <span v-else>-</span>
       </template>
       <template #toolbar-left>
@@ -31,6 +31,11 @@
           <template #icon><icon-download /></template>
           <template #default>导出</template>
         </a-button> -->
+      </template>
+      <template #creditScore="{ record }">
+        <a-tag :color="getCreditColor(record.creditScore)">
+          {{ record.creditScore }}
+        </a-tag>
       </template>
       <template #action="{ record }">
         <a-space>
@@ -96,6 +101,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '法定代表人', dataIndex: 'legalPerson', slotName: 'legalPerson', },
   { title: '机构规模大小', dataIndex: 'scale', slotName: 'scale', },
   { title: '营业执照', dataIndex: 'businessLicense', slotName: 'previewImage' },
+  { title: '信誉分', dataIndex: 'creditScore', slotName: 'creditScore' },
   { title: '机构账号', dataIndex: 'username', slotName: 'username' },
   { title: '联系电话', dataIndex: 'phone', slotName: 'phone' },
   {
@@ -164,6 +170,22 @@ const OrgDetailDrawerRef = ref<InstanceType<typeof OrgDetailDrawer>>()
 const onDetail = (record: OrgResp) => {
   OrgDetailDrawerRef.value?.onOpen(record.id)
 }
+
+const getCreditColor = (score?: number) => {
+  if (score === undefined || score === null) {
+    return 'default';
+  }
+  if (score >= 90) {
+    return 'green';
+  }
+  if (score >= 80) {
+    return 'gold'; // 黄色
+  }
+  if (score < 80) {
+    return 'red';
+  }
+  return 'orange'; // 70-79 可选
+};
 
 
 </script>

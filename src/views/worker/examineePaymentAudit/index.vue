@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { type OrgClassResp, type OrgClassQuery, listOrgClass } from '@/apis/training/orgClass'
+import { type OrgClassResp, type OrgClassQuery, listOrgClassPayAudit } from '@/apis/training/orgClass'
 import { getSelectOrgProjectClass } from '@/apis/training/org'
 import PaymentModal from "./PanymentModal.vue";
 import type { TableInstanceColumns } from '@/components/GiTable/type'
@@ -84,7 +84,7 @@ const {
   selectedKeys,
   select,
   selectAll
-} = useTable((page) => listOrgClass({ ...queryForm, ...page }), { immediate: true })
+} = useTable((page) => listOrgClassPayAudit({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
   { title: '机构代号', dataIndex: 'orgCode', slotName: 'orgCode' },
   { title: '机构名称', dataIndex: 'orgName', slotName: 'orgName' },

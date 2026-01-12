@@ -7,13 +7,13 @@
             <template #toolbar-left>
                 <a-input-search v-model="queryForm.candidateName" placeholder="请输入作业人员姓名" allow-clear
                     @search="search" />
-                <a-select v-model="queryForm.status" placeholder="审核状态" allow-clear class="search-input ml-2"
+                <!-- <a-select v-model="queryForm.status" placeholder="审核状态" allow-clear class="search-input ml-2"
                     @change="search">
                     <a-option value="0">未审核</a-option>
                     <a-option value="1">审核通过</a-option>
                     <a-option value="2">审核未通过</a-option>
                     <a-option value="3">虚假材料</a-option>
-                </a-select>
+                </a-select> -->
                 <a-select v-model="queryForm.applyType" placeholder="来源" allow-clear class="search-input ml-2"
                     @change="search">
                     <a-option :value="0">扫码报考</a-option>
@@ -132,7 +132,6 @@ const { width } = useWindowSize()
 
 const queryForm = reactive<WorkerApplyQuery>({
     candidateName: undefined,
-    status: undefined,
     applyType: undefined,
     isOrgQuery: false,
     classId: undefined

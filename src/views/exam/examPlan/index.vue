@@ -129,7 +129,7 @@
             <a-link v-permission="['exam:examPlan:sjjdgljreview']" title="审核" @click="onExamineA(record)">审核</a-link>
           </div>
           <div v-if="record.status >= 3">
-            <a-link v-permission="['exam:plan:applyList']" title="查看考生" @click="openApplyList(record)">报考人员</a-link>
+            <a-link v-permission="['exam:enroll:adminList']" title="查看考生" @click="openApplyList(record)">报考人员</a-link>
           </div>
           <!-- <div v-if="record.isFinalConfirmed > 0">
             <a-link v-permission="['exam:examPlan:queryInvigilator']" title="查看监考员" style="text-align: center"

@@ -25,6 +25,7 @@ export interface EnrollResp {
   auditStatus: number
   ticketUrl: string
   auditNoticeUrl: string
+  facePhoto: string
 }
 export interface EnrollDetailResp {
   id: string
@@ -98,6 +99,11 @@ export function downloadAuditNoticeSingle(id: number) {
 /** @desc 考生考试报名*/
 export function singUp(data: EnrollReq) {
   return http.post(`${BASE_URL}/singUp`, data)
+}
+
+/** @desc 查询考生报名表列表 */
+export function listEnrollAdminQuery(query: EnrollPageQuery) {
+  return http.get<PageRes<EnrollResp[]>>(`${BASE_URL}/admin/page`, query)
 }
 /** @desc 查询考生报名表列表 */
 export function listEnroll(query: EnrollPageQuery) {

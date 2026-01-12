@@ -18,7 +18,7 @@ export interface OrgClassResp {
   payNoticeUrl: string
   payProofUrl: string
   payStatus: number
-  candidateCount:number
+  candidateCount: number
 }
 export interface OrgClassDetailResp {
   id: string
@@ -35,7 +35,7 @@ export interface OrgClassDetailResp {
   payNoticeUrl: string
   payProofUrl: string
   payStatus: number
-  candidateCount:number
+  candidateCount: number
 }
 export interface OrgClassQuery {
   className: string | undefined
@@ -62,6 +62,16 @@ export function getSelectClassByProject(projectId: string, classType: number) {
   return http.get<any[]>(`${BASE_URL}/select/${projectId}/${classType}/0`)
 }
 
+/** @desc 根据班级展示班级缴费信息 */
+export function listOrgClassPayAudit(query: OrgClassPageQuery) {
+  return http.get<PageRes<OrgClassResp[]>>(`${BASE_URL}/pay/audit/page`, query)
+}
+
+
+/** @desc 根据班级展示作业人员的报名信息 */
+export function listOrgClassWorker(query: OrgClassPageQuery) {
+  return http.get<PageRes<OrgClassResp[]>>(`${BASE_URL}/worker/page`, query)
+}
 
 /** @desc 查询培训机构班级列表 */
 export function listOrgClass(query: OrgClassPageQuery) {

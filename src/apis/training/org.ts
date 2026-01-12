@@ -20,6 +20,7 @@ export interface OrgResp {
   updateUserString: string
   disabled: boolean
   CandidateName: string[]
+  creditScore: number
 }
 export interface OrgDetailResp {
   id: string
@@ -46,12 +47,12 @@ export interface OrgQuery {
   code: string | undefined
   sort: Array<string>
 }
-export interface OrgPageQuery extends OrgQuery, PageQuery {}
+export interface OrgPageQuery extends OrgQuery, PageQuery { }
 
 
 
 /** @desc 获取机构对应的项目-班级-考生级联选择 */
-export function getSelectOrgProjectClass(type:number) {
+export function getSelectOrgProjectClass(type: number) {
   return http.get<any[]>(`${BASE_URL}/select/org/project/class/${type}`)
 }
 
@@ -91,7 +92,7 @@ export function exportOrg(query: OrgQuery) {
 }
 
 /**@desc 导入机构考生关联信息 */
-export function getStudents(id:string) {
+export function getStudents(id: string) {
   return http.get(`${BASE_URL}/${id}`)
 }
 
