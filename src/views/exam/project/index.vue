@@ -64,31 +64,10 @@
       </template>
       <template #action="{ record }">
         <a-space :size="2">
-          <div v-if="record.projectStatus === 1 && userInfo.id != 1">
-            <a-link v-permission="['exam:project:examine']" title="审核" @click="onExamineA(record)">审核</a-link>
-            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-            <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-
-          </div>
-          <!-- 状态2：仅显示详情 + 删除 -->
-          <div v-else-if="record.projectStatus === 2">
-            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-            <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-          </div>
-
-          <div v-else>
-            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-            <!-- <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link> -->
-            <!--            <a-link-->
-            <!--                v-permission="['exam:project:delete']"-->
-            <!--                status="danger"-->
-            <!--                :disabled="record.disabled"-->
-            <!--                :title="record.disabled ? '不可删除' : '删除'"-->
-            <!--                @click="onDelete(record)"-->
-            <!--            >-->
-            <!--              删除-->
-            <!--            </a-link>-->
-          </div>
+          <a-link v-permission="['exam:project:examine']" title="审核" @click="onExamineA(record)"
+            v-if="record.projectStatus === 1 && userInfo.id != 1">审核</a-link>
+          <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+          <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <a-link v-permission="['exam:project:delete']" status="danger" :disabled="record.disabled"
             :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除

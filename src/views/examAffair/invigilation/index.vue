@@ -47,11 +47,11 @@
               </template>
             </a-button>
             <template #content>
-              <a-doption v-permission="['examAffair:invigilation:update']" :disabled="record.isSystem" title="修改"
+              <a-doption v-permission="['system:user:update']" :disabled="record.isSystem" title="修改"
                 @click="onUpdate(record)">修改</a-doption>
               <a-doption v-permission="['examAffair:invigilation:delete']" :disabled="record.isSystem"
                 :title="record.isSystem ? '系统内置数据不能删除' : '删除'" @click="onDelete(record)">删除</a-doption>
-              <a-doption v-permission="['examAffair:invigilation:resetPwd']" title="重置密码"
+              <a-doption v-permission="['system:user:resetPwd']" title="重置密码"
                 @click="onResetPwd(record)">重置密码</a-doption>
             </template>
           </a-dropdown>
@@ -233,10 +233,10 @@ const columns: TableInstanceColumns[] = [
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
       "examAffair:invigilation:exportFee",
-      "examAffair:invigilation:detail",
-      "examAffair:invigilation:resetPwd",
+      "system:user:detail",
+      "system:user:resetPwd",
       "examAffair:invigilation:delete",
-      "examAffair:invigilation:update",
+      "system:user:update",
       "examAffair:invigilation:addQualification",
     ]),
   },
