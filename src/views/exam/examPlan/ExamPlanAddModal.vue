@@ -36,9 +36,7 @@ const { width } = useWindowSize();
 const dataId = ref("");
 const visible = ref(false);
 const isUpdate = computed(() => !!dataId.value);
-const title = computed(() =>
-  isUpdate.value ? "确认考试计划地点时间" : "新增考试计划"
-);
+const title = ref("")
 const formRef = ref<InstanceType<typeof GiForm>>();
 const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
 
@@ -342,6 +340,7 @@ const getProjectList = async (planType: number) => {
 
 // 新增
 const onAdd = async () => {
+  title.value = "新增计划"
   reset();
   visible.value = true;
   dataId.value = "";
@@ -349,6 +348,7 @@ const onAdd = async () => {
 };
 // 修改
 const onUpdate = async (id: string) => {
+  title.value = "确认考试计划地点时间"
   reset();
   dataId.value = id;
   visible.value = true;
@@ -415,6 +415,7 @@ const mapRoomIdsToPaths = (roomIds: number[], options: any[]) => {
 };
 // 审核
 const onExamineA = async (id: string) => {
+  title.value = "审核计划"
   reset();
   dataId.value = id;
   const { data } = await getExamPlanId(id);

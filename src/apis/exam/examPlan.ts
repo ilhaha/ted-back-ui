@@ -63,6 +63,12 @@ export interface ExamPlanQuery {
 export interface ExamPlanPageQuery extends ExamPlanQuery, PageQuery { }
 
 
+/** @desc 根据班级列表获取每个班级在考试计划下的报名人数、考试人数、及格人数、成绩录入情况和证书生成情况 */
+export function getClassExamStatsPage(query: ExamPlanPageQuery) {
+  return http.get<PageRes<ExamPlanResp[]>>(`${BASE_URL}/class-stats`, query)
+}
+
+
 /** @desc 调整考试/报名时间 */
 export function adjustPlanTimeApi(data: any, planId: number) {
   return http.post(`${BASE_URL}/adjustPlanTime/${planId}`, data)

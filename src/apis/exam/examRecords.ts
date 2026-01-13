@@ -20,9 +20,12 @@ export interface ExamRecordsResp {
   reviewStatus: string
   createUserString: string
   updateUserString: string
-  isCertificateGenerated: string
+  isCertificateGenerated: number
   disabled: boolean
-  examResultStatus:string
+  examResultStatus: string
+  isOperation: number,
+  isRoad: number
+
 }
 export interface ExamRecordsDetailResp {
   id: string
@@ -43,7 +46,9 @@ export interface ExamRecordsDetailResp {
 }
 export interface ExamRecordsQuery {
   planId: string
+  classId: string
   candidateName: string
+  className: string
   username: string
   isCertificateGenerated: string
   registrationProgress: string | undefined

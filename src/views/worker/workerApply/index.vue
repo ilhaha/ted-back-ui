@@ -57,9 +57,9 @@ const {
   search,
 } = useTable((page) => listOrgClassWorker({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
+  { title: '班级编号', dataIndex: 'className', slotName: 'className', },
   { title: '机构代号', dataIndex: 'orgCode', slotName: 'orgCode' },
   { title: '机构名称', dataIndex: 'orgName', slotName: 'orgName' },
-  { title: '班级编号', dataIndex: 'className', slotName: 'className', },
   { title: '报考项目', dataIndex: 'projectName', slotName: 'projectName' },
   { title: '待审核数', dataIndex: 'pendingReviewCount', slotName: 'pendingReviewCount' },
   { title: '提交时间', dataIndex: 'docSubmitTime', slotName: 'docSubmitTime' },

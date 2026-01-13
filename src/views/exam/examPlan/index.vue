@@ -120,12 +120,12 @@
       </template> -->
       <template #action="{ record }">
         <a-space>
-          <div v-if="record.status == 1">
+          <div v-if="record.status == 1 && userInfo.id != 1">
             <a-link v-permission="['exam:examPlan:zxzrreview']" title="审核" @click="onExamineA(record)">
               审核
             </a-link>
           </div>
-          <div v-if="record.status == 2">
+          <div v-if="record.status == 2 && userInfo.id != 1">
             <a-link v-permission="['exam:examPlan:sjjdgljreview']" title="审核" @click="onExamineA(record)">审核</a-link>
           </div>
           <div v-if="record.status >= 3">
@@ -278,8 +278,6 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "exam:examPlan:update",
-      "exam:examPlan:delete",
       "exam:examPlan:detail"
     ]),
   },
