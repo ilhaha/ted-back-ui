@@ -2,8 +2,8 @@
   <div class="gi_table_page">
     <GiTable title="机构报考审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection"
-      @select="select" @select-all="selectAll">
+      :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
+      @select-all="selectAll">
       <template #toolbar-left>
         <a-select v-model="queryForm.status" placeholder="请选择审核状态" allow-clear style="width: 200px" @change="search">
           <a-option :value="0">未审核</a-option>
@@ -45,7 +45,8 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['document:enrollPreUpload:update']" title="审核" @click="openReview(record)" v-if="record.status == 0">审核</a-link>
+          <a-link v-permission="['document:enrollPreUpload:update']" title="审核" @click="openReview(record)"
+            v-if="record.status == 0">审核</a-link>
         </a-space>
       </template>
     </GiTable>
@@ -63,7 +64,7 @@
         <a-form-item v-if="form.status === 2 || form.status === 3" field="remark"
           :label="form.status === 2 ? '退回原因' : '虚假资料原因'"
           :rules="[{ required: true, message: form.status === 2 ? '请填写退回原因' : '请填写虚假资料原因' }]">
-          <a-input v-model="form.remark" :placeholder="form.status === 2 ? '请输入退回原因' : '请输入虚假资料原因'" allow-clear />
+          <a-textarea v-model="form.remark" :placeholder="form.status === 2 ? '请输入退回原因' : '请输入虚假资料原因'" allow-clear />
         </a-form-item>
       </a-form>
     </a-modal>

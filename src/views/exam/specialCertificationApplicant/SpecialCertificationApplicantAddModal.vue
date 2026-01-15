@@ -23,7 +23,7 @@
         :label="form.status === 2 ? '退回原因' : '虚假资料原因'"
         :rules="[{ required: true, message: form.status === 2 ? '请填写退回原因' : '请填写虚假资料原因' }]"
       >
-        <a-input v-model="form.remark" :placeholder="form.status === 2 ? '请输入退回原因' : '请输入虚假资料原因'" allow-clear />
+        <a-textarea v-model="form.remark" :placeholder="form.status === 2 ? '请输入退回原因' : '请输入虚假资料原因'" allow-clear />
       </a-form-item>
     </a-form>
   </a-modal>
