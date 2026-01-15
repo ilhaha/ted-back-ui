@@ -2,7 +2,7 @@
   <a-row justify="end" align="center">
     <a-space size="medium">
       <!-- 搜索 -->
-<!--      <Search />-->
+      <!--      <Search />-->
       <!-- 项目配置 -->
       <a-tooltip content="项目配置" position="bl">
         <a-button size="mini" class="gi_hover_btn" @click="SettingDrawerRef?.open">
@@ -13,12 +13,8 @@
       </a-tooltip>
 
       <!-- 消息通知 -->
-      <a-popover
-        position="bottom"
-        trigger="click"
-        :content-style="{ marginTop: '-5px', padding: 0, border: 'none' }"
-        :arrow-style="{ width: 0, height: 0 }"
-      >
+      <a-popover position="bottom" trigger="click" :content-style="{ marginTop: '-5px', padding: 0, border: 'none' }"
+        :arrow-style="{ width: 0, height: 0 }">
         <a-badge :count="unreadMessageCount" dot>
           <a-button size="mini" class="gi_hover_btn">
             <template #icon>

@@ -1,89 +1,36 @@
 <template>
   <div v-if="isDesktop" class="login pc">
     <h3 class="login-logo">
-      <img v-if="logo" :src="logo" alt="logo" />
-      <img v-else src="/logo.svg" alt="logo" />
-    </h3>
-
-    <a-row align="stretch" class="login-box">
-      <a-col :xs="0" :sm="12" :md="6">
-<!--        <div class="login-left">-->
-<!--          <img class="login-left__img" src="@/assets/images/banner.png" alt="banner" />-->
-<!--        </div>-->
-      </a-col>
-<!--      <a-col :xs="24" :sm="12" :md="12">-->
-        <div class="login-right">
-<!--          <h3 v-if="isEmailLogin" class="login-right__title">邮箱登录</h3>-->
-<!--          <EmailLogin v-if="isEmailLogin"/>-->
-<!--          <a-tabs v-else v-model:activeKey="activeTab" class="login-right__form">-->
-          <h1 class="login-right__title1">一信通特种设备作业人员考试系统</h1>
-          <a-tabs class="login-right__form">
-            <a-tab-pane key="1">
-              <component :is="AccountLogin" v-if="activeTab === '1'" />
-            </a-tab-pane>
-          </a-tabs>
-<!--          <div class="login-right__oauth">-->
-<!--            <a-divider orientation="center">其他登录方式</a-divider>-->
-<!--            <div class="list">-->
-<!--              <div v-if="isEmailLogin" class="mode item" @click="toggleLoginMode"><icon-user /> 账号/手机号登录</div>-->
-<!--              <div v-else class="mode item" @click="toggleLoginMode"><icon-email /> 邮箱登录</div>-->
-<!--              <a class="item" title="使用 Gitee 账号登录" @click="onOauth('gitee')">-->
-<!--                <GiSvgIcon name="gitee" :size="24" />-->
-<!--              </a>-->
-<!--              <a class="item" title="使用 GitHub 账号登录" @click="onOauth('github')">-->
-<!--                <GiSvgIcon name="github" :size="24" />-->
-<!--              </a>-->
-<!--            </div>-->
-<!--          </div>-->
-        </div>
-<!--      </a-col>-->
-    </a-row>
-
-    <div v-if="isDesktop" class="footer">
-      <div class="beian">
-        <div class="below text">{{ appStore.getCopyright() }}{{ appStore.getForRecord() ? ` · ${appStore.getForRecord()}` : '' }}</div>
-      </div>
-    </div>
-
-    <ToggleDark class="theme-btn" />
-    <Background />
-  </div>
-
-  <div v-else class="login h5">
-    <div class="login-logo">
-      <img v-if="logo" :src="logo" alt="logo" />
-      <img v-else src="/logo.svg" alt="logo" />
+      <img v-if="logo"
+        src="https://onedt-exam-system.oss-cn-shenzhen.aliyuncs.com/2025/12/17/6942110403843972e893861a.svg"
+        alt="logo" />
+      <img v-else src="https://onedt-exam-system.oss-cn-shenzhen.aliyuncs.com/2025/12/17/6942110403843972e893861a.svg"
+        alt="logo" />
       <span>{{ title }}</span>
-    </div>
+    </h3>
     <a-row align="stretch" class="login-box">
+      <a-col :xs="0" :sm="12" :md="13">
+        <div class="login-left">
+          <img class="login-left__img" src="@/assets/images/banner.png" alt="banner" />
+        </div>
+      </a-col>
       <a-col :xs="24" :sm="12" :md="11">
         <div class="login-right">
-          <h3 v-if="isEmailLogin" class="login-right__title">邮箱登录</h3>
-          <EmailLogin v-if="isEmailLogin" />
-          <a-tabs v-else v-model:activeKey="activeTab" class="login-right__form">
+          <a-tabs v-model:activeKey="activeTab" class="login-right__form">
             <a-tab-pane key="1" title="账号登录">
               <component :is="AccountLogin" v-if="activeTab === '1'" />
             </a-tab-pane>
-            <a-tab-pane key="2" title="手机号登录">
-              <component :is="PhoneLogin" v-if="activeTab === '2'" />
-            </a-tab-pane>
+            <!-- <a-tab-pane key="2" title="监考员登录">
+              <component :is="InvigilatorAccountLogin" v-if="activeTab === '2'" />
+            </a-tab-pane> -->
           </a-tabs>
         </div>
       </a-col>
     </a-row>
-    <div class="login-right__oauth">
-      <a-divider orientation="center">其他登录方式</a-divider>
-      <div class="list">
-        <div v-if="isEmailLogin" class="mode item" @click="toggleLoginMode"><icon-user /> 账号/手机号登录</div>
-        <div v-else class="mode item" @click="toggleLoginMode"><icon-email /> 邮箱登录</div>
-        <a class="item" title="使用 Gitee 账号登录" @click="onOauth('gitee')">
-          <GiSvgIcon name="gitee" :size="24" />
-        </a>
-        <a class="item" title="使用 GitHub 账号登录" @click="onOauth('github')">
-          <GiSvgIcon name="github" :size="24" />
-        </a>
-      </div>
-    </div>
+
+
+    <GiThemeBtn class="theme-btn" />
+    <Background />
   </div>
 </template>
 
@@ -120,31 +67,6 @@ const onOauth = async (source: string) => {
 </script>
 
 <style scoped lang="scss">
-.login {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-image: url('/static/images/back.jpg');
-}
-
-.login-box {
-  border-radius: 20px; /* 设置圆角大小 */
-  overflow: hidden; /* 确保内容不会溢出圆角 */
-}
-
-.login-right {
-  border-radius: 15px; /* 设置圆角大小 */
-  overflow: hidden; /* 确保内容不会溢出圆角 */
-}
-
-.login-right__title1 {
-  font-size: 24px; /* 标题字体大小 */
-  font-weight: bold; /* 加粗 */
-  color: #333; /* 字体颜色 */
-  margin-bottom: 20px; /* 与下方内容的间距 */
-  text-align: center; /* 居中 */
-}
-
 @media screen and (max-width: 570px) {
   .pc {
     display: none !important;
@@ -182,7 +104,7 @@ const onOauth = async (source: string) => {
     }
 
     &-box {
-      width: 50%;
+      width: 100%;
       display: flex;
       z-index: 999;
     }
@@ -361,14 +283,14 @@ const onOauth = async (source: string) => {
       align-items: center;
 
       img {
-        //width: 34px;
-        height: 70px;
+        width: 34px;
+        height: 34px;
         margin-right: 8px;
       }
     }
 
     &-box {
-      width: 25%;
+      width: 86%;
       max-width: 850px;
       height: 490px;
       display: flex;

@@ -54,6 +54,7 @@ export interface ExamRecordsQuery {
   registrationProgress: string | undefined
   sort: Array<string>
   isOrgQuery: boolean
+  candidateId: string
 }
 export interface ExamRecordsPageQuery extends ExamRecordsQuery, PageQuery { }
 
@@ -72,6 +73,11 @@ export function generateQualificationCertificate(data: any) {
 /** @desc 录入实操或道路成绩 */
 export function inputScores(data: any) {
   return http.post(`${BASE_URL}/input`, data)
+}
+
+/** @desc 查询某个考生的考试记录列表 */
+export function listCandidateExamRecords(query: ExamRecordsPageQuery) {
+  return http.get<PageRes<ExamRecordsResp[]>>(`${BASE_URL}/candidate`, query)
 }
 
 /** @desc 查询考试记录列表 */

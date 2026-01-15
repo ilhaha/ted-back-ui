@@ -87,7 +87,7 @@ const ExamRecordListRef = ref<InstanceType<typeof ExamRecordList>>();
 
 // 详情
 const onDetail = (record: any) => {
-  title.value = record.className + "考试记录"
+  title.value = record.className + "班级考试记录"
   classId.value = record.classId
   showRecordVisible.value = true
   ExamRecordListRef.value?.onOpen(record.classId, record.id, record.hasOper, record.hasRoad);
