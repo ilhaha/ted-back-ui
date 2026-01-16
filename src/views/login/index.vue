@@ -1,17 +1,15 @@
 <template>
   <div v-if="isDesktop" class="login pc">
     <h3 class="login-logo">
-      <img v-if="logo"
-        src="https://onedt-exam-system.oss-cn-shenzhen.aliyuncs.com/2025/12/17/6942110403843972e893861a.svg"
-        alt="logo" />
-      <img v-else src="https://onedt-exam-system.oss-cn-shenzhen.aliyuncs.com/2025/12/17/6942110403843972e893861a.svg"
+      <img v-if="logo" src="../../../public/logo.png" alt="logo" />
+      <img v-else src="../../../public/logo.png"
         alt="logo" />
       <span>{{ title }}</span>
     </h3>
     <a-row align="stretch" class="login-box">
       <a-col :xs="0" :sm="12" :md="13">
         <div class="login-left">
-          <img class="login-left__img" src="@/assets/images/banner.png" alt="banner" />
+          <img class="login-left__img" src="@/assets/images/banner.png" alt="banner" height="100%" width="100%"/>
         </div>
       </a-col>
       <a-col :xs="24" :sm="12" :md="11">

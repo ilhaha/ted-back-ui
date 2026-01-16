@@ -11,10 +11,10 @@
         <h2 class="company-title" :class="{ 'collapsed': appStore.menuCollapse }">
           <div class="gradient-wrapper">
             <div class="title-group">
-              <span class="main-title">一信通科技</span>
-              <span class="subtitle">One Dt</span>
+              <span class="main-title">特种设备考试系统</span>
+              <!-- <span class="subtitle"></span> -->
             </div>
-            <div class="phone-number">0755-26918050</div>
+            <div class="phone-number">后台管理</div>
           </div>
         </h2>
       </div>
