@@ -116,11 +116,9 @@ const categorySelect = ref<DocumentTypeNameVO[]>([]); // 存储八大类类型
 // 获取资料类型列表
 const getDocumentTypeList = async () => {
   try {
-    const res = await selectOptions(); // 调用新的接口
+    const res = await selectOptions(1); // 调用新的接口
     categorySelect.value = res.data || []; // 将返回的数据绑定到选择器
   } catch (error) {
-    console.error("获取八大类类型失败:", error);
-    Message.error("获取八大类类型失败，请稍后重试");
   }
 };
 

@@ -45,8 +45,8 @@ export interface CategoryQuery {
 export interface CategoryPageQuery extends CategoryQuery, PageQuery { }
 
 
-export function selectOptions() {
-  return http.get(`${SELECT_OPTIONS}`)
+export function selectOptions(isSelectWeldingCategory: number) {
+  return http.get(`${SELECT_OPTIONS}/${isSelectWeldingCategory}`)
 }
 
 /** @desc 查询八大类，存储题目分类信息列表 */
