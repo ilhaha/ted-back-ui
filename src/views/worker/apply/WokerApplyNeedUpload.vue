@@ -1,5 +1,35 @@
 <template>
     <div>
+        <!-- 基本信息选择卡片 -->
+        <div class="doc-card info-card">
+            <div class="form-item">
+                <span class="form-label">学历</span>
+                <a-select v-model="form.education" :options="educationOptions" placeholder="请选择学历"
+                    style="width: 100%;" />
+            </div>
+            <div class="form-item">
+                <span class="form-label">工作单位</span>
+                <a-input v-model="form.workUnit" placeholder="请输入工作单位" style="width: 100%;" />
+            </div>
+            <div class="form-item">
+                <span class="form-label">工作区域</span>
+                <a-select v-model="form.address" :options="workAreaOptions" placeholder="请选择工作区域"
+                    style="width: 100%;" />
+            </div>
+
+            <div class="form-item">
+                <span class="form-label">政治面貌</span>
+                <a-select v-model="form.politicalStatus" :options="politicalStatusOptions" placeholder="请选择政治面貌"
+                    style="width: 100%;" />
+            </div>
+            <div class="form-item" v-if="weldingProjectCodes && weldingProjectCodes.length">
+                <span class="form-label">焊接资格项目</span>
+                <a-select v-model="form.weldingProjectCode" :options="weldingProjectOptions" placeholder="请选择焊接资格项目"
+                    multiple style="width: 100%;" />
+            </div>
+        </div>
+
+
         <div class="tips-card idCard-warning-tips">
             <div class="tips-icon">⚠️</div>
             <div class="tips-text">
@@ -162,6 +192,7 @@ import { encryptByRsa } from '@/utils/encrypt'
 const showDialog = ref(false)
 const props = defineProps<{
     projectNeedUploadDocs: any[],
+    weldingProjectCodes: any[]
     classId: string | number
 }>()
 
@@ -197,10 +228,53 @@ const form = ref({
     qualificationFileUrl: undefined,
     phone: '',
     classId: props.classId,
-    qualificationName: ''
+    qualificationName: '',
+    address: '东城区',
+    workUnit: '',
+    education: '本科',
+    politicalStatus: '群众',
+    weldingProjectCode: []
 })
+const workAreaOptions = ref([
+    { label: '东城区', value: '东城区' },
+    { label: '西城区', value: '西城区' },
+    { label: '朝阳区', value: '朝阳区' },
+    { label: '丰台区', value: '丰台区' },
+    { label: '石景山区', value: '石景山区' },
+    { label: '海淀区', value: '海淀区' },
+    { label: '顺义区', value: '顺义区' },
+    { label: '通州区', value: '通州区' },
+    { label: '大兴区', value: '大兴区' },
+    { label: '房山区', value: '房山区' },
+    { label: '门头沟区', value: '门头沟区' },
+    { label: '昌平区', value: '昌平区' },
+    { label: '大兴区', value: '大兴区' },
+    { label: '平谷区', value: '平谷区' },
+    { label: '密云区', value: '密云区' },
+    { label: '延庆区', value: '延庆区' },
+])
+const educationOptions = ref([
+    { label: '小学', value: '小学' },
+    { label: '初中', value: '初中' },
+    { label: '高中', value: '高中' },
+    { label: '专科', value: '丰台区' },
+    { label: '本科', value: '本科' },
+    { label: '研究生', value: '研究生' },
+])
+const politicalStatusOptions = ref([
+    { label: '中共党员', value: '中共党员' },
+    { label: '共青团员', value: '共青团员' },
+    { label: '群众', value: '群众' }
+])
 const temporary = ref('')
 const isBeijing = ref(false)
+
+const weldingProjectOptions = computed(() => {
+    return props.weldingProjectCodes.map(code => ({
+        label: code,
+        value: code
+    }));
+});
 
 // 提交上传
 const submitUpload = async (phone: string, idCard: string, isRestUpload: boolean) => {
@@ -280,7 +354,22 @@ const checkIdCard = (uploadedId: string | undefined, inputIdCard: string) => {
     return checkRes;
 }
 
+const isWeldingProjectCodeFilled = computed(() => {
+    // 只有为焊接项目的才需要判断有没有选
+    if (!props.weldingProjectCodes || props.weldingProjectCodes.length === 0) {
+        return true;
+    }
+    // 多选字段必须至少选择一个
+    return Array.isArray(form.value.weldingProjectCode) && form.value.weldingProjectCode.length > 0;
+});
+
 const isAllUploaded = computed(() => {
+    // 1. 基本信息必填
+    const isAddressFilled = !!form.value.address?.trim();
+    const isWorkUnitFilled = !!form.value.workUnit?.trim();
+    const isEducationFilled = !!form.value.education?.trim();
+    const isPoliticalStatusFilled = !!form.value.politicalStatus?.trim();
+
     // 1. 项目资料：逐个判断是否需要上传
     const isImageAllUploaded = props.projectNeedUploadDocs.every(item => {
         const needUpload = isUploadRequired(item.needUploadPerson, isBeijing.value);
@@ -297,7 +386,13 @@ const isAllUploaded = computed(() => {
     const isIdCardUploaded = frontFileList.value.length >= 1;
     const isBackUploaded = backFileList.value.length >= 1;
     const isFaceUploaded = faceFileList.value.length >= 1;
+
     return (
+        isAddressFilled &&
+        isWorkUnitFilled &&
+        isEducationFilled &&
+        isPoliticalStatusFilled &&
+        isWeldingProjectCodeFilled.value &&
         isImageAllUploaded &&
         isFormUploaded &&
         isIdCardUploaded &&
@@ -475,6 +570,33 @@ defineExpose({ submitUpload, getFormIdcard })
 </script>
 
 <style scoped>
+.doc-card.info-card {
+    background: #f0f8ff;
+    /* 淡蓝色背景 */
+    border-left: 4px solid #1890ff;
+    /* 深蓝色左边框 */
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.doc-card.info-card .form-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.doc-card.info-card .form-label {
+    width: 80px;
+    font-weight: 500;
+    color: #1d2129;
+}
+
+
+
 .tips-card {
     background: #edf2ff;
     border-radius: 16px;

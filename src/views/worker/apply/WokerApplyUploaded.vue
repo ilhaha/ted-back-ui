@@ -38,6 +38,33 @@
             </div>
         </div>
 
+        <!-- 基本信息选择卡片 -->
+        <div class="doc-card info-card">
+            <div class="form-item">
+                <span class="form-label">学历</span>
+                <a-input v-model="workerUploadedDocs.education" placeholder="请选择学历" style="width: 100%;" disabled />
+            </div>
+            <div class="form-item">
+                <span class="form-label">工作单位</span>
+                <a-input v-model="workerUploadedDocs.workUnit" placeholder="请输入工作单位" style="width: 100%;" disabled />
+            </div>
+            <div class="form-item">
+                <span class="form-label">工作区域</span>
+                <a-input v-model="workerUploadedDocs.address" placeholder="请选择工作区域" style="width: 100%;" disabled />
+            </div>
+
+            <div class="form-item">
+                <span class="form-label">政治面貌</span>
+                <a-input v-model="workerUploadedDocs.politicalStatus" placeholder="请选择政治面貌" style="width: 100%;"
+                    disabled />
+            </div>
+            <div class="form-item" v-if="workerUploadedDocs.weldingProjectCode">
+                <span class="form-label">焊接资格项目</span>
+                <a-select v-model="workerUploadedDocs.weldingProjectCode" :options="weldingProjectOptions" disabled
+                    placeholder="请选择焊接资格项目" multiple style="width: 100%;" />
+            </div>
+        </div>
+
 
         <div class="doc-card-id">
             <div class="upload-item">
@@ -105,6 +132,13 @@ const props = defineProps<{
 }>()
 const fileListMap = reactive<Record<string, any[]>>({})
 const cardHovered = ref('')
+const weldingProjectOptions = computed(() => {
+    return props.workerUploadedDocs.weldingProjectCode.map(code => ({
+        label: code,
+        value: code
+    }));
+});
+
 onMounted(() => {
     const docs = props.workerUploadedDocs?.workerApplyDocuments || []
 
@@ -128,6 +162,31 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.doc-card.info-card {
+    background: #f0f8ff;
+    /* 淡蓝色背景 */
+    border-left: 4px solid #1890ff;
+    /* 深蓝色左边框 */
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.doc-card.info-card .form-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.doc-card.info-card .form-label {
+    width: 80px;
+    font-weight: 500;
+    color: #1d2129;
+}
+
 .doc-card-id {
     background: #fff;
     border-radius: 16px;

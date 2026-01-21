@@ -19,14 +19,14 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['worker:workerApply:review']" title="审核" @click="openDocList(record.id)">{{
+          <a-link v-permission="['worker:workerApply:review']" title="审核" @click="openDocList(record)">{{
             record.pendingReviewCount > 0 ?
               '审核' : '详情' }}</a-link>
         </a-space>
       </template>
     </GiTable>
 
-    <a-modal v-model:visible="showDocListVisible" title="考生报考资料" :mask-closable="false" :esc-to-close="false"
+    <a-modal v-model:visible="showDocListVisible" :title="title" :mask-closable="false" :esc-to-close="false"
       width="95%" draggable :footer="null" modal-class="no-padding-modal" @close="search">
       <SubmitDocList ref="submitDocListRef" />
     </a-modal>
@@ -50,6 +50,7 @@ const queryForm = reactive<OrgClassQuery>({
   isOrgQuery: false,
   flag: 1
 })
+const title = ref("")
 const {
   tableData: dataList,
   loading,
@@ -74,14 +75,17 @@ const columns = ref<TableInstanceColumns[]>([
   }
 ]);
 
+
 const orgCategoryClassOptions = ref<any[]>([])
 const showDocListVisible = ref(false);
 // 查看作业人员名单
 const submitDocListRef = ref<InstanceType<typeof SubmitDocList>>()
 
-const openDocList = (classId: string) => {
-  submitDocListRef.value?.onOpen(classId)
+const openDocList = (record: any) => {
+  submitDocListRef.value?.onOpen(record.id,record.projectId)
+  title.value = record.className + "考生报考资料"
   showDocListVisible.value = true
+
 }
 
 

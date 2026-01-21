@@ -45,12 +45,13 @@ const verifyAndGet = async () => {
         const projectNeedUploadDocs = res.data.projectNeedUploadDocs;
         const workerUploadedDocs = res.data.workerUploadedDocs
         const projectInfo = res.data.projectInfo
+        const weldingProjectCodes = res.data.weldingProjectCodes
 
         if (isUploadedFlag.value && workerUploadedDocs) {
             Message.warning("您已提交过报名，不可重复提交！")
             emit('switchPhoneVerify', false)
         }
-        emit('verifiedResult', { projectNeedUploadDocs, idCard: idCard.value, workerUploadedDocs, projectInfo })
+        emit('verifiedResult', { projectNeedUploadDocs, idCard: idCard.value, workerUploadedDocs, projectInfo, weldingProjectCodes })
         showDialog.value = false
     } catch (e) {
 

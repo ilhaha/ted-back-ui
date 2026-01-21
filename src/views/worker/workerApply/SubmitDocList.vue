@@ -129,6 +129,7 @@ const emit = defineEmits<{
 
 defineOptions({ name: 'WorkerApply' })
 const { width } = useWindowSize()
+const isWelding = ref(false)
 
 const queryForm = reactive<WorkerApplyQuery>({
     candidateName: undefined,
@@ -167,8 +168,18 @@ const baseColumns = ref<TableInstanceColumns[]>([
 
 
 const columns = computed(() => {
+    const columnsTemp: TableInstanceColumns[] = [...baseColumns.value]
+    console.log(isWelding.value);
+
+    if (isWelding.value) {
+        columnsTemp.push({
+            title: '焊接资格项目',
+            dataIndex: 'weldingProjectCode',
+            slotName: 'weldingProjectCode',
+        })
+    }
     return [
-        ...baseColumns.value,
+        ...columnsTemp,
         ...docColumns.value,
         { title: '状态', dataIndex: 'status', slotName: 'status' },
         {
@@ -255,8 +266,9 @@ const isImage = (url: string) => {
     return /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
 }
 
-const onOpen = async (classId: string) => {
+const onOpen = async (classId: string, projectId: string) => {
     queryForm.classId = classId
+    isWelding.value = projectId == '110' || projectId == '111'
     reset()
 
 }

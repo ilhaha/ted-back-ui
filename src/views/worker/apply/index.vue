@@ -23,9 +23,9 @@
             </div>
 
             <WokerApplyNeedUpload ref="WokerApplyNeedUploadRef" :projectNeedUploadDocs="projectNeedUploadDocs"
-                :classId="classId" @isAllUploaded="handIsAllUploaded" @switchPhoneVerify="handSwitchPhoneVerify"
-                @updateIdCard="hanldUpdateIdCard" @submitAfter="handSubmitAfter"
-                v-if="!workerUploadedDocs && projectInfo" />
+                :weldingProjectCodes="weldingProjectCodes" :classId="classId" @isAllUploaded="handIsAllUploaded"
+                @switchPhoneVerify="handSwitchPhoneVerify" @updateIdCard="hanldUpdateIdCard"
+                @submitAfter="handSubmitAfter" v-if="!workerUploadedDocs && projectInfo" />
 
             <WokerApplyUploaded ref="WokerApplyUploadedRef" :workerUploadedDocs="workerUploadedDocs"
                 v-if="workerUploadedDocs" />
@@ -87,6 +87,7 @@ const route = useRoute()
 const title = ref('作业人员报考资料补全');
 const classId = ref('')
 const projectNeedUploadDocs = ref<any[]>([])
+const weldingProjectCodes = ref<any[]>([])
 const projectInfo = ref<any>()
 const workerUploadedDocs = ref<any>()
 const isAllUploaded = ref(true)
@@ -242,6 +243,7 @@ const handVerifiedResult = (res: any) => {
     workerUploadedDocs.value = res.workerUploadedDocs
     projectInfo.value = res.projectInfo
     candidateName.value = res.workerUploadedDocs ? res.workerUploadedDocs.candidateName : ''
+    weldingProjectCodes.value = res.weldingProjectCodes
     idCard.value = res.idCard
 }
 

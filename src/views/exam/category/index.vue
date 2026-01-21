@@ -38,9 +38,11 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['exam:category:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-          <a-link v-permission="['exam:category:delete']" status="danger" :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
+          <a-link v-permission="['exam:category:update']" title="修改" @click="onUpdate(record)"
+            :disabled="record.id == '27'">修改</a-link>
+          <a-link v-permission="['exam:category:delete']" status="danger"
+            :disabled="record.disabled || record.id == '27'" :title="record.disabled ? '不可删除' : '删除'"
+            @click="onDelete(record)">
             删除
           </a-link>
         </a-space>

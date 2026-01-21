@@ -67,8 +67,10 @@
           <a-link v-permission="['exam:project:examine']" title="审核" @click="onExamineA(record)"
             v-if="record.projectStatus === 1 && userInfo.id != 1">审核</a-link>
           <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-          <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
-          <a-link v-permission="['exam:project:delete']" status="danger" :disabled="record.disabled"
+          <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)"
+            :disabled="record.id == '110' || record.id == '111'">修改</a-link>
+          <a-link v-permission="['exam:project:delete']" status="danger"
+            :disabled="record.disabled || record.id == '110' || record.id == '111'"
             :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>

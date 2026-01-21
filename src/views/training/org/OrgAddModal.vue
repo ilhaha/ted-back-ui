@@ -354,7 +354,7 @@ const onAdd = async () => {
   reset()
   dataId.value = ''
   visible.value = true
-  const res = await selectOptions(1)
+  const res = await selectOptions()
   categorySelect.value = res.data || []
 }
 
@@ -363,7 +363,7 @@ const onUpdate = async (id: string) => {
   reset()
   dataId.value = id
   visible.value = true
-  const res = await selectOptions(1)
+  const res = await selectOptions()
   categorySelect.value = res.data || []
   const { data } = await getOrg(id)
   Object.assign(form, data)
