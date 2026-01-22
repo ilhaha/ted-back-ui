@@ -42,10 +42,9 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['exam:category:update']" title="修改" @click="onUpdate(record)"
-            :disabled="record.id == '27'">修改</a-link>
+          <a-link v-permission="['exam:category:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           <a-link v-permission="['exam:category:delete']" status="danger"
-            :disabled="record.disabled || record.id == '27'" :title="record.disabled ? '不可删除' : '删除'"
+            :disabled="record.disabled || record.categoryType == 2" :title="record.disabled ? '不可删除' : '删除'"
             @click="onDelete(record)">
             删除
           </a-link>
@@ -96,7 +95,7 @@ const {
 
 // 新增：定义种类类型映射关系
 const categoryTypeMap = {
-  1: '普通八大类',
+  1: '八大类',
   2: '焊接',
   3: '无损检测',
   4: '检验人员'

@@ -9,11 +9,11 @@
     @before-ok="save"
     @close="reset"
   >
-    <GiForm :columns="columns" v-model="form">
+    <GiForm :columns="computedColumns" v-model="form" ref="formRef">
       <!-- 自定义上传后的预览区域 -->
       <template #videoUrl>
         <div class="video-uploader">
-          <!-- 上传按钮 -->
+          <!-- 上传按钮：仅焊接场景也保留可点击（允许修改视频） -->
           <a-upload
               :file-list="form.videoUrl ? [] : []"
               :show-file-list="false"
@@ -36,12 +36,12 @@
         </div>
       </template>
 
-      <!-- 种类类型 - 小圆点单选按钮 -->
+      <!-- 种类类型 - 小圆点单选按钮：添加禁用控制 -->
       <template #categoryType>
         <div class="category-type-radio">
-          <a-radio-group v-model="form.categoryType">
+          <a-radio-group v-model="form.categoryType" :disabled="isWeldingReadonly">
             <div class="radio-item">
-              <a-radio :value="1">普通八大类</a-radio>
+              <a-radio :value="1">八大类</a-radio>
             </div>
             <div class="radio-item">
               <a-radio :value="2">焊接</a-radio>
@@ -65,7 +65,8 @@ import { useWindowSize } from '@vueuse/core'
 import { addCategory, getCategory, updateCategory } from '@/apis/exam/category'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useResetReactive } from '@/hooks'
-import {upload} from "@/utils/upload";
+import { upload } from "@/utils/upload";
+import { ref, computed, reactive } from 'vue'
 
 const emit = defineEmits<{
   (e: 'save-success'): void
@@ -78,6 +79,11 @@ const visible = ref(false)
 const isUpdate = computed(() => !!dataId.value)
 const title = computed(() => (isUpdate.value ? '修改八大类信息' : '新增八大类'))
 const formRef = ref<InstanceType<typeof GiForm>>()
+
+// 核心判断：修改场景 + 种类类型为2（焊接）→ 只读控制
+const isWeldingReadonly = computed(() => {
+  return isUpdate.value && form.categoryType === 2
+})
 
 const beforeUpload = (file) => {
   const isVideo = file.type.startsWith('video/');
@@ -94,7 +100,7 @@ const handleFileUpload = async (file) => {
   formData.append('type', 'video')
 
   try {
-    const response = await upload( formData )
+    const response = await upload(formData)
     form.videoUrl = response.data.url // 更新表单中的视频URL
     Message.success('上传成功')
   } catch (error) {
@@ -102,16 +108,17 @@ const handleFileUpload = async (file) => {
   }
 }
 
-// 种类类型字段（1-普通八大类 2-焊接 3-无损检测 4-检验人员）
+// 表单初始值
 const [form, resetForm] = useResetReactive({
   name: '',
   code: '',
-  videoUrl: '', // 视频URL字段
-  topicNumber: 0, // 题目数量字段
-  categoryType: undefined, // 种类类型
+  videoUrl: '',
+  topicNumber: 0,
+  categoryType: undefined,
 })
 
-const columns: ColumnItem[] = reactive([
+// 基础列配置（抽离公共配置）
+const baseColumns: ColumnItem[] = [
   {
     label: '种类名称',
     field: 'name',
@@ -126,7 +133,6 @@ const columns: ColumnItem[] = reactive([
     span: 24,
     rules: [{ required: true, message: '请输入八大类代码' }],
   },
-  // 种类类型 - 小圆点单选
   {
     label: '种类类型',
     field: 'categoryType',
@@ -151,11 +157,28 @@ const columns: ColumnItem[] = reactive([
       limit: 1,
       showFileList: false,
       fileList: computed(() =>
-          form.videoUrl ? [{ uid: '-1', name: '视频', url: form.videoUrl }] : []
+        form.videoUrl ? [{ uid: '-1', name: '视频', url: form.videoUrl }] : []
       ),
     },
   },
-])
+]
+
+// 动态计算列：根据焊接只读状态控制字段禁用，全部字段保留显示
+const computedColumns = computed(() => {
+  return baseColumns.map(col => {
+    // 焊接修改场景：禁用 名称/代码/种类类型，保留 题目数量/警示短片 可编辑
+    if (isWeldingReadonly.value) {
+      return {
+        ...col,
+        disabled: ['name', 'code', 'categoryType'].includes(col.field),
+        // 禁用字段清空校验规则，避免必填校验报错
+        rules: ['name', 'code', 'categoryType'].includes(col.field) ? [] : col.rules
+      }
+    }
+    // 其他场景：所有字段可编辑，保留原规则
+    return { ...col, disabled: false }
+  })
+})
 
 // 重置
 const reset = () => {
@@ -163,20 +186,24 @@ const reset = () => {
   resetForm()
 }
 
-// 保存
+// 保存：适配焊接场景的校验逻辑
 const save = async () => {
   try {
+    // 统一执行表单校验（已通过computedColumns处理不同场景的规则）
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
-    if(form.topicNumber === undefined) {
+
+    // 额外校验题目数量（焊接场景核心必传）
+    if (form.topicNumber === 0 || form.topicNumber === undefined) {
       Message.error('请输入题目数量')
       return false
     }
-    // 校验种类类型
-    if(!form.categoryType || ![1,2,3,4].includes(form.categoryType)) {
-      Message.error('请选择有效的种类类型（仅支持普通八大类、焊接、无损检测、检验人员）')
+    // 非焊接场景：校验种类类型有效性
+    if (!isWeldingReadonly.value && (!form.categoryType || ![1,2,3,4].includes(form.categoryType))) {
+      Message.error('请选择有效的种类类型')
       return false
     }
+
     if (isUpdate.value) {
       await updateCategory(form, dataId.value)
       Message.success('修改成功')
@@ -185,6 +212,7 @@ const save = async () => {
       Message.success('新增成功')
     }
     emit('save-success')
+    visible.value = false
     return true
   } catch (error) {
     return false
@@ -198,15 +226,12 @@ const onAdd = async () => {
   visible.value = true
 }
 
-// 修改 - 回显种类类型
+// 修改回显
 const onUpdate = async (id: string) => {
   reset()
   dataId.value = id
   const { data } = await getCategory(id)
-  // 确保categoryType是数字类型，适配单选按钮回显
-  if(data.categoryType) {
-    data.categoryType = Number(data.categoryType)
-  }
+  if (data.categoryType) data.categoryType = Number(data.categoryType)
   Object.assign(form, data)
   visible.value = true
 }
@@ -217,19 +242,20 @@ defineExpose({ onAdd, onUpdate })
 <style scoped lang="scss">
 .video-preview {
   margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-// 小圆点单选按钮样式优化
 .category-type-radio {
   padding: 8px 0;
   
   .radio-item {
     display: inline-block;
-    margin-right: 24px; // 选项之间的间距
-    line-height: 32px; // 垂直居中
+    margin-right: 24px;
+    line-height: 32px;
   }
 
-  // 自定义小圆点大小（可选）
   :deep(.arco-radio) {
     :deep(.arco-radio-inner) {
       width: 16px;
