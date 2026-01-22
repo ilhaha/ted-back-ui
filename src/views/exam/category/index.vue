@@ -7,6 +7,10 @@
         <video v-if="record.videoUrl" :src="record.videoUrl" controls style="width: 120px; height: 80px"></video>
         <span v-else>-</span>
       </template>
+      <!-- 新增种类类型展示模板 -->
+      <template #categoryType="{ record }">
+        <span>{{ getCategoryTypeName(record.categoryType) }}</span>
+      </template>
       <template #toolbar-left>
         <a-input-search v-model="queryForm.name" placeholder="请输入种类名称" allow-clear @search="search" />
         <a-button type="primary" class="ml-2" @click="search">
@@ -72,7 +76,6 @@ import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import { useUserStore } from '@/stores'
 
-
 defineOptions({ name: "Category" });
 
 const queryForm = reactive<CategoryQuery>({
@@ -90,9 +93,34 @@ const {
 } = useTable((page) => listCategory({ ...queryForm, ...page }), {
   immediate: true,
 });
+
+// 新增：定义种类类型映射关系
+const categoryTypeMap = {
+  1: '普通八大类',
+  2: '焊接',
+  3: '无损检测',
+  4: '检验人员'
+};
+
+// 新增：根据数字获取种类类型中文名称
+const getCategoryTypeName = (type: number | undefined) => {
+  if (!type || !categoryTypeMap[type]) {
+    return '-'; // 无值时显示横线
+  }
+  return categoryTypeMap[type];
+};
+
 const columns = ref<TableInstanceColumns[]>([
   { title: "八大类名称", dataIndex: "name", slotName: "name" },
   { title: "代号", dataIndex: "code", slotName: "code" },
+  // 新增：种类类型列
+  { 
+    title: "种类类型", 
+    dataIndex: "categoryType", 
+    slotName: "categoryType",
+    width: 120,
+    align: "center"
+  },
   { title: "题目数量", dataIndex: "topicNumber", slotName: "topicNumber" },
   {
     title: "警示短片",

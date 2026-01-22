@@ -35,6 +35,26 @@
           </div>
         </div>
       </template>
+
+      <!-- 种类类型 - 小圆点单选按钮 -->
+      <template #categoryType>
+        <div class="category-type-radio">
+          <a-radio-group v-model="form.categoryType">
+            <div class="radio-item">
+              <a-radio :value="1">普通八大类</a-radio>
+            </div>
+            <div class="radio-item">
+              <a-radio :value="2">焊接</a-radio>
+            </div>
+            <div class="radio-item">
+              <a-radio :value="3">无损检测</a-radio>
+            </div>
+            <div class="radio-item">
+              <a-radio :value="4">检验人员</a-radio>
+            </div>
+          </a-radio-group>
+        </div>
+      </template>
     </GiForm>
   </a-modal>
 </template>
@@ -82,12 +102,13 @@ const handleFileUpload = async (file) => {
   }
 }
 
+// 种类类型字段（1-普通八大类 2-焊接 3-无损检测 4-检验人员）
 const [form, resetForm] = useResetReactive({
-  // todo 待补充
   name: '',
   code: '',
-  videoUrl: '', // 新增视频URL字段
-  topicNumber: 0, // 新增题目数量字段
+  videoUrl: '', // 视频URL字段
+  topicNumber: 0, // 题目数量字段
+  categoryType: undefined, // 种类类型
 })
 
 const columns: ColumnItem[] = reactive([
@@ -105,6 +126,14 @@ const columns: ColumnItem[] = reactive([
     span: 24,
     rules: [{ required: true, message: '请输入八大类代码' }],
   },
+  // 种类类型 - 小圆点单选
+  {
+    label: '种类类型',
+    field: 'categoryType',
+    type: 'slot',
+    span: 24,
+    rules: [{ required: true, message: '请选择种类类型' }],
+  },
   {
     label: '题目数量',
     field: 'topicNumber',
@@ -115,21 +144,18 @@ const columns: ColumnItem[] = reactive([
   {
     label: '警示短片',
     field: 'videoUrl',
-    type: 'upload', // 启用上传组件
+    type: 'upload',
     span: 24,
     props: {
       accept: 'video/*',
       limit: 1,
-      showFileList: false, // 隐藏默认文件列表
-      // customRequest: handleFileUpload, // 自定义上传逻辑
+      showFileList: false,
       fileList: computed(() =>
           form.videoUrl ? [{ uid: '-1', name: '视频', url: form.videoUrl }] : []
       ),
     },
   },
 ])
-
-
 
 // 重置
 const reset = () => {
@@ -143,13 +169,14 @@ const save = async () => {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
     if(form.topicNumber === undefined) {
-      Message.error('请上传题目数量')
+      Message.error('请输入题目数量')
       return false
     }
-    // if(form.videoUrl === '') {
-    //   Message.error('请上传视频')
-    //   return false
-    // }
+    // 校验种类类型
+    if(!form.categoryType || ![1,2,3,4].includes(form.categoryType)) {
+      Message.error('请选择有效的种类类型（仅支持普通八大类、焊接、无损检测、检验人员）')
+      return false
+    }
     if (isUpdate.value) {
       await updateCategory(form, dataId.value)
       Message.success('修改成功')
@@ -171,11 +198,15 @@ const onAdd = async () => {
   visible.value = true
 }
 
-// 修改
+// 修改 - 回显种类类型
 const onUpdate = async (id: string) => {
   reset()
   dataId.value = id
   const { data } = await getCategory(id)
+  // 确保categoryType是数字类型，适配单选按钮回显
+  if(data.categoryType) {
+    data.categoryType = Number(data.categoryType)
+  }
   Object.assign(form, data)
   visible.value = true
 }
@@ -186,5 +217,24 @@ defineExpose({ onAdd, onUpdate })
 <style scoped lang="scss">
 .video-preview {
   margin-top: 20px;
+}
+
+// 小圆点单选按钮样式优化
+.category-type-radio {
+  padding: 8px 0;
+  
+  .radio-item {
+    display: inline-block;
+    margin-right: 24px; // 选项之间的间距
+    line-height: 32px; // 垂直居中
+  }
+
+  // 自定义小圆点大小（可选）
+  :deep(.arco-radio) {
+    :deep(.arco-radio-inner) {
+      width: 16px;
+      height: 16px;
+    }
+  }
 }
 </style>

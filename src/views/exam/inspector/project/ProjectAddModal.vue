@@ -233,7 +233,7 @@ const save = async () => {
 const onAdd = async () => {
   reset();
   dataId.value = "";
-  const res = await selectOptions();
+  const res = await selectOptions([3,4]); 
   categorySelect.value = res.data || [];
   visible.value = true;
 };
@@ -242,7 +242,7 @@ const onAdd = async () => {
 const onUpdate = async (id: string) => {
   reset();
   dataId.value = id;
-  const res = await selectOptions();
+  const res = await selectOptions([3,4]); 
   categorySelect.value = res.data || [];
 
   const { data } = await getProject(id);
@@ -277,7 +277,7 @@ const onAuditConfirm = async () => {
 const onExamineA = async (id: string) => {
   reset();
   dataId.value = id;
-  const res = await selectOptions();
+  const res = await selectOptions([3,4]); 
   categorySelect.value = res.data || [];
 
   const { data } = await getProject(id);

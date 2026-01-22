@@ -45,10 +45,9 @@ export interface CategoryQuery {
 export interface CategoryPageQuery extends CategoryQuery, PageQuery { }
 
 
-export function selectOptions() {
-  return http.get(`${SELECT_OPTIONS}`)
+export function selectOptions(categoryType) {
+  return http.get(SELECT_OPTIONS, { categoryType });
 }
-
 /** @desc 查询八大类，存储题目分类信息列表 */
 export function listCategory(query: CategoryPageQuery) {
   return http.get<PageRes<CategoryResp[]>>(`${BASE_URL}`, query)
