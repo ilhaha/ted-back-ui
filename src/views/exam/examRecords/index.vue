@@ -15,12 +15,14 @@
           </a-button>
         </a-space>
       </template>
-      <!-- 报名 / 考试人数 -->
+      <!-- 报名 / 考试 / 缺考人数 -->
       <template #enrolledCount="{ record }">
         <a-space>
           <a-tag color="orange">{{ record.enrolledCount }}</a-tag>
           <a-divider direction="vertical" />
-          <a-tag color="blue">{{ record.examCount }}</a-tag>
+          <a-tag color="blue">{{ record.examCount - record.absentCount }}</a-tag>
+          <a-divider direction="vertical" />
+          <a-tag color="blue">{{ record.absentCount }}</a-tag>
         </a-space>
       </template>
 
@@ -40,7 +42,8 @@
         <a-space>
           <a-tag color="green">{{ record.certificateGeneratedCount }}</a-tag>
           <a-divider direction="vertical" />
-          <a-tag color="red">{{ record.certificateNotGeneratedCount }}</a-tag>
+          <a-tag color="red">{{ record.certificateNotGeneratedCount - record.failedCount - record.notEnteredCount
+            }}</a-tag>
         </a-space>
       </template>
 
@@ -123,7 +126,7 @@ const columns = ref<TableInstanceColumns[]>([
   { dataIndex: 'orgName', title: '机构名称' },
   { dataIndex: 'projectName', title: '考试项目' },
   { dataIndex: 'examPlanName', title: '考试计划' },
-  { dataIndex: 'enrolledCount', slotName: 'enrolledCount', title: '报名 / 考试人数', align: 'center' },
+  { dataIndex: 'enrolledCount', slotName: 'enrolledCount', title: '报名 / 考试 / 缺考人数', align: 'center' },
   { dataIndex: 'passedCount', slotName: 'passedCount', title: '及格 / 不及格 / 待录入', align: 'center' },
   { dataIndex: 'certificateGeneratedCount', slotName: 'certificateGeneratedCount', title: '证书（已生成 / 待生成）', align: 'center' },
   {

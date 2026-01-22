@@ -70,7 +70,13 @@ export function generateQualificationCertificate(data: any) {
   return http.post(`${BASE_URL}/generate`, data)
 }
 
-/** @desc 录入实操或道路成绩 */
+/** @desc 焊接录入实操 */
+export function inputWeldingScores(data: any) {
+  return http.post(`${BASE_URL}/input/welding`, data)
+}
+
+
+/** @desc 普通项目录入实操或道路成绩 */
 export function inputScores(data: any) {
   return http.post(`${BASE_URL}/input`, data)
 }

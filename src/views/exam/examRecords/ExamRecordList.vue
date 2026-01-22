@@ -23,12 +23,12 @@
       </template>
       <template #toolbar-right>
         <a-space class="batch-actions">
-          <a-popconfirm title="确认生成资格证？" content="生成资格证后，所选考生成绩将无法修改，请确认是否继续。" ok-text="确认生成" cancel-text="取消"
+          <a-popconfirm title="确认生成资格证？" content="生成资格证信息后，所选考生成绩将无法修改，请确认是否继续。" ok-text="确认生成" cancel-text="取消"
             @ok="handleBatchGenerate">
             <a-button v-permission="['exam:certificate:generated']" :loading="generateing"
               :disabled="!(selectedKeys.length && queryForm.planId)" type="primary">
               <template #icon><icon-upload /></template>
-              <template #default>批量生成资格证</template>
+              <template #default>批量生成资格证信息</template>
             </a-button>
           </a-popconfirm>
         </a-space>
@@ -60,7 +60,10 @@
         </a-space>
       </template>
       <template #examPaper="{ record }">
-        <a-link @click="showFormattedExamPaper(record)">查阅</a-link>
+        <a-link @click="showFormattedExamPaper(record)" v-if="record.examPaper">查阅</a-link>
+        <a-tag color="red" v-else>
+          缺考
+        </a-tag>
       </template>
       <template #registrationProgress="{ record }">
         <a-tag :color="getProgressColor(Number(record.registrationProgress))">
@@ -79,19 +82,37 @@
       </template>
 
       <template #isCertificateGenerated="{ record }">
-        <a-tag :color="getCertificateStatusColor(record.isCertificateGenerated)">
+        <a-tag :color="getCertificateStatusColor(record.isCertificateGenerated)" v-if="record.examResultStatus != 0">
           {{ getCertificateStatusText(record.isCertificateGenerated) }}
+        </a-tag>
+        <a-tag color="red" v-else>
+          不具备取证条件
         </a-tag>
       </template>
       <template #operScores="{ record }">
-        <a-space v-if="canInputOperScore(record)">
-          <a-input-number v-model="record.operScores" :min="0" :max="100" :precision="0" placeholder="分数" />
-        </a-space>
+        <!-- 焊接项目 -->
+        <span v-if="record.projectId === 110 || record.projectId === 111">
+          <a-space direction="vertical" style="width: 100%;">
+            <div v-for="item in record.weldingOperScoreVoList" :key="item.id">
+              <span>{{ item.projectCode }} <a-divider direction="vertical" />
+              </span>
+              <a-input-number v-if="canInputOperScore(record)" v-model="item.operScore" :min="0" :max="100"
+                :precision="0" placeholder="分数" />
+              <a-tag v-else color="blue">{{ item.operScore ?? '-' }}</a-tag>
+            </div>
+          </a-space>
+        </span>
 
-        <a-space v-else>
-          {{ record.operScores }}
-        </a-space>
+        <!-- 普通项目 -->
+        <span v-else>
+          <a-space>
+            <a-input-number v-if="canInputOperScore(record)" v-model="record.operScores" :min="0" :max="100"
+              :precision="0" placeholder="分数" />
+            <span v-else>{{ record.operScores }}</span>
+          </a-space>
+        </span>
       </template>
+
 
       <template #roadScores="{ record }">
         <a-space v-if="canInputRoadScore(record)">
@@ -107,10 +128,10 @@
 
       <template #action="{ record }">
         <a-space v-if="canGenerateCertificate(record)">
-          <a-popconfirm title="确认生成资格证？" content="生成资格证后，该考生成绩将无法修改，请确认是否继续。" ok-text="确认生成" cancel-text="取消"
+          <a-popconfirm title="确认生成资格证？" content="生成资格证信息后，该考生成绩将无法修改，请确认是否继续。" ok-text="确认生成" cancel-text="取消"
             @ok="generateQualificationCertificate(record)">
-            <a-link v-permission="['exam:certificate:generated']" title="生成资格证" :loading="generateing">
-              生成资格证
+            <a-link v-permission="['exam:certificate:generated']" title="生成资格证信息" :loading="generateing">
+              生成资格证信息
             </a-link>
           </a-popconfirm>
         </a-space>
@@ -208,6 +229,7 @@ import {
   type ExamRecordsQuery, type ExamRecordsResp, deleteExamRecords, exportExamRecords, listExamRecords, inputScores,
   generateQualificationCertificate as generateQualificationCertificateApi,
   downloadQualificationCertificate as downloadQualificationCertificateApi,
+  inputWeldingScores
 } from '@/apis/exam/examRecords'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
@@ -281,7 +303,7 @@ const canInputRoadScore = computed(() => {
 // 生成资格证
 const generateQualificationCertificate = async (record: any) => {
   if (record.isCertificateGenerated !== 0) {
-    Message.warning('该记录已生成资格证，无法再次生成');
+    Message.warning('该记录已生成资格证信息，无法再次生成');
     return;
   }
   if (record.examScores < 70) {
@@ -314,41 +336,88 @@ const generateQualificationCertificate = async (record: any) => {
 // 判断是否可以生成资格证
 const canGenerateCertificate = (record: any) => {
   if (record.isCertificateGenerated !== 0) return false;
-  if (record.examScores < 70) return false;
-  if (record.isOperation === 1 && record.operScores < 70) return false;
-  if (record.isRoad === 1 && record.roadScores < 70) return false;
-  return true && !isShowInputOperScore.value && !isShowInputRoadScore.value;
+  // if (record.examScores < 70) return false;
+  // if (record.isOperation === 1 && record.operScores < 70) return false;
+  // if (record.isRoad === 1 && record.roadScores < 70) return false;
+  return record.examResultStatus == 1 && !isShowInputOperScore.value && !isShowInputRoadScore.value;
 };
 
 // 批量保存实操成绩
 const saveOperScores = async () => {
-  // 过滤出：需要实操 + 未生成证书 + 已填写分数的记录
-  const targetList = dataList.value.filter(item =>
-    item.isOperation === 1 &&
-    item.isCertificateGenerated === 0 &&
-    item.operScores !== null &&
-    item.operScores !== undefined
-  )
+  // 过滤出需要保存的记录：需要实操 + 未生成证书 + 已填写分数
+  const targetList = dataList.value.filter(item => {
+    if (item.isOperation !== 1 || item.isCertificateGenerated !== 0) return false
+
+    if (item.projectId === 110 || item.projectId === 111) {
+      return Boolean(item.weldingOperScoreVoList?.some(w => w.operScore !== null && w.operScore !== undefined))
+    } else {
+      return item.operScores !== null && item.operScores !== undefined
+    }
+  })
+
   if (targetList.length === 0) {
     Message.warning('暂无可保存的实操成绩')
     return
   }
-  inputScoresForm.value.scoresType = 1
-  inputScoresForm.value.scoresList = targetList.map(item => ({
-    recordId: item.id,
-    scores: item.operScores
-  }))
 
-  try {
-    saveScoresLoading.value = true
-    await inputScores(inputScoresForm.value)
-    Message.success('实操成绩已保存')
-    isShowInputOperScore.value = false
-    search()
-  } finally {
-    saveScoresLoading.value = false
+  // 判断要保存的是哪种类型
+  const firstItem = targetList[0]
+
+  if (firstItem.projectId === 110 || firstItem.projectId === 111) {
+    // 焊接项目
+    const weldingScoresList = targetList
+      .flatMap(item =>
+        item.weldingOperScoreVoList
+          .filter(w => w.operScore !== null && w.operScore !== undefined)
+          .map(w => ({
+            recordId: item.id,
+            weldingOperScoreId: w.id,
+            operScore: w.operScore
+          }))
+      )
+
+    if (weldingScoresList.length === 0) {
+      Message.warning('暂无焊接项目可保存的实操成绩')
+      return
+    }
+    try {
+      saveScoresLoading.value = true
+      await inputWeldingScores(weldingScoresList)
+      Message.success('焊接项目实操成绩已保存')
+    } finally {
+      saveScoresLoading.value = false
+    }
+  } else {
+    // 普通项目
+    const normalScoresList = targetList
+      .filter(item => item.projectId !== 110 && item.projectId !== 111)
+      .map(item => ({
+        recordId: item.id,
+        scores: item.operScores
+      }))
+
+    if (normalScoresList.length === 0) {
+      Message.warning('暂无普通项目可保存的实操成绩')
+      return
+    }
+
+    inputScoresForm.value.scoresType = 1
+    inputScoresForm.value.scoresList = normalScoresList
+
+    try {
+      saveScoresLoading.value = true
+      await inputScores(inputScoresForm.value)
+      Message.success('普通项目实操成绩已保存')
+    } finally {
+      saveScoresLoading.value = false
+    }
   }
+
+  // 关闭弹窗 & 刷新列表
+  isShowInputOperScore.value = false
+  search()
 }
+
 
 // 批量保存道路成绩
 const saveRoadScores = async () => {
@@ -454,7 +523,7 @@ const queryForm = reactive<ExamRecordsQuery>({
 // 批量生成资格证按钮点击
 const handleBatchGenerate = async () => {
   if (selectedKeys.value.length === 0) {
-    Message.warning('请先选择要生成资格证的记录')
+    Message.warning('请先选择要生成资格证信息的记录')
     return
   }
   try {
@@ -467,13 +536,13 @@ const handleBatchGenerate = async () => {
 
     if (certificateRecords.length > 0) {
       const names = certificateRecords.map(item => item.candidateName);
-      Message.error(`${names.join('、')} 已生成证书，无法再次生成`);
+      Message.error(`${names.join('、')} 已生成资格证书信息，无法再次生成`);
       return;
     }
     generateing.value = true;
     generateQualificationForm.value.recordIds = selectedKeys.value
     await generateQualificationCertificateApi(generateQualificationForm.value);
-    Message.success(`已生成 ${selectedKeys.value.length} 条记录资格证`);
+    Message.success(`已生成 ${selectedKeys.value.length} 条记录资格证信息`);
     isShowInputOperScore.value = false
     isShowInputRoadScore.value = false
     selectedKeys.value = [];

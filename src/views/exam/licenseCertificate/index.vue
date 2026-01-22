@@ -12,21 +12,31 @@
           <template #default>重置</template>
         </a-button>
       </template>
-      <template #toolbar-right>
+      <template #approvalType="{ record }">
+        <a-tag :color="getApprovalTypeColor(record.approvalType)" bordered>
+          {{ getApprovalTypeText(record.approvalType) }}
+        </a-tag>
+      </template>
+      <template #certGenerated="{ record }">
+        <a-tag :color="getCertGeneratedColor(record.certGenerated)" bordered>
+          {{ getCertGeneratedText(record.certGenerated) }}
+        </a-tag>
+      </template>
+      <!-- <template #toolbar-right>
         <a-button v-permission="['exam:certificate:download']" :disabled="!selectedKeys.length" :loading="downloading"
           type="primary" @click="handleBatchDownload">
           <template #icon><icon-download /></template>
           <template #default>批量下载资格证</template>
         </a-button>
-      </template>
-      <template #action="{ record }">
+      </template> -->
+      <!-- <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:certificate:download']" title="下载资格证" :loading="downloading"
             @click="downloadQualificationCertificate(record)">
             下载
           </a-link>
         </a-space>
-      </template>
+      </template> -->
     </GiTable>
 
     <LicenseCertificateAddModal ref="LicenseCertificateAddModalRef" @save-success="search" />
@@ -82,17 +92,20 @@ const columns = ref<TableInstanceColumns[]>([
   // { title: '是否审核', dataIndex: 'isVerify', slotName: 'isVerify' },
   // { title: '是否操作', dataIndex: 'isOpr', slotName: 'isOpr' },
   { title: '证书类别', dataIndex: 'lcnsKind', slotName: 'lcnsKind' },
+  { title: '证书项目名称', dataIndex: 'psnlcnsItem', slotName: 'psnlcnsItem' },
+  { title: '证书项目代码', dataIndex: 'psnlcnsItemCode', slotName: 'psnlcnsItemCode' },
+  { title: '许可类型', dataIndex: 'approvalType', slotName: 'approvalType' },
+  { title: '许可状态', dataIndex: 'certGenerated', slotName: 'certGenerated' },
   // { title: '证书分类', dataIndex: 'lcnsCategory', slotName: 'lcnsCategory' },
   { title: '证书编号', dataIndex: 'lcnsNo', slotName: 'lcnsNo' },
   { title: '证书签发日期', dataIndex: 'certDate', slotName: 'certDate' },
   { title: '授权日期', dataIndex: 'authDate', slotName: 'authDate' },
   { title: '证书有效期', dataIndex: 'endDate', slotName: 'endDate' },
-  { title: '原授权单位', dataIndex: 'originalAuthCom', slotName: 'originalAuthCom' },
+  // { title: '原授权单位', dataIndex: 'originalAuthCom', slotName: 'originalAuthCom' },
   { title: '授权单位', dataIndex: 'authCom', slotName: 'authCom' },
   // { title: '备注', dataIndex: 'remark', slotName: 'remark' },
   // { title: '状态', dataIndex: 'state', slotName: 'state' },
-  { title: '证书项目名称', dataIndex: 'psnlcnsItem', slotName: 'psnlcnsItem' },
-  { title: '证书项目代码', dataIndex: 'psnlcnsItemCode', slotName: 'psnlcnsItemCode' },
+
   // { title: '许可范围', dataIndex: 'permitScope', slotName: 'permitScope' },
   // { title: '明细备注', dataIndex: 'detailRemark', slotName: 'detailRemark' },
   // { title: '明细状态', dataIndex: 'detailState', slotName: 'detailState' },
@@ -111,6 +124,7 @@ const columns = ref<TableInstanceColumns[]>([
     show: has.hasPermOr(['exam:certificate:download'])
   }
 ]);
+
 
 const rowSelection = reactive({
   type: 'checkbox',
@@ -218,6 +232,52 @@ const LicenseCertificateDetailDrawerRef = ref<InstanceType<typeof LicenseCertifi
 const onDetail = (record: LicenseCertificateResp) => {
   LicenseCertificateDetailDrawerRef.value?.onOpen(record.id)
 }
+
+
+const getCertGeneratedColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue";
+    case 1:
+      return "green";
+    default:
+      return "default";
+  }
+};
+
+const getCertGeneratedText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "待许可";
+    case 1:
+      return "已许可";
+    default:
+      return "未知";
+  };
+}
+
+const getApprovalTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue";
+    case 1:
+      return "orange";
+    default:
+      return "default";
+  }
+};
+
+const getApprovalTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "初审";
+    case 1:
+      return "复审";
+    default:
+      return "未知";
+  };
+}
+
 </script>
 
 <style scoped lang="scss"></style>
