@@ -126,7 +126,7 @@ const columns = ref<TableInstanceColumns[]>([
   { dataIndex: 'orgName', title: '机构名称' },
   { dataIndex: 'projectName', title: '考试项目' },
   { dataIndex: 'examPlanName', title: '考试计划' },
-  { dataIndex: 'enrolledCount', slotName: 'enrolledCount', title: '报名 / 考试 / 缺考人数', align: 'center' },
+  { dataIndex: 'enrolledCount', slotName: 'enrolledCount', title: '报名 / 考试 / 理论缺考人数', align: 'center' },
   { dataIndex: 'passedCount', slotName: 'passedCount', title: '及格 / 不及格 / 待录入', align: 'center' },
   { dataIndex: 'certificateGeneratedCount', slotName: 'certificateGeneratedCount', title: '证书（已生成 / 待生成）', align: 'center' },
   {

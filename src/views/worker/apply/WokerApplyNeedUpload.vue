@@ -318,7 +318,7 @@ const ID_CARD_REGEX = /^[1-9]\d{5}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01
 // 校验两个身份证是否是一个
 const verifyIdCard = async () => {
     if (!ID_CARD_REGEX.test(idCard.value)) {
-        Message.warning("身份证格式不正确2")
+        Message.warning("身份证格式不正确")
         return
     }
     if (!checkIdCard(form.value.idCardNumber, idCard.value)) {
