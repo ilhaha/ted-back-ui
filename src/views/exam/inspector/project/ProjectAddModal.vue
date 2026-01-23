@@ -1,9 +1,39 @@
 <template>
-  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
-    <GiForm ref="formRef" v-model="form" :columns="currentColumns" />
+  <a-modal
+    v-model:visible="visible"
+    :title="title"
+    :mask-closable="false"
+    :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'"
+    draggable
+    @before-ok="save"
+    @close="reset"
+  >
+  <GiForm ref="formRef" v-model="form" :columns="currentColumns">
+  <!-- 考试等级 - 小圆点单选按钮 -->
+  <template #projectLevel>
+    <div class="project-type-radio">
+      <a-radio-group
+        v-model="form.projectLevel"
+        :disabled="isWeldingReadonly"
+      >
+        <div class="radio-item">
+          <a-radio :value="0">无</a-radio>
+        </div>
+        <div class="radio-item">
+          <a-radio :value="1">一级</a-radio>
+        </div>
+        <div class="radio-item">
+          <a-radio :value="2">二级</a-radio>
+        </div>
+      </a-radio-group>
+    </div>
+  </template>
+</GiForm>
     <template #footer>
-      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm">确认审核</a-button>
+      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm"
+        >确认审核</a-button
+      >
     </template>
   </a-modal>
 </template>
@@ -123,6 +153,13 @@ const columns: ColumnItem[] = reactive([
       // disabled: categoryDisabled,
     },
   },
+    {
+    label: '考试等级',
+    field: 'projectLevel',
+    type: 'slot',
+    span: 24,
+    rules: [{ required: true, message: '请选择考试等级' }],
+  },
   {
     label: "实操考试",
     field: "isOperation",
@@ -207,6 +244,13 @@ const reset = () => {
   isAudit.value = false;
 };
 
+
+// 核心判断：修改场景 + 考试等级为 1 或 2 → 只读
+// 修改场景 + 考试等级为 1 / 2 → 只读
+const isWeldingReadonly = computed(() => {
+  return isUpdate.value && [0,1, 2].includes(Number(form.projectLevel))
+})
+
 // 保存
 const save = async () => {
   try {
@@ -233,7 +277,7 @@ const save = async () => {
 const onAdd = async () => {
   reset();
   dataId.value = "";
-  const res = await selectOptions([3,4]); 
+  const res = await selectOptions([3, 4]);
   categorySelect.value = res.data || [];
   visible.value = true;
 };
@@ -242,7 +286,7 @@ const onAdd = async () => {
 const onUpdate = async (id: string) => {
   reset();
   dataId.value = id;
-  const res = await selectOptions([3,4]); 
+  const res = await selectOptions([3, 4]);
   categorySelect.value = res.data || [];
 
   const { data } = await getProject(id);
@@ -277,7 +321,7 @@ const onAuditConfirm = async () => {
 const onExamineA = async (id: string) => {
   reset();
   dataId.value = id;
-  const res = await selectOptions([3,4]); 
+  const res = await selectOptions([3, 4]);
   categorySelect.value = res.data || [];
 
   const { data } = await getProject(id);
@@ -289,4 +333,21 @@ const onExamineA = async (id: string) => {
 defineExpose({ onAdd, onUpdate, onExamineA });
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.project-type-radio {
+  padding: 8px 0;
+  
+  .radio-item {
+    display: inline-block;
+    margin-right: 24px;
+    line-height: 32px;
+  }
+
+  :deep(.arco-radio) {
+    :deep(.arco-radio-inner) {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+</style>
