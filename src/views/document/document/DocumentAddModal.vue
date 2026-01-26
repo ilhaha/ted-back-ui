@@ -33,7 +33,11 @@ const statusOptions = [
   { label: '补正', value: AUDIT_STATUS.REJECTED },
 ]
 
-const emit = defineEmits<{ (e: 'save-success'): void }>()
+const emit = defineEmits<{
+  (e: 'save-success'): void
+  (e: 'close-parent'): void
+  (e: 'audit-finished'): void   
+}>()
 
 const { width } = useWindowSize()
 const dataId = ref('')
@@ -100,20 +104,23 @@ const handleClose = () => {
 //  保存审核结果（含校验）
 const save = async () => {
   const payload = {
-    id: dataId.value, // 资料 ID
-    typeId: typeId.value, // 资料种类 ID
-    candidateId: candidateId.value, // 用户 ID
-    status: form.status, // 审核状态
-    auditRemark: form.auditRemark, // 审核备注
+    id: dataId.value,
+    typeId: typeId.value,
+    candidateId: candidateId.value,
+    status: form.status,
+    auditRemark: form.auditRemark,
   }
 
   try {
-    await reviewDocument(payload); // 调用后端接口
-    Message.success('审核成功');
-    emit('save-success');
-    handleClose(); // 成功后关闭弹窗
+    await reviewDocument(payload)
+    Message.success('审核成功')
+    emit('save-success')
+    emit('audit-finished')
   } catch (error) {
-    handleClose(); // 失败后关闭弹窗
+    Message.error('审核失败')
+  } finally {
+    handleClose()          // 关闭【审核资料】弹窗
+    emit('close-parent')   // ✅ 通知父组件关【考生资料窗口】
   }
 }
 

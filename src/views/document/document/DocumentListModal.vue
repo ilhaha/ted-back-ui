@@ -43,7 +43,12 @@
     </a-table>
 
     <!-- 审核弹窗 -->
-    <DocumentAddModal ref="DocumentAddModalRef" @save-success="onSaveSuccess" />
+<DocumentAddModal
+  ref="DocumentAddModalRef"
+  @save-success="onSaveSuccess"
+  @close-parent="closeCandidateModal"
+  @audit-finished="onAuditFinished" 
+/>
   </a-modal>
 </template>
 
@@ -102,6 +107,18 @@ const onSaveSuccess = () => {
   Message.success("审核成功");
   // 可以刷新列表或者触发父组件事件
 };
+//关闭资料框
+const closeCandidateModal = () => {
+  visible.value = false
+}
+const emit = defineEmits<{
+  (e: 'audit-finished'): void
+}>()
+
+const onAuditFinished = () => {
+  visible.value = false   
+  emit('audit-finished') 
+}
 
 // 审核状态文字
 const getStatusText = (status: number) => {

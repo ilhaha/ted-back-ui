@@ -412,7 +412,7 @@ const reset = () => {
   queryForm.planYear = undefined;
   queryForm.locationName = undefined;
   queryForm.status = undefined;
-  queryForm.planType = 0
+  queryForm.planType = 1
   search();
 };
 

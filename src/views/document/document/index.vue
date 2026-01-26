@@ -53,7 +53,10 @@
     </GiTable>
     <DocumentAddModal ref="DocumentAddModalRef" @save-success="search" @审核成功="search" />
     <DocumentDetailDrawer ref="DocumentDetailDrawerRef" />
-    <DocumentListModal ref="DocumentListModalRef" />
+<DocumentListModal
+  ref="DocumentListModalRef"
+  @audit-finished="search"
+/>
   </div>
 </template>
 
