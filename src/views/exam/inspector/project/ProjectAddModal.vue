@@ -111,10 +111,11 @@ const handleUpload = (options: RequestOption) => {
 };
 
 const categorySelect = ref<LabelValueState[]>([]);
-//计算属性，判断所属八大类是否禁用
-// const categoryDisabled = computed(() => {
-//   return isUpdate.value && form.projectStatus === "2";
-// });
+
+const categoryDisabled = computed(() => {
+  return isUpdate.value; 
+});
+
 const columns: ColumnItem[] = reactive([
   {
     label: "项目名称",
@@ -141,7 +142,7 @@ const columns: ColumnItem[] = reactive([
     span: 24,
   },
   {
-    label: "所属八大类",
+    label: "所属种类",
     prop: "categoryId",
     field: "categoryId",
     type: "select",
@@ -150,7 +151,7 @@ const columns: ColumnItem[] = reactive([
     props: {
       allowSearch: true,
       options: categorySelect,
-      // disabled: categoryDisabled,
+      disabled: categoryDisabled,
     },
   },
     {
@@ -159,6 +160,20 @@ const columns: ColumnItem[] = reactive([
     type: 'slot',
     span: 24,
     rules: [{ required: true, message: '请选择考试等级' }],
+  },
+    {
+    label: "理论考试",
+    field: "isTheory",
+    type: "select",
+    span: 24,
+    required: true,
+    props: {
+      options: [
+        { label: "无", value: 0 },
+        { label: "有", value: 1 },
+      ],
+      placeholder: "请选择是否有理论考试",
+    },
   },
   {
     label: "实操考试",
@@ -250,7 +265,6 @@ const reset = () => {
 const isWeldingReadonly = computed(() => {
   return isUpdate.value && [0,1, 2].includes(Number(form.projectLevel))
 })
-
 // 保存
 const save = async () => {
   try {
