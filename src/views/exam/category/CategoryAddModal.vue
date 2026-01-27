@@ -1,25 +1,13 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm :columns="computedColumns" v-model="form" ref="formRef">
       <!-- 自定义上传后的预览区域 -->
       <template #videoUrl>
         <div class="video-uploader">
           <!-- 上传按钮：仅焊接场景也保留可点击（允许修改视频） -->
-          <a-upload
-              :file-list="form.videoUrl ? [] : []"
-              :show-file-list="false"
-              :custom-request="handleFileUpload"
-              :before-upload="beforeUpload"
-          >
+          <a-upload :file-list="form.videoUrl ? [] : []" :show-file-list="false" :custom-request="handleFileUpload"
+            :before-upload="beforeUpload">
             <a-button type="outline">
               <template #icon><icon-upload /></template>
               上传视频
@@ -77,7 +65,7 @@ const { width } = useWindowSize()
 const dataId = ref('')
 const visible = ref(false)
 const isUpdate = computed(() => !!dataId.value)
-const title = computed(() => (isUpdate.value ? '修改八大类信息' : '新增八大类'))
+const title = computed(() => (isUpdate.value ? '修改考核项目种类信息' : '新增考核项目种类'))
 const formRef = ref<InstanceType<typeof GiForm>>()
 
 // 核心判断：修改场景 + 种类类型为2（焊接）→ 只读控制
@@ -104,7 +92,6 @@ const handleFileUpload = async (file) => {
     form.videoUrl = response.data.url // 更新表单中的视频URL
     Message.success('上传成功')
   } catch (error) {
-    Message.error('上传失败')
   }
 }
 
@@ -114,7 +101,7 @@ const [form, resetForm] = useResetReactive({
   code: '',
   videoUrl: '',
   topicNumber: 0,
-  categoryType: undefined,
+  categoryType: 1,
 })
 
 // 基础列配置（抽离公共配置）
@@ -131,7 +118,7 @@ const baseColumns: ColumnItem[] = [
     field: 'code',
     type: 'input',
     span: 24,
-    rules: [{ required: true, message: '请输入八大类代码' }],
+    rules: [{ required: true, message: '请输入考核项目种类代码' }],
   },
   {
     label: '种类类型',
@@ -199,7 +186,7 @@ const save = async () => {
       return false
     }
     // 非焊接场景：校验种类类型有效性
-    if (!isWeldingReadonly.value && (!form.categoryType || ![1,2,3,4].includes(form.categoryType))) {
+    if (!isWeldingReadonly.value && (!form.categoryType || ![1, 2, 3, 4].includes(form.categoryType))) {
       Message.error('请选择有效的种类类型')
       return false
     }
@@ -249,7 +236,7 @@ defineExpose({ onAdd, onUpdate })
 
 .category-type-radio {
   padding: 8px 0;
-  
+
   .radio-item {
     display: inline-block;
     margin-right: 24px;

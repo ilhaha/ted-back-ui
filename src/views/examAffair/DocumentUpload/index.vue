@@ -111,7 +111,7 @@ const selectedType = ref<number>();
 
 // 资料类型列表
 const typeNameList = ref<DocumentTypeNameVO[]>([]);
-const categorySelect = ref<DocumentTypeNameVO[]>([]); // 存储八大类类型
+const categorySelect = ref<DocumentTypeNameVO[]>([]); // 存储考核项目种类类型
 
 // 获取资料类型列表
 const getDocumentTypeList = async () => {
@@ -200,10 +200,10 @@ const open = async (id: number) => {
   visible.value = true; // 打开弹窗
 
   try {
-    await getDocumentTypeList(); // 调用获取八大类类型的方法
+    await getDocumentTypeList(); // 调用获取考核项目种类类型的方法
   } catch (error) {
-    console.error("获取八大类类型失败:", error);
-    Message.error("获取八大类类型失败，请稍后重试");
+    console.error("获取考核项目种类类型失败:", error);
+    Message.error("获取考核项目种类类型失败，请稍后重试");
   }
 };
 

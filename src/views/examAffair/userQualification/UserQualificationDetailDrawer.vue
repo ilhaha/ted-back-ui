@@ -3,7 +3,7 @@
     <a-descriptions :column="2" size="large" class="general-description">
       <a-descriptions-item label="">{{ dataDetail?.id }}</a-descriptions-item>
       <a-descriptions-item label="用户ID">{{ dataDetail?.userId }}</a-descriptions-item>
-      <a-descriptions-item label="八大类ID">{{ dataDetail?.categoryId }}</a-descriptions-item>
+      <a-descriptions-item label="考核项目种类ID">{{ dataDetail?.categoryId }}</a-descriptions-item>
       <a-descriptions-item label="资质证明URL">{{ dataDetail?.qualificationUrl }}</a-descriptions-item>
       <a-descriptions-item label="创建人">{{ dataDetail?.createUser }}</a-descriptions-item>
       <a-descriptions-item label="创建人">{{ dataDetail?.createUserString }}</a-descriptions-item>

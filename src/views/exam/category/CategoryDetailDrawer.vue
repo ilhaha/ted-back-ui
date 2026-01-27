@@ -1,5 +1,5 @@
 <template>
-  <a-drawer v-model:visible="visible" title="八大类，存储题目分类信息详情" :width="width >= 600 ? 600 : '100%'" :footer="false">
+  <a-drawer v-model:visible="visible" title="考核项目种类，存储题目分类信息详情" :width="width >= 600 ? 600 : '100%'" :footer="false">
     <a-descriptions :column="2" size="large" class="general-description">
 <!--      <a-descriptions-item label="主键ID">{{ dataDetail?.id }}</a-descriptions-item>-->
       <a-descriptions-item label="种类名称">{{ dataDetail?.name }}</a-descriptions-item>

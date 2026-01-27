@@ -14,7 +14,7 @@
     >
       <template #toolbar-left>
 	    <a-input-search v-model="queryForm.userId" placeholder="请输入用户ID" allow-clear @search="search" />
-	    <a-input-search v-model="queryForm.categoryId" placeholder="请输入八大类ID" allow-clear @search="search" />
+	    <a-input-search v-model="queryForm.categoryId" placeholder="请输入考核项目种类ID" allow-clear @search="search" />
 	    <a-input-search v-model="queryForm.qualificationUrl" placeholder="请输入资质证明URL" allow-clear @search="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
@@ -83,7 +83,7 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   { title: '', dataIndex: 'id', slotName: 'id' },
   { title: '用户ID', dataIndex: 'userId', slotName: 'userId' },
-  { title: '八大类ID', dataIndex: 'categoryId', slotName: 'categoryId' },
+  { title: '考核项目种类ID', dataIndex: 'categoryId', slotName: 'categoryId' },
   { title: '资质证明URL', dataIndex: 'qualificationUrl', slotName: 'qualificationUrl' },
   { title: '创建人', dataIndex: 'createUserString', slotName: 'createUser' },
   { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },

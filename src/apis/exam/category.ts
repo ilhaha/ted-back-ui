@@ -48,32 +48,32 @@ export interface CategoryPageQuery extends CategoryQuery, PageQuery { }
 export function selectOptions(categoryType) {
   return http.get(SELECT_OPTIONS, { categoryType });
 }
-/** @desc 查询八大类，存储题目分类信息列表 */
+/** @desc 查询考核项目种类，存储题目分类信息列表 */
 export function listCategory(query: CategoryPageQuery) {
   return http.get<PageRes<CategoryResp[]>>(`${BASE_URL}`, query)
 }
 
-/** @desc 查询八大类，存储题目分类信息详情 */
+/** @desc 查询考核项目种类，存储题目分类信息详情 */
 export function getCategory(id: string) {
   return http.get<CategoryDetailResp>(`${BASE_URL}/${id}`)
 }
 
-/** @desc 新增八大类，存储题目分类信息 */
+/** @desc 新增考核项目种类，存储题目分类信息 */
 export function addCategory(data: any) {
   return http.post(`${BASE_URL}`, data)
 }
 
-/** @desc 修改八大类，存储题目分类信息 */
+/** @desc 修改考核项目种类，存储题目分类信息 */
 export function updateCategory(data: any, id: string) {
   return http.put(`${BASE_URL}/${id}`, data)
 }
 
-/** @desc 删除八大类，存储题目分类信息 */
+/** @desc 删除考核项目种类，存储题目分类信息 */
 export function deleteCategory(id: string) {
   return http.del(`${BASE_URL}/${id}`)
 }
 
-/** @desc 导出八大类，存储题目分类信息 */
+/** @desc 导出考核项目种类，存储题目分类信息 */
 export function exportCategory(query: CategoryQuery) {
   return http.download(`${BASE_URL}/export`, query)
 }

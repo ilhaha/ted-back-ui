@@ -127,19 +127,16 @@ const columns = ref<TableInstanceColumns[]>([
     title: "项目名称",
     dataIndex: "projectName",
     slotName: "projectName",
-    align: "center",
   },
   {
-    title: "所属八大类",
+    title: "所属考核项目种类",
     dataIndex: "categoryName",
     slotName: "categoryName",
-    align: "center",
   },
   {
     title: "项目代码",
     dataIndex: "projectCode",
     slotName: "projectCode",
-    align: "center",
   },
   {
     title: "考试时长（分钟）",
@@ -175,7 +172,6 @@ const columns = ref<TableInstanceColumns[]>([
     title: "创建时间",
     dataIndex: "createTime",
     slotName: "createTime",
-    align: "center",
   },
   //{ title: "部门名称", dataIndex: "deptName", slotName: "deptName" },
   {

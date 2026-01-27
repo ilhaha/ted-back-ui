@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="八大类管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="考核项目种类管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #video="{ record }">
@@ -95,7 +95,7 @@ const {
 
 // 新增：定义种类类型映射关系
 const categoryTypeMap = {
-  1: '八大类',
+  1: '考核项目种类',
   2: '焊接',
   3: '无损检测',
   4: '检验人员'
@@ -110,7 +110,7 @@ const getCategoryTypeName = (type: number | undefined) => {
 };
 
 const columns = ref<TableInstanceColumns[]>([
-  { title: "八大类名称", dataIndex: "name", slotName: "name" },
+  { title: "考核项目种类名称", dataIndex: "name", slotName: "name" },
   { title: "代号", dataIndex: "code", slotName: "code" },
   // 新增：种类类型列
   { 

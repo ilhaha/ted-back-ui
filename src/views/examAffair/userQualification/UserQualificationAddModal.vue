@@ -46,11 +46,11 @@ const columns: ColumnItem[] = reactive([
     rules: [{ required: true, message: '请输入用户ID' }]
   },
   {
-    label: '八大类ID',
+    label: '考核项目种类ID',
     field: 'categoryId',
     type: 'input',
     span: 24,
-    rules: [{ required: true, message: '请输入八大类ID' }]
+    rules: [{ required: true, message: '请输入考核项目种类ID' }]
   },
   {
     label: '资质证明URL',

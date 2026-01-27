@@ -4,7 +4,7 @@
       <a-descriptions :column="2" size="large" class="general-description">
         <a-descriptions-item label="机构代号">{{ dataDetail?.code }}</a-descriptions-item>
         <a-descriptions-item label="机构名称">{{ dataDetail?.name }}</a-descriptions-item>
-        <a-descriptions-item label="机构八大类归属">{{ dataDetail?.categoryNames }}</a-descriptions-item>
+        <a-descriptions-item label="机构考核项目种类归属">{{ dataDetail?.categoryNames }}</a-descriptions-item>
         <a-descriptions-item label="社会统一代码">{{ dataDetail?.socialCode }}</a-descriptions-item>
         <a-descriptions-item label="地点">{{ dataDetail?.location }}</a-descriptions-item>
         <a-descriptions-item label="法人">{{ dataDetail?.legalPerson }}</a-descriptions-item>

@@ -95,7 +95,7 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   { title: '机构代号', dataIndex: 'code', slotName: 'code', },
   { title: '机构名称', dataIndex: 'name', slotName: 'name', },
-  { title: '机构八大类归属', dataIndex: 'categoryNames', slotName: 'categoryNames' },
+  { title: '考核项目种类归属', dataIndex: 'categoryNames', slotName: 'categoryNames' },
   { title: '统一社会信用代码', dataIndex: 'socialCode', slotName: 'socialCode' },
   { title: '地址', dataIndex: 'location', slotName: 'location' },
   { title: '法定代表人', dataIndex: 'legalPerson', slotName: 'legalPerson', },

@@ -5,7 +5,7 @@
       :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
         <a-input-search v-model="queryForm.question" placeholder="问题" allow-clear @search="search" />
-        <a-input-search v-model="queryForm.categoryName" placeholder="八大类" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.categoryName" placeholder="考核项目种类" allow-clear @search="search" />
         <a-input-search v-model="queryForm.projectName" placeholder="所属项目" allow-clear @search="search" />
         <a-input-search v-model="queryForm.knowledgeTypeName" placeholder="知识类型" allow-clear @search="search" />
         <!-- <a-button type="primary" class="ml-2" @click="search">
@@ -136,7 +136,7 @@ const {
 });
 const columns = ref<TableInstanceColumns[]>([
   { title: "问题", dataIndex: "question", slotName: "question" },
-  { title: "所属八大类", dataIndex: "categoryName", slotName: "categoryName" },
+  { title: "所属考核项目种类", dataIndex: "categoryName", slotName: "categoryName" },
   { title: "所属考试项目", dataIndex: "projectName", slotName: "projectName" },
   {
     title: "知识类型",

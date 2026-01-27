@@ -91,7 +91,7 @@ const handleUpload = (options: RequestOption) => {
 };
 
 const categorySelect = ref<LabelValueState[]>([]);
-//计算属性，判断所属八大类是否禁用
+//计算属性，判断所属考核项目种类是否禁用
 // const categoryDisabled = computed(() => {
 //   return isUpdate.value && form.projectStatus === "2";
 // });
@@ -122,7 +122,7 @@ const columns: ColumnItem[] = reactive([
     span: 24,
   },
   {
-    label: "所属八大类",
+    label: "所属考核项目种类",
     prop: "categoryId",
     field: "categoryId",
     type: "select",

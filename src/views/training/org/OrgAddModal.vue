@@ -80,7 +80,7 @@ const columns: ColumnItem[] = reactive([
     rules: [{ required: true, message: '请输入机构名称' }],
   },
   {
-    label: '机构八大类归属',
+    label: '考核项目种类归属',
     field: 'categoryIds',
     type: 'select',
     required: true,
@@ -92,7 +92,7 @@ const columns: ColumnItem[] = reactive([
       fieldNames: { label: 'label', value: 'value' }
     },
     rules: [
-      { required: true, message: '请选择机构八大类归属' },
+      { required: true, message: '请选择机构考核项目种类归属' },
       { type: 'array', min: 1, message: '至少选择一个类目' }
     ],
   },
