@@ -46,6 +46,11 @@
                 <a-link v-permission="['worker:examineePaymentAudit:download']"
                     @click.prevent="downloadAuditNotice(record)" :loading="downloadLodding">下载</a-link>
             </template> -->
+            <template #theoryScoreReused="{ record }">
+                <a-tag :color="getTheoryScoreReusedColor(record.theoryScoreReused)">{{
+                    getTheoryScoreReusedText(record.theoryScoreReused)
+                    }}</a-tag>
+            </template>
             <template #ticketUrl="{ record }">
                 <div v-if="record.ticketUrl">
                     <a-link @click="getPreviewUrl(record.ticketUrl)" v-permission="['exam:download:ticket']">预览</a-link>
@@ -126,9 +131,11 @@ const {
 const columns = ref<TableInstanceColumns[]>([
     { title: "机构名称", dataIndex: "orgName", slotName: "orgName" },
     { title: "所属班级", dataIndex: "className", slotName: "className" },
+    { title: "序号", dataIndex: "seatId", slotName: "seatId" },
     { title: "考生姓名", dataIndex: "nickName", slotName: "nickName" },
     { title: "报名时间", dataIndex: "createTime", slotName: "createTime" },
     { title: "照片", dataIndex: "facePhoto", slotName: "facePhoto" },
+    { title: "理论考试状态", dataIndex: "theoryScoreReused", slotName: "theoryScoreReused" },
 
     // { title: "缴费通知单编号", dataIndex: "noticeNo", slotName: "noticeNo" },
     // { title: "缴费通知单", dataIndex: "auditNoticeUrl", slotName: "auditNoticeUrl" },
@@ -148,6 +155,7 @@ const columns = ref<TableInstanceColumns[]>([
     //     ]),
     // },
 ]);
+
 
 // 重置
 const reset = () => {
@@ -192,6 +200,29 @@ const getPreviewUrl = (url: string) => {
         Message.warning("暂不支持此文件类型预览");
     }
 };
+
+
+const getTheoryScoreReusedText = (auditStatus: number) => {
+    switch (auditStatus) {
+        case 0:
+            return "待考";
+        case 1:
+            return "免考";
+        default:
+            return "未知";
+    }
+};
+const getTheoryScoreReusedColor = (auditStatus: number) => {
+    switch (auditStatus) {
+        case 0:
+            return "blue";
+        case 1:
+            return "green";
+        default:
+            return "default";
+    }
+}
+
 
 const getStatusText = (auditStatus: number) => {
     switch (auditStatus) {
