@@ -63,6 +63,11 @@ export interface ExamPlanQuery {
 export interface ExamPlanPageQuery extends ExamPlanQuery, PageQuery { }
 
 
+/** @desc 考试成绩确认 */
+export function scoreConfirmed(planId: number, classId: number) {
+  return http.post(`${BASE_URL}/score/confirmed/${planId}/${classId}`)
+}
+
 /** @desc 根据班级列表获取每个班级在考试计划下的报名人数、考试人数、及格人数、成绩录入情况和证书生成情况 */
 export function getClassExamStatsPage(query: ExamPlanPageQuery) {
   return http.get<PageRes<ExamPlanResp[]>>(`${BASE_URL}/class-stats`, query)

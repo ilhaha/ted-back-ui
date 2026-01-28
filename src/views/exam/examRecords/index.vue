@@ -43,7 +43,7 @@
           <a-tag color="green">{{ record.certificateGeneratedCount }}</a-tag>
           <a-divider direction="vertical" />
           <a-tag color="red">{{ record.certificateNotGeneratedCount - record.failedCount - record.notEnteredCount
-            }}</a-tag>
+          }}</a-tag>
         </a-space>
       </template>
 
@@ -51,6 +51,12 @@
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:examRecords:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+          <a-popconfirm content="确认要进行成绩确认吗？" ok-text="确认" cancel-text="取消"
+            @ok="onScoreConfirmed(record.id, record.classId)">
+            <a-link v-permission="['plan:score:confirmed']" title="成绩确认">
+              成绩确认
+            </a-link>
+          </a-popconfirm>
         </a-space>
       </template>
     </GiTable>
@@ -63,8 +69,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { getCascaderProjectPlan } from '@/apis/exam/examPlan'
-import { getClassExamStatsPage } from '@/apis/exam/examPlan'
+import { getCascaderProjectPlan, scoreConfirmed, getClassExamStatsPage } from '@/apis/exam/examPlan'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import ExamRecordList from './ExamRecordList.vue'
 import {
@@ -73,6 +78,7 @@ import {
 import { useDownload, useTable } from '@/hooks'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
+import { Message } from '@arco-design/web-vue'
 
 defineOptions({ name: 'ExamRecords' })
 
@@ -87,6 +93,13 @@ const title = ref('')
 const classId = ref('')
 
 const ExamRecordListRef = ref<InstanceType<typeof ExamRecordList>>();
+
+// 成绩确认
+const onScoreConfirmed = async (planId: any, classId: any) => {
+  await scoreConfirmed(planId, classId);
+  Message.success('已确认');
+  search();
+}
 
 // 详情
 const onDetail = (record: any) => {

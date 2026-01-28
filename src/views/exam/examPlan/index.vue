@@ -60,7 +60,7 @@
             <a-option value="3">已生效</a-option>
             <a-option value="4">未通过</a-option>
             <a-option value="5">已开考</a-option>
-            <a-option value="6">已结束</a-option>
+            <!-- <a-option value="6">已结束</a-option> -->
           </a-select>
           <a-space class="ml-2">
             <!-- <a-button type="primary" @click="search">

@@ -33,6 +33,19 @@
           </a-popconfirm>
         </a-space>
       </template>
+      <template #examScoresTitle>
+        理论成绩
+        <a-space>
+          <a-link v-permission="['update:theoretical:score']" title="修改理论成绩" @click="openInputExamScore"
+            v-if="!isShowInputExamScore">【修改】</a-link>
+          <a-popconfirm content="确定要修改理论成绩吗？" ok-text="确定" cancel-text="取消" @ok="saveExamScores">
+            <a-link v-permission="['update:theoretical:score']" title="修改理论成绩绩" v-if="isShowInputExamScore"
+              :loading="saveScoresLoading">
+              【保存】
+            </a-link>
+          </a-popconfirm>
+        </a-space>
+      </template>
       <template #operScoresTitle>
         实操成绩
         <a-space>
@@ -88,6 +101,14 @@
         <a-tag color="red" v-else>
           不具备取证条件
         </a-tag>
+      </template>
+      <template #examScores="{ record }">
+        <a-space v-if="canInputExamScore(record)">
+          <a-input-number v-model="record.examScores" :min="0" :max="100" :precision="0" placeholder="分数" />
+        </a-space>
+        <a-space v-else>
+          {{ record.examScores }}
+        </a-space>
       </template>
       <template #operScores="{ record }">
         <!-- 焊接项目 -->
@@ -229,7 +250,7 @@ import {
   type ExamRecordsQuery, type ExamRecordsResp, deleteExamRecords, exportExamRecords, listExamRecords, inputScores,
   generateQualificationCertificate as generateQualificationCertificateApi,
   downloadQualificationCertificate as downloadQualificationCertificateApi,
-  inputWeldingScores
+  inputWeldingScores, updateExamScores
 } from '@/apis/exam/examRecords'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
@@ -258,6 +279,8 @@ const generateQualificationForm = ref<any>({
 
 const generateing = ref(false);
 
+const isShowInputExamScore = ref(false)
+
 const isShowInputOperScore = ref(false)
 
 const isShowInputRoadScore = ref(false)
@@ -266,10 +289,35 @@ const hasOper = ref(0)
 
 const hasRoad = ref(0)
 
+// 显示录入理论成绩的输入框
+const openInputExamScore = () => {
+  if (isShowInputOperScore.value) {
+    Message.warning("请先完成实操成绩的录入")
+    return
+  }
+  if (isShowInputRoadScore.value) {
+    Message.warning("请先完成道路成绩的录入")
+    return
+  }
+  isShowInputExamScore.value = true;
+}
+
+// 是否可以修改理论成绩
+const canInputExamScore = computed(() => {
+  return (record: any) => {
+    return record.examPaper && record.isCertificateGenerated === 0 && isShowInputExamScore.value
+  }
+})
+
+
 // 显示录入实操成绩的输入框
 const openInputOperScore = () => {
   if (isShowInputRoadScore.value) {
     Message.warning("请先完成道路成绩的录入")
+    return
+  }
+  if (isShowInputExamScore.value) {
+    Message.warning("请先完成理论成绩的修改")
     return
   }
   isShowInputOperScore.value = true;
@@ -286,6 +334,10 @@ const canInputOperScore = computed(() => {
 const openInputRoadScore = () => {
   if (isShowInputOperScore.value) {
     Message.warning("请先完成实操成绩的录入")
+    return
+  }
+  if (isShowInputExamScore.value) {
+    Message.warning("请先完成理论成绩的修改")
     return
   }
   isShowInputRoadScore.value = true;
@@ -339,8 +391,36 @@ const canGenerateCertificate = (record: any) => {
   // if (record.examScores < 70) return false;
   // if (record.isOperation === 1 && record.operScores < 70) return false;
   // if (record.isRoad === 1 && record.roadScores < 70) return false;
-  return record.examResultStatus == 1 && !isShowInputOperScore.value && !isShowInputRoadScore.value;
+  return record.examResultStatus == 1 && !isShowInputOperScore.value && !isShowInputRoadScore.value && !isShowInputExamScore.value;
 };
+
+// 批量修改理论成绩
+const saveExamScores = async () => {
+  // 过滤出 未生成证书 + 已填写分数的记录
+  const targetList = dataList.value.filter(item => item.isCertificateGenerated === 0 &&
+    item.examScores !== null &&
+    item.examScores !== undefined
+  )
+  if (targetList.length === 0) {
+    Message.warning('暂无可修改的理论成绩')
+    return
+  }
+  inputScoresForm.value.scoresType = 0
+  inputScoresForm.value.scoresList = targetList.map(item => ({
+    recordId: item.id,
+    scores: item.examScores
+  }))
+
+  try {
+    saveScoresLoading.value = true
+    await updateExamScores(inputScoresForm.value)
+    Message.success('理论成绩已修改')
+    isShowInputExamScore.value = false
+    search()
+  } finally {
+    saveScoresLoading.value = false
+  }
+}
 
 // 批量保存实操成绩
 const saveOperScores = async () => {
@@ -601,9 +681,12 @@ const getProgressText = (progress: number) => {
 const columns = ref<TableInstanceColumns[]>([
   { dataIndex: 'projectName', title: '考试项目' },
   { dataIndex: 'planName', title: '考试计划' },
+  { dataIndex: 'seatId', title: '序号' },
   { dataIndex: 'candidateName', title: '考生姓名' },
   { dataIndex: 'username', title: '考生身份证号' },
-  { dataIndex: 'examScores', title: '理论成绩', align: 'center', },
+  {
+    dataIndex: 'examScores', slotName: 'examScores', title: '理论成绩', align: 'center', titleSlotName: 'examScoresTitle', width: 165
+  },
   {
     dataIndex: 'operScores',
     slotName: 'operScores',
@@ -730,6 +813,7 @@ const afterClose = () => {
   queryForm.username = ''
   isShowInputOperScore.value = false
   isShowInputRoadScore.value = false
+  isShowInputExamScore.value = false
 }
 
 defineExpose({ onOpen, afterClose })

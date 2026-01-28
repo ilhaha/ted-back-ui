@@ -75,6 +75,11 @@ export function inputWeldingScores(data: any) {
   return http.post(`${BASE_URL}/input/welding`, data)
 }
 
+/** @desc 修改理论成绩 */
+export function updateExamScores(data: any) {
+  return http.post(`${BASE_URL}/update/exam/score`, data)
+}
+
 
 /** @desc 普通项目录入实操或道路成绩 */
 export function inputScores(data: any) {
