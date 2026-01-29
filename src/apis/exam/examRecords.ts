@@ -58,6 +58,10 @@ export interface ExamRecordsQuery {
 }
 export interface ExamRecordsPageQuery extends ExamRecordsQuery, PageQuery { }
 
+/** @desc 查询某个考生的考试记录列表 */
+export function getClassExamTableList(planId: string) {
+  return http.get<any[]>(`${BASE_URL}/grade/${planId}`)
+}
 
 /** @desc 下载资格证 */
 export function downloadQualificationCertificate(data: any, planType: number) {

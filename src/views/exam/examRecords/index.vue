@@ -22,7 +22,7 @@
           <a-divider direction="vertical" />
           <a-tag color="blue">{{ record.examCount - record.absentCount }}</a-tag>
           <a-divider direction="vertical" />
-          <a-tag color="blue">{{ record.absentCount }}</a-tag>
+          <a-tag color="red">{{ record.absentCount }}</a-tag>
         </a-space>
       </template>
 

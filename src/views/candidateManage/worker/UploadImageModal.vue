@@ -26,7 +26,7 @@
               <icon-upload />
               <div class="upload-text">点击或拖拽文件到此处上传</div>
               <div class="upload-hint">
-                支持常见图片（jpeg、png、jpg）、文档（PDF、Word），大小不超过5MB
+                支持常见图片（jpeg、png、jpg）大小不超过5MB
               </div>
             </div>
           </template>
@@ -92,9 +92,7 @@ const handleSuccess = (file: any) => {
 
 const beforeUpload = (file: File) => {
   const allowedTypes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+
     'image/jpeg',
     'image/png',
     'image/jpg',
@@ -102,7 +100,7 @@ const beforeUpload = (file: File) => {
     'image/webp'
   ];
   if (!allowedTypes.includes(file.type)) {
-    Message.error('只能上传图片、PDF 或 Word 文件');
+    Message.error('只能上传图片');
     return false;
   }
   const maxSize = 5 * 1024 * 1024;
