@@ -93,7 +93,7 @@ const columns: ColumnItem[] = reactive([
     ],
   },
   {
-    label: "手机号",
+    label: "联系电话",
     field: "phone",
     type: "input",
     span: 24,

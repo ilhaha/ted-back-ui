@@ -7,7 +7,12 @@
         <a-input-search @search="search" v-model="queryForm.candidateName" placeholder="搜索作业人员姓名" allow-clear
           class="search-input ml-2" />
         <a-input-search @search="search" v-model="queryForm.idNumber" placeholder="搜索作业人员身份证号" allow-clear
-          class="search-input ml-2" /> <a-button @click="reset">
+          class="search-input ml-2" />
+        <a-input-search @search="search" v-model="queryForm.phone" placeholder="搜索作业人员联系电话" allow-clear
+          class="search-input ml-2" />
+        <a-input-search @search="search" v-model="queryForm.workUnit" placeholder="搜索作业人员工作单位" allow-clear
+          class="search-input ml-2" />
+        <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
         </a-button>
@@ -105,6 +110,8 @@ defineOptions({ name: 'CandidateType' })
 const queryForm = reactive<CandidateTypeQuery>({
   candidateName: undefined,
   idNumber: undefined,
+  workUnit: undefined,
+  phone: undefined,
   sort: ['id,desc']
 })
 
@@ -118,7 +125,10 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   { title: '姓名', dataIndex: 'nickname', slotName: 'nickname' },
   { title: '身份证号', dataIndex: 'username', slotName: 'username' },
-  { title: '手机号', dataIndex: 'phone', slotName: 'phone' },
+  { title: '联系电话', dataIndex: 'phone', slotName: 'phone' },
+  { title: '学历', dataIndex: 'education', slotName: 'education' },
+  { title: '工作单位', dataIndex: 'workUnit', slotName: 'workUnit' },
+  { title: '工作区域', dataIndex: 'address', slotName: 'address' },
   { title: '照片', dataIndex: 'avatar', slotName: 'avatar' },
   { title: '考试次数 / 及格 / 不及格', dataIndex: 'examTotalCount', slotName: 'examTotalCount', width: 190, align: 'center', },
   { title: '黑名单', dataIndex: 'isBlacklist', slotName: 'isBlacklist', align: 'center', },
@@ -239,6 +249,8 @@ const handlIsBlacklistChange = (record: any) => {
 const reset = () => {
   queryForm.idNumber = undefined
   queryForm.candidateName = undefined
+  queryForm.phone = undefined
+  queryForm.workUnit = undefined
   search()
 }
 
