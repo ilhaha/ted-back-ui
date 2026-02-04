@@ -1,18 +1,18 @@
 <template>
   <div class="gi_page container">
     <a-space direction="vertical" :size="14" fill>
-      <div>
+      <!-- <div>
         <DataOverview />
-      </div>
+      </div> -->
       <div>
         <a-grid :cols="24" :col-gap="14" :row-gap="14">
           <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 18, xxl: 18 }">
             <Geo />
           </a-grid-item>
-          <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 6, xxl: 6 }">
+          <!-- <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 6, xxl: 6 }">
             <Os style="margin-bottom: 16px" />
             <Browser />
-          </a-grid-item>
+          </a-grid-item> -->
         </a-grid>
       </div>
       <div>

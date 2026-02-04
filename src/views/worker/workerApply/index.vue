@@ -7,6 +7,7 @@
         <a-cascader v-model="queryForm.classId" :options="orgCategoryClassOptions" placeholder="请选择班级" allow-clear
           @change="search" />
         <a-input-search v-model="queryForm.className" placeholder="请输入班级编号" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.projectName" placeholder="请输入报考项目" allow-clear @search="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -48,6 +49,7 @@ const queryForm = reactive<OrgClassQuery>({
   className: undefined,
   classId: undefined,
   isOrgQuery: false,
+  projectName: undefined,
   flag: 1
 })
 const title = ref("")
@@ -82,7 +84,7 @@ const showDocListVisible = ref(false);
 const submitDocListRef = ref<InstanceType<typeof SubmitDocList>>()
 
 const openDocList = (record: any) => {
-  submitDocListRef.value?.onOpen(record.id,record.projectId)
+  submitDocListRef.value?.onOpen(record.id, record.projectId)
   title.value = record.className + "考生报考资料"
   showDocListVisible.value = true
 
@@ -94,6 +96,7 @@ const openDocList = (record: any) => {
 const reset = () => {
   queryForm.classId = undefined
   queryForm.className = undefined
+  queryForm.projectName = undefined
   search()
 }
 

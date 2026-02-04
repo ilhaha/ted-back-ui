@@ -27,20 +27,20 @@ export const systemRoutes: RouteRecordRaw[] = [
     path: '/',
     name: 'Dashboard',
     component: Layout,
-    redirect: '/dashboard/workplace',
+    redirect: '/dashboard/analysis',
     meta: { title: '仪表盘', icon: 'dashboard', hidden: false },
     children: [
       {
         path: '/dashboard/workplace',
         name: 'Workplace',
         component: () => import('@/views/dashboard/workplace/index.vue'),
-        meta: { title: '工作台', icon: 'desktop', hidden: false, affix: true },
+        meta: { title: '工作台', icon: 'desktop', hidden: true, affix: true },
       },
       {
         path: '/dashboard/analysis',
         name: 'Analysis',
         component: () => import('@/views/dashboard/analysis/index.vue'),
-        meta: { title: '分析页', icon: 'insert-chart', hidden: false },
+        meta: { title: '统计汇总', icon: 'insert-chart', hidden: false },
       },
     ],
   },

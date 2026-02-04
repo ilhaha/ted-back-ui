@@ -36,18 +36,6 @@
           <a-tag color="orange">{{ record.notEnteredCount }}</a-tag>
         </a-space>
       </template>
-
-      <!-- 证书情况（已 / 未） -->
-      <template #certificateGeneratedCount="{ record }">
-        <a-space>
-          <a-tag color="green">{{ record.certificateGeneratedCount }}</a-tag>
-          <a-divider direction="vertical" />
-          <a-tag color="red">{{ record.certificateNotGeneratedCount - record.failedCount - record.notEnteredCount
-          }}</a-tag>
-        </a-space>
-      </template>
-
-
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:examRecords:detail']" title="详情" @click="onDetail(record)">详情</a-link>
@@ -141,7 +129,6 @@ const columns = ref<TableInstanceColumns[]>([
   { dataIndex: 'examPlanName', title: '考试计划' },
   { dataIndex: 'enrolledCount', slotName: 'enrolledCount', title: '报名 / 考试 / 理论缺考人数', align: 'center' },
   { dataIndex: 'passedCount', slotName: 'passedCount', title: '及格 / 不及格 / 待录入', align: 'center' },
-  { dataIndex: 'certificateGeneratedCount', slotName: 'certificateGeneratedCount', title: '证书（已生成 / 待生成）', align: 'center' },
   {
     dataIndex: 'action',
     title: '操作',

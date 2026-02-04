@@ -7,6 +7,24 @@
       <template #toolbar-left>
         <a-input-search v-model="queryForm.psnName" placeholder="请输入姓名" allow-clear @search="search" />
         <a-input-search v-model="queryForm.idcardNo" placeholder="请输入身份证号" allow-clear @search="search" />
+        <a-select v-model="queryForm.address" placeholder="工作区域" allow-clear class="search-input ml-2" @change="search">
+          <a-option value="东城区">东城区</a-option>
+          <a-option value="西城区">西城区</a-option>
+          <a-option value="朝阳区">朝阳区</a-option>
+          <a-option value="丰台区">丰台区</a-option>
+          <a-option value="石景山区">石景山区</a-option>
+          <a-option value="海淀区">海淀区</a-option>
+          <a-option value="顺义区">顺义区</a-option>
+          <a-option value="通州区">通州区</a-option>
+          <a-option value="大兴区">大兴区</a-option>
+          <a-option value="房山区">房山区</a-option>
+          <a-option value="门头沟区">门头沟区</a-option>
+          <a-option value="昌平区">昌平区</a-option>
+          <a-option value="大兴区">大兴区</a-option>
+          <a-option value="平谷区">平谷区</a-option>
+          <a-option value="密云区">密云区</a-option>
+          <a-option value="延庆区">延庆区</a-option>
+        </a-select>
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -87,6 +105,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '身份证号', dataIndex: 'idcardNo', slotName: 'idcardNo' },
   { title: '原单位名称', dataIndex: 'originalComName', slotName: 'originalComName' },
   { title: '单位名称', dataIndex: 'comName', slotName: 'comName' },
+  { title: '工作区域', dataIndex: 'address', slotName: 'address' },
   // { title: '申请类型', dataIndex: 'applyType', slotName: 'applyType' },
   { title: '申请日期', dataIndex: 'applyDate', slotName: 'applyDate' },
   // { title: '是否审核', dataIndex: 'isVerify', slotName: 'isVerify' },

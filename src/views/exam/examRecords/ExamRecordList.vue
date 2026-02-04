@@ -21,7 +21,7 @@
           </a-button>
         </a-space>
       </template>
-      <template #toolbar-right>
+      <!-- <template #toolbar-right>
         <a-space class="batch-actions">
           <a-popconfirm title="确认生成资格证？" content="生成资格证信息后，所选考生成绩将无法修改，请确认是否继续。" ok-text="确认生成" cancel-text="取消"
             @ok="handleBatchGenerate">
@@ -32,7 +32,7 @@
             </a-button>
           </a-popconfirm>
         </a-space>
-      </template>
+      </template> -->
       <template #examScoresTitle>
         理论成绩
         <a-space>
@@ -147,7 +147,7 @@
         </a-space>
       </template>
 
-      <template #action="{ record }">
+      <!-- <template #action="{ record }">
         <a-space v-if="canGenerateCertificate(record)">
           <a-popconfirm title="确认生成资格证？" content="生成资格证信息后，该考生成绩将无法修改，请确认是否继续。" ok-text="确认生成" cancel-text="取消"
             @ok="generateQualificationCertificate(record)">
@@ -156,7 +156,7 @@
             </a-link>
           </a-popconfirm>
         </a-space>
-      </template>
+      </template> -->
     </GiTable>
 
     <!-- 修改弹窗内容为结构化展示 -->
@@ -681,9 +681,9 @@ const getProgressText = (progress: number) => {
 const columns = ref<TableInstanceColumns[]>([
   { dataIndex: 'projectName', title: '考试项目' },
   { dataIndex: 'planName', title: '考试计划' },
-  { dataIndex: 'seatId', title: '序号' },
+  { dataIndex: 'seatId', title: '序号', align: 'center', },
   { dataIndex: 'candidateName', title: '考生姓名' },
-  { dataIndex: 'username', title: '考生身份证号' },
+  { dataIndex: 'username', title: '考生身份证号', width: 180 },
   {
     dataIndex: 'examScores', slotName: 'examScores', title: '理论成绩', align: 'center', titleSlotName: 'examScoresTitle', width: 165
   },
@@ -711,16 +711,16 @@ const columns = ref<TableInstanceColumns[]>([
     dataIndex: 'examResultStatus',
     title: '总评', slotName: 'examResultStatus', align: 'center' // 添加插槽名称
   },
-  { dataIndex: 'isCertificateGenerated', slotName: 'isCertificateGenerated', title: '证书状态', align: 'center', },
-  {
-    dataIndex: 'action',
-    title: '操作',
-    slotName: 'action',
-    width: 160,
-    align: 'center',
-    fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['exam:certificate:generated']),
-  },
+  // { dataIndex: 'isCertificateGenerated', slotName: 'isCertificateGenerated', title: '证书状态', align: 'center', },
+  // {
+  //   dataIndex: 'action',
+  //   title: '操作',
+  //   slotName: 'action',
+  //   width: 160,
+  //   align: 'center',
+  //   fixed: !isMobile() ? 'right' : undefined,
+  //   show: has.hasPermOr(['exam:certificate:generated']),
+  // },
 ])
 
 // 表格多选配置
