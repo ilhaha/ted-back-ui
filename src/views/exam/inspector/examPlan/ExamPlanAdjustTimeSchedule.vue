@@ -127,6 +127,20 @@ const columns: ColumnItem[] = reactive([
       placeholder: isUpdate.value ? "请选择日期时间" : "请选择日期",
     })),
   },
+    {
+    label: "准考证下载截至时间",
+    prop: "admitCardEndTime",
+    field: "admitCardEndTime",
+    type: "date-picker",
+    required: true,
+    span: 22,
+    props: computed(() => ({
+      showTime: isUpdate.value, // 修改时显示时间选择，新增时仅显示日期
+      format: isUpdate.value ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD",
+      valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
+      placeholder: isUpdate.value ? "请选择日期时间" : "请选择日期",
+    })),
+  },
 
 
 ]);

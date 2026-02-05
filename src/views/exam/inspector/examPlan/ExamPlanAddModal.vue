@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, reactive, watch } from "vue"; // 补充 reactive 导入（你原有代码已用，此处确认）
 import { Message } from "@arco-design/web-vue";
 import { useWindowSize } from "@vueuse/core";
 import {
@@ -18,6 +18,7 @@ import {
   getExamPlanId,
   getExamPlanvalid,
   updateExamPlan,
+  inspectorUpdate,
   updateExamPlanClassroom,
   getExamClassroom,
 } from "@/apis/exam/examPlan";
@@ -67,25 +68,27 @@ const [form, resetForm] = useResetReactive({
 
 const projectBindingDocList = ref([]);
 
-
-
 // 监听新增 删除串口是否打开
 watch(
   () => form.examProjectId,
-  async (newExamProjectId) => {
-    if (!newExamProjectId) {
-      return;
-    }
-    const response = await bindingDocumentListApi(newExamProjectId);
+  async (val) => {
+    if (!val) return;
+
+    // ⭐ 只取最后一级ID
+    const projectId = Array.isArray(val) ? val.at(-1) : val;
+
+    const response = await bindingDocumentListApi(projectId);
+
     projectBindingDocList.value = response.data.map((doc: any) => ({
       value: doc.id,
       label: doc.typeName,
     }));
-
-  },
-  { immediate: false }
+  }
 );
 
+// ====================================== 关键修改 1：定义响应式变量控制显示 ======================================
+const hasTheory = ref(false); // false=隐藏（对应0），true=显示（对应1）
+const hasOper = ref(false); // false=隐藏（对应0），true=显示（对应1）
 
 const columns: ColumnItem[] = reactive([
   {
@@ -131,7 +134,8 @@ const columns: ColumnItem[] = reactive([
     field: "theoryClassroomId",
     type: "cascader",
     required: true,
-    show: false,
+    // ====================================== 关键修改 2：关联 hasTheory 响应式变量 ======================================
+    show: () => hasTheory.value, // 直接关联响应式变量，1=显示（true），0=隐藏（false）
     span: 24,
     props: {
       options: theoryClassRoomSelectList,
@@ -144,14 +148,14 @@ const columns: ColumnItem[] = reactive([
       },
     },
   },
-
   {
     label: "实操考场",
     prop: "operationClassroomId",
     field: "operationClassroomId",
     type: "cascader",
     required: true,
-    show: false,
+    // ====================================== 关键修改 3：关联 hasOper 响应式变量 ======================================
+    show: () => hasOper.value, // 直接关联响应式变量，1=显示（true），0=隐藏（false）
     span: 24,
     props: {
       options: operationClassRoomSelectList,
@@ -164,7 +168,6 @@ const columns: ColumnItem[] = reactive([
       },
     },
   },
-
   {
     label: "考试报名时间",
     prop: "enrollList",
@@ -184,6 +187,20 @@ const columns: ColumnItem[] = reactive([
     label: "考试开始时间",
     prop: "startTime",
     field: "startTime",
+    type: "date-picker",
+    required: true,
+    span: 24,
+    props: computed(() => ({
+      showTime: isUpdate.value, // 修改时显示时间选择，新增时仅显示日期
+      format: isUpdate.value ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD",
+      valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
+      placeholder: isUpdate.value ? "请选择日期时间" : "请选择日期",
+    })),
+  },
+    {
+    label: "准考证下载截至时间",
+    prop: "admitCardEndTime",
+    field: "admitCardEndTime",
     type: "date-picker",
     required: true,
     span: 24,
@@ -242,10 +259,8 @@ const auditColumns: ColumnItem[] = reactive([
   },
 ]);
 
-
 // 动态计算当前显示的列
 const currentColumns = computed(() => {
-  // eslint-disable-next-line ts/no-use-before-define
   return isAudit.value ? auditColumns : columns;
 });
 
@@ -256,8 +271,9 @@ const reset = () => {
   formRef.value?.formRef?.resetFields();
   resetForm();
   isAudit.value = false;
-  columns.find((item) => item.field === "theoryClassroomId")!.show = false;
-  columns.find((item) => item.field === "operationClassroomId")!.show = false;
+  // ====================================== 关键修改 4：重置时还原隐藏状态 ======================================
+  hasTheory.value = false;
+  hasOper.value = false;
 };
 
 // 保存
@@ -272,8 +288,8 @@ const save = async () => {
     if (isInvalid) return false
 
     // 计算考场总数
-    const theoryLen = 1;
-    const operationLen = form.operationClassroomId?.length || 0;
+    const theoryLen = hasTheory.value ? 1 : 0; // 优化：基于 hasTheory 判断是否计入理论考场
+    const operationLen = hasOper.value ? (form.operationClassroomId?.length || 0) : 0; // 优化：基于 hasOper 判断是否计入实操考场
     const totalClassroom = theoryLen + operationLen;
 
     // 核心修改：仅修改时校验是否选择考场（新增时跳过）
@@ -305,7 +321,7 @@ const save = async () => {
 
     // 发送请求
     if (isUpdate.value) {
-      await updateExamPlan(submitForm, dataId.value);
+      await inspectorUpdate(submitForm, dataId.value);
       Message.success("已确认");
     } else {
       submitForm.enrollList = [submitForm.enrollList[0].slice(0, 10) + " 09:00:00", submitForm.enrollList[1].slice(0, 10) + " 17:00:00"]
@@ -325,6 +341,7 @@ const save = async () => {
     loading.value = false;
   }
 };
+
 const onAuditConfirm = async () => {
   try {
     if (form.status === undefined || form.status === null) {
@@ -355,59 +372,73 @@ const onAdd = async () => {
   getProjectList(1);
 };
 
+// ⭐ 根据 value 找 cascader 路径（支持任意层级/虚拟节点）
+const findPath = (value: number | string, options: any[]): any[] | null => {
+  for (const item of options) {
+    if (item.value === value) return [item.value];
+
+    if (item.children?.length) {
+      const childPath = findPath(value, item.children);
+      if (childPath) return [item.value, ...childPath];
+    }
+  }
+  return null;
+};
+
 // 修改
 const onUpdate = async (id: string) => {
-  reset();
+  reset(); // 先重置，还原初始状态
   dataId.value = id;
   visible.value = true;
 
   try {
-    // 1. 获取考试计划详情
-    const { data: examPlanData } = await getExamPlan(id);
-    // 2. 获取部门项目列表（父项目数组）
+    // ====================================== 关键修改 5：异步获取 examPlanData 后，提取 hasTheory/hasOper ======================================
+    const { data: examPlanData } = await getExamPlan(id); // 异步请求完成，获取数据
+
+    // 1. 提取 hasTheory 和 hasOper（0=隐藏→false，1=显示→true），兼容字段不存在的兜底
+    hasTheory.value = examPlanData.hasTheory === 1;
+    hasOper.value = examPlanData.hasOper === 1;
+
     await getExamProjectOptions(examPlanData.planType);
-    const parentProjects = examProjectOptions.value;
 
-    // 3. 核心：根据子项目ID（examProjectId）找对应的子项目+父项目
-    const subProjectId = examPlanData.examProjectId; // 子项目ID（如81）
-    let targetSubProject = null;
-    let targetParentProject = null;
-    // 遍历父项目数组，找包含当前子项目ID的父项
-    for (const parent of parentProjects) {
-      targetSubProject = parent.children?.find(
-        (child: any) => child.value === subProjectId
-      );
-      if (targetSubProject) {
-        targetParentProject = parent;
-        break;
-      }
+    const subProjectId = examPlanData.examProjectId;
+
+    // ⭐ 递归找完整路径（支持虚拟节点）
+    const path = findPath(subProjectId, examProjectOptions.value);
+
+    if (path) {
+      form.examProjectId = path; // cascader 回显必须是路径数组
+    } else {
+      console.warn("未匹配到树路径，直接使用原ID");
+      form.examProjectId = subProjectId;
     }
 
-    // 容错：如果没找到子项目，提示并终止后续逻辑
-    if (!targetSubProject) {
-      console.warn(`未找到ID为${subProjectId}的子项目`);
-      Object.assign(form, examPlanData);
-      return;
+    // 加载考场选项（按需加载，不影响显示控制）
+    if (hasTheory.value) { // 仅当需要显示理论考场时，加载理论考场选项
+      await getProjectClassRoomSelect(subProjectId, 0);
     }
-
-    // 4. 加载理论考场（用子项目ID）
-    await getProjectClassRoomSelect(subProjectId, 0);
-    columns.find((item) => item.field === "theoryClassroomId")!.show = true;
-
-    // 5. 加载实操考场（如果子项目是实操类型）
-    if (targetSubProject.isOperation === 1) {
-      columns.find((item) => item.field === "operationClassroomId")!.show = true;
+    if (hasOper.value) { // 仅当需要显示实操考场时，加载实操考场选项
       await getProjectClassRoomSelect(subProjectId, 1);
     }
 
-    // 6. 表单赋值
-    form.enrollList = [examPlanData.enrollStartTime, examPlanData.enrollEndTime];
+    // ⭐ 统一赋值顺序（非常重要）
     Object.assign(form, examPlanData);
+
+    form.enrollList = [
+      examPlanData.enrollStartTime,
+      examPlanData.enrollEndTime
+    ];
+
+    form.startTime = examPlanData.startTime;
 
   } catch (e) {
     console.error("考试计划回显失败：", e);
+    // 异常时还原隐藏状态，避免残留显示
+    hasTheory.value = false;
+    hasOper.value = false;
   }
 };
+
 const mapRoomIdsToPaths = (roomIds: number[], options: any[]) => {
   const paths: number[][] = []
   roomIds.forEach(roomId => {
@@ -420,6 +451,7 @@ const mapRoomIdsToPaths = (roomIds: number[], options: any[]) => {
   })
   return paths
 }
+
 // 审核
 const onExamineA = async (id: string) => {
   reset();

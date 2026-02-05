@@ -188,7 +188,7 @@ import {
   deleteExamPlan,
   exportExamPlan,
   listExamPlan,
-  centerDirectorConform
+  inspectorCenterDirectorConform
 } from "@/apis/exam/examPlan";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -288,11 +288,11 @@ const onImport = () => {
 };
 
 
-// 中心主任确认考试
+// 检验人员中心主任确认考试
 const conformExam = async () => {
   try {
     await formRef.value?.validate()
-    const res = await centerDirectorConform(form.id, form.isFinalConfirmed)
+    const res = await inspectorCenterDirectorConform(form.id, form.isFinalConfirmed)
     if (!res.data) return false
     Message.success("已确定")
     conformVisible.value = false

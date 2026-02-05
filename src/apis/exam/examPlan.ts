@@ -88,6 +88,13 @@ export function centerDirectorConform(planId: number, isFinalConfirmed: number) 
   })
 }
 
+/** @desc 检验人员中心主任确认考试 */
+export function inspectorCenterDirectorConform(planId: number, isFinalConfirmed: number) {
+  return http.post(`${BASE_URL}/inspector/conform/${planId}/${isFinalConfirmed}`, {
+    timeout: 300000,
+  })
+}
+
 /** @desc 查询考试计划列表 */
 export function listExamPlan(query: ExamPlanPageQuery) {
   return http.get<PageRes<ExamPlanResp[]>>(`${BASE_URL}`, query)
@@ -168,6 +175,13 @@ export function customizAddExamPlan(data: any) {
 export function updateExamPlan(data: any, id: string) {
   return http.put(`${BASE_URL}/${id}`, data)
 }
+
+
+/** @desc 确认考试时间 */
+export function inspectorUpdate(data: any, id: string) {
+  return http.put(`${BASE_URL}/confirm/${id}`, data)
+}
+
 
 /** @desc 修改考试计划考场 */
 export function updateExamPlanClassroom(data: [], id: string) {
