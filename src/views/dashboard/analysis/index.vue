@@ -6,7 +6,7 @@
       </div> -->
       <div>
         <a-grid :cols="24" :col-gap="14" :row-gap="14">
-          <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 18, xxl: 18 }">
+          <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 24 }">
             <Geo />
           </a-grid-item>
           <!-- <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 6, xxl: 6 }">

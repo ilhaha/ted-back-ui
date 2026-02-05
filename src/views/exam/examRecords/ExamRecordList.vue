@@ -2,8 +2,7 @@
   <div class="gi_table_page">
     <GiTable row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" :row-selection="rowSelection" @refresh="search" @select="select"
-      @select-all="selectAll">
+      :disabled-column-keys="['name']"  @refresh="search">
       <template #toolbar-left>
         <a-space>
           <a-input-search @search="search" v-model="queryForm.candidateName" placeholder="搜索考生姓名" allow-clear
@@ -644,9 +643,7 @@ const {
   loading,
   pagination,
   search,
-  selectedKeys,
-  select,
-  selectAll
+  selectedKeys
 } = useTable(
   (page) => listExamRecords(
     { ...queryForm, ...page },
@@ -723,16 +720,6 @@ const columns = ref<TableInstanceColumns[]>([
   // },
 ])
 
-// 表格多选配置
-const rowSelection = reactive({
-  type: 'checkbox',
-  showCheckedAll: true,
-  onlyCurrent: false,
-  selectedRowKeys: selectedKeys,
-  onChange: (keys: string[]) => {
-    selectedKeys.value = keys
-  }
-})
 
 // 证书状态
 const getCertificateStatusColor = (status: number) => {
