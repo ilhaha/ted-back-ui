@@ -40,6 +40,28 @@
         </template>
         <span v-else>-</span>
       </template>
+         <template #refundNoticeUrl="{ record }">
+        <template v-if="record.refundNoticeUrl">
+          <div class="image-list">
+
+            <template v-for="(url, idx) in record.refundNoticeUrl.split(',')" :key="idx">
+
+              <!-- 图片预览 -->
+              <a-image v-if="isImage(url)" width="80" height="60" :src="url" fit="cover"
+                :preview-props="{ zoomRate: 1.5 }" class="preview-image"  />
+
+              <!-- PDF 预览 -->
+              <div v-else>
+                <a-link title="预览" @click="getPreviewUrl(url)">
+                  PDF 预览
+                </a-link>
+              </div>
+            </template>
+
+          </div>
+        </template>
+        <span v-else>-</span>
+      </template>
       <template #toolbar-right>
         <a-button v-permission="['exam:examineePaymentAudit:review']" type="primary" @click="batchReview"
           :disabled="!selectedKeys.length">
@@ -192,9 +214,14 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "auditNoticeUrl",
   },
   {
-    title: "凭证（缴费/退款）",
+    title: "凭证（缴费）",
     dataIndex: "paymentProofUrl",
     slotName: "paymentProofUrl",
+  },
+    {
+    title: "凭证（退款）",
+    dataIndex: "refundNoticeUrl",
+    slotName: "refundNoticeUrl",
   },
   { title: "提交时间", dataIndex: "paymentTime", slotName: "paymentTime" },
   {

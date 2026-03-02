@@ -110,6 +110,9 @@
       <template #projectLevel="{ record }">
         <span>{{ getProjectLevelName(record.projectLevel) }}</span>
       </template>
+         <template #examType="{ record }">
+        <span>{{ getexamTypeName(record.examType) }}</span>
+      </template>
     </GiTable>
 
     <SpecialCertificationApplicantAddModal
@@ -255,6 +258,25 @@ const getProjectLevelName = (type: number | undefined) => {
   return projectLevelsMap[type];
 };
 
+
+
+//定义项目考试等级映射关系
+const examTypeMap = {
+  0: "首考",
+  1: "补考",
+};
+
+// 根据数字获取种类类型中文名称
+const getexamTypeName = (type: number | undefined) => {
+  // 当 type 为 null 或 undefined 时显示横线；0 是有效值，应返回映射内容
+  if (type === undefined || type === null || examTypeMap[type] === undefined) {
+    return "-"; // 无值时显示横线
+  }
+  return examTypeMap[type];
+};
+
+
+
 const columns = ref<TableInstanceColumns[]>([
   { title: "考生名称", dataIndex: "candidateName", slotName: "candidateName" },
   { title: "考试项目名称", dataIndex: "projectName", slotName: "projectName" },
@@ -264,6 +286,13 @@ const columns = ref<TableInstanceColumns[]>([
     title: "考试等级",
     dataIndex: "projectLevel",
     slotName: "projectLevel",
+    width: 120,
+    align: "center",
+  },
+    {
+    title: "考试场次",
+    dataIndex: "examType",
+    slotName: "examType",
     width: 120,
     align: "center",
   },
