@@ -11,7 +11,7 @@ import { useWindowSize } from '@vueuse/core'
 import { addUser, getUser, updateUser, getUserByUserName, getVerifyPhone } from '@/apis/system/user'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import type { Gender, Status } from '@/types/global'
-import { GenderList } from '@/constant/common'
+import { GenderList, ExamSupervisionTypeList } from '@/constant/common'
 import { useResetReactive } from '@/hooks'
 import { useDept, useRole } from '@/hooks/app'
 import { encryptByRsa } from '@/utils/encrypt'
@@ -33,6 +33,7 @@ const { deptList, getDeptList } = useDept()
 const [form, resetForm] = useResetReactive({
   gender: 1 as Gender,
   status: 1 as Status,
+  examSupervisionType: 0,
 })
 
 const columns: ColumnItem[] = reactive([
@@ -100,6 +101,7 @@ const columns: ColumnItem[] = reactive([
       options: GenderList,
     },
   },
+
   {
     label: '描述',
     field: 'description',
@@ -117,6 +119,15 @@ const columns: ColumnItem[] = reactive([
       uncheckedValue: 2,
       checkedText: '启用',
       uncheckedText: '禁用',
+    },
+  },
+  {
+    label: '监考考试类型',
+    field: 'examSupervisionType',
+    type: 'radio-group',
+    span: 24,
+    props: {
+      options: ExamSupervisionTypeList,
     },
   },
 ])

@@ -25,6 +25,11 @@
       <template #status="{ record }">
         <GiCellStatus :status="record.status" />
       </template>
+      <template #examSupervisionType="{ record }">
+        <a-tag :color="getExamSupervisionTypeColor(record.examSupervisionType)" bordered>{{
+          getExamSupervisionTypeText(record.examSupervisionType)
+        }}</a-tag>
+      </template>
       <template #isSystem="{ record }">
         <a-tag v-if="record.isSystem" color="red" size="small">是</a-tag>
         <a-tag v-else color="arcoblue" size="small">否</a-tag>
@@ -169,6 +174,7 @@ const columns: TableInstanceColumns[] = [
     ellipsis: true,
     tooltip: true,
   },
+  { title: "监考考试类型", dataIndex: "examSupervisionType", slotName: "examSupervisionType", align: "center" },
   { title: "状态", dataIndex: "status", slotName: "status", align: "center" },
   { title: "性别", dataIndex: "gender", slotName: "gender", align: "center" },
   {
@@ -253,6 +259,28 @@ const canShowUpdate = computed(() => {
     return roleIds?.every((id) => !forbiddenRoleIds.includes(id));
   };
 });
+
+const getExamSupervisionTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 理论考试
+    case 1:
+      return "orange"; // 实操考试
+    default:
+      return "default";
+  }
+};
+
+const getExamSupervisionTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "理论考试";
+    case 1:
+      return "实操考试";
+    default:
+      return "未知状态";
+  }
+};
 
 // 重置
 const reset = () => {

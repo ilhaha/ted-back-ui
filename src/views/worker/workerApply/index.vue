@@ -7,7 +7,8 @@
         <a-cascader v-model="queryForm.classId" :options="orgCategoryClassOptions" placeholder="请选择班级" allow-clear
           @change="search" />
         <a-input-search v-model="queryForm.className" placeholder="请输入班级编号" allow-clear @search="search" />
-        <a-input-search v-model="queryForm.projectName" placeholder="请输入报考项目" allow-clear @search="search" />
+        <a-cascader v-model="queryForm.projectId" :options="examProjectOptions" placeholder="请选择报考项目" allow-clear
+          @change="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -41,6 +42,10 @@ import SubmitDocList from './SubmitDocList.vue'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
+import { useExamPlanProject } from "@/hooks";
+
+const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
+
 import { useDownload, useTable } from '@/hooks'
 
 defineOptions({ name: 'ClassApplyMaterials' })
@@ -49,7 +54,7 @@ const queryForm = reactive<OrgClassQuery>({
   className: undefined,
   classId: undefined,
   isOrgQuery: false,
-  projectName: undefined,
+  projectId: undefined,
   flag: 1
 })
 const title = ref("")
@@ -90,19 +95,23 @@ const openDocList = (record: any) => {
 
 }
 
+const getProjectList = async () => {
+  await getExamProjectOptions(0);
+};
 
 
 // 重置
 const reset = () => {
   queryForm.classId = undefined
   queryForm.className = undefined
-  queryForm.projectName = undefined
+  queryForm.projectId = undefined
   search()
 }
 
 onMounted(async () => {
   const res = await getSelectOrgProjectClass(0)
   orgCategoryClassOptions.value = res.data
+  getProjectList()
 })
 </script>
 

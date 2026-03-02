@@ -63,17 +63,19 @@
       </template>
     </GiTable>
 
-    <a-modal v-model:visible="blacklistModalVisible" title="加入黑名单" width="480px" @ok="submitBlacklist"
+    <a-modal :visible="blacklistModalVisible" title="加入黑名单" width="25%" @ok="submitBlacklist"
       @cancel="cancelBlacklist">
       <a-form :model="blacklistForm" layout="vertical">
+        <a-form-item label="禁考项目" required>
+          <a-cascader v-model="blacklistForm.disableProjectIds" :options="examProjectOptions" multiple
+            placeholder="请选择禁考项目" />
+        </a-form-item>
         <a-form-item label="黑名单时长" required>
           <a-select v-model="blacklistForm.durationType" placeholder="请选择黑名单时长">
-            <a-option :value="1">1天</a-option>
-            <a-option :value="2">1个月</a-option>
-            <a-option :value="3">3个月</a-option>
-            <a-option :value="4">6个月</a-option>
-            <a-option :value="5">1年</a-option>
-            <a-option :value="6">无期限</a-option>
+            <a-option :value="1">1年</a-option>
+            <a-option :value="3">3年</a-option>
+            <a-option :value="5">5年</a-option>
+            <a-option :value="-1">无期限</a-option>
           </a-select>
         </a-form-item>
         <a-form-item label="加入原因" required>
@@ -100,10 +102,12 @@ import CandidateTypeDetailDrawer from './CandidateTypeDetailDrawer.vue'
 import CandidateExamRecords from './CandidateExamRecords.vue'
 import { type CandidateTypeResp, type CandidateTypeQuery, deleteCandidateType, exportCandidateType, listCandidateType, blacklistSwitch } from '@/apis/training/candidateType'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
-import { useDownload, useTable } from '@/hooks'
+import { useDownload, useTable, useExamPlanProject } from '@/hooks'
+
 import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
+const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
 
 defineOptions({ name: 'CandidateType' })
 
@@ -132,6 +136,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '照片', dataIndex: 'avatar', slotName: 'avatar' },
   { title: '考试次数 / 及格 / 不及格', dataIndex: 'examTotalCount', slotName: 'examTotalCount', width: 190, align: 'center', },
   { title: '黑名单', dataIndex: 'isBlacklist', slotName: 'isBlacklist', align: 'center', },
+  { title: '禁考项目', dataIndex: 'disableProjectNames', slotName: 'disableProjectNames' },
   { title: '加入黑名单原因', dataIndex: 'blacklistReason', slotName: 'blacklistReason' },
   { title: '黑名单时长', dataIndex: 'blacklistDurationType', slotName: 'blacklistDurationType' },
   { title: '加入黑名单时间', dataIndex: 'blacklistTime', slotName: 'blacklistTime' },
@@ -167,6 +172,10 @@ const handleClose = () => {
 }
 
 
+const getProjectList = async (planType: number) => {
+  await getExamProjectOptions(planType);
+};
+
 // 黑名单弹窗状态
 const blacklistModalVisible = ref(false)
 // 当前操作的人员
@@ -174,7 +183,8 @@ const currentRecord = ref<any>(null)
 const currentChecked = ref(false)
 const blacklistForm = reactive({
   durationType: undefined as number | undefined,
-  reason: ''
+  reason: '',
+  disableProjectIds: [] as number[]
 })
 
 /**
@@ -183,10 +193,12 @@ const blacklistForm = reactive({
 const onBlacklistSwitch = (record: any, checked: boolean) => {
   currentChecked.value = checked
   if (checked) {
+    getProjectList(0)
     // 加入黑名单 → 打开弹窗
     currentRecord.value = record
     blacklistForm.durationType = undefined
     blacklistForm.reason = ''
+    blacklistForm.disableProjectIds = []
     blacklistModalVisible.value = true
   } else {
     // 移出黑名单
@@ -209,6 +221,12 @@ const onBlacklistSwitch = (record: any, checked: boolean) => {
  * 提交黑名单
  */
 const submitBlacklist = async () => {
+  console.log(blacklistForm.disableProjectIds);
+
+  if (blacklistForm.disableProjectIds.length == 0) {
+    Message.warning('请选择禁考项目')
+    return
+  }
   if (!blacklistForm.durationType) {
     Message.warning('请选择黑名单时长')
     return
@@ -222,7 +240,8 @@ const submitBlacklist = async () => {
     id: currentRecord.value.id,
     blacklistDurationType: blacklistForm.durationType,
     blacklistReason: blacklistForm.reason,
-    isBlacklist: currentChecked.value
+    isBlacklist: currentChecked.value,
+    disableProjectIds: blacklistForm.disableProjectIds
   })
 
   currentRecord.value.isBlacklist = true
@@ -239,12 +258,7 @@ const cancelBlacklist = () => {
   blacklistModalVisible.value = false
 }
 
-// 切换黑名单启用状态
-const handlIsBlacklistChange = (record: any) => {
 
-  console.log(record);
-
-}
 // 重置
 const reset = () => {
   queryForm.idNumber = undefined
@@ -283,16 +297,12 @@ const getBlacklistDurationTypeColor = (type: number) => {
   switch (type) {
     case 1:
       return 'blue';      // 1天
-    case 2:
-      return 'cyan';      // 1个月
     case 3:
       return 'purple';   // 3个月
-    case 4:
-      return 'orange';   // 6个月
     case 5:
-      return 'red';      // 1年
-    case 6:
-      return 'black';    // 无期限（最严重）
+      return 'orange';      // 1年
+    case -1:
+      return 'red';    // 无期限（最严重）
     default:
       return 'default';  // 无
   }
@@ -302,21 +312,19 @@ const getBlacklistDurationTypeColor = (type: number) => {
 const getBlacklistDurationTypeText = (type: number) => {
   switch (type) {
     case 1:
-      return '1天';
-    case 2:
-      return '1个月';
-    case 3:
-      return '3个月';
-    case 4:
-      return '6个月';
-    case 5:
       return '1年';
-    case 6:
+    case 3:
+      return '3年';
+    case 5:
+      return '5年';
+    case -1:
       return '无期限';
     default:
       return '无';
   }
 };
+
+
 
 </script>
 

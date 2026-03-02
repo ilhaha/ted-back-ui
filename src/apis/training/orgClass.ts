@@ -40,6 +40,7 @@ export interface OrgClassDetailResp {
 export interface OrgClassQuery {
   className: string | undefined
   projectName: string | undefined
+  projectId: string | undefined
   classId: string | undefined
   isOrgQuery: boolean
   flag: number

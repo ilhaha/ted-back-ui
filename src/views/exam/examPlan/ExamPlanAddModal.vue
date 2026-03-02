@@ -62,6 +62,7 @@ const [form, resetForm] = useResetReactive({
   invigilatorCount: 1,
   theoryClassroomId: [],
   operationClassroomId: [],
+  statusa: 1
 });
 
 const projectBindingDocList = ref([]);

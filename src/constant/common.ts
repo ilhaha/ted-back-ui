@@ -12,3 +12,9 @@ export const GenderList: LabelValueItem[] = [
   { label: '女', value: 2 },
   { label: '未知', value: 0 },
 ]
+
+/** @desc 监考考试类型 */
+export const ExamSupervisionTypeList: LabelValueItem[] = [
+  { label: '理论考试', value: 0 },
+  { label: '实操考试', value: 1 },
+]
