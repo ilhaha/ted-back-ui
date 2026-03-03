@@ -16,7 +16,6 @@
             height="60"
             :src="path"
             fit="cover"
-            
           />
         </a-space>
         <span v-else>-</span>
@@ -37,18 +36,23 @@
       <!-- 操作列 -->
       <template #action="{ record }">
         <a-space>
-          <a-link title="审核" @click="onExamine(record)" v-permission="['document:document:examine']">审核</a-link>
+          <a-link
+            title="审核"
+            @click="onExamine(record)"
+            v-permission="['document:document:examine']"
+            >审核</a-link
+          >
         </a-space>
       </template>
     </a-table>
 
     <!-- 审核弹窗 -->
-<DocumentAddModal
-  ref="DocumentAddModalRef"
-  @save-success="onSaveSuccess"
-  @close-parent="closeCandidateModal"
-  @audit-finished="onAuditFinished" 
-/>
+    <DocumentAddModal
+      ref="DocumentAddModalRef"
+      @save-success="onSaveSuccess"
+      @close-parent="closeCandidateModal"
+      @audit-finished="onAuditFinished"
+    />
   </a-modal>
 </template>
 
@@ -63,18 +67,18 @@ const documents = ref([]);
 // 定义表格列
 const columns = [
   { title: "资料名称", dataIndex: "typeName", key: "typeName" },
+  {
+    title: "资料图片",
+    dataIndex: "docPath",
+    key: "docPath",
+    slotName: "docPath",
+  },
   { title: "审核状态", dataIndex: "status", key: "status", slotName: "status" },
   {
     title: "审核备注",
     dataIndex: "auditRemark",
     key: "auditRemark",
     slotName: "auditRemark",
-  },
-  {
-    title: "资料图片",
-    dataIndex: "docPath",
-    key: "docPath",
-    slotName: "docPath",
   },
   { title: "创建时间", dataIndex: "createTime", key: "createTime" },
   { title: "操作", key: "action", slotName: "action" },
@@ -109,16 +113,16 @@ const onSaveSuccess = () => {
 };
 //关闭资料框
 const closeCandidateModal = () => {
-  visible.value = false
-}
+  visible.value = false;
+};
 const emit = defineEmits<{
-  (e: 'audit-finished'): void
-}>()
+  (e: "audit-finished"): void;
+}>();
 
 const onAuditFinished = () => {
-  visible.value = false   
-  emit('audit-finished') 
-}
+  visible.value = false;
+  emit("audit-finished");
+};
 
 // 审核状态文字
 const getStatusText = (status: number) => {
@@ -151,8 +155,6 @@ const getStatusColor = (status: number) => {
       return "default";
   }
 };
-
-
 
 defineExpose({ open });
 </script>

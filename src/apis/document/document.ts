@@ -91,3 +91,8 @@ export function exportDocument(query: DocumentQuery) {
 export function reviewDocument(data: { id: string; typeId: string; candidateId: string; status: number; auditRemark: string  }) {
   return http.post(`${BASE_URL}/audit`, data)
 }
+
+/** @desc 根据考生id查询不同项目的所需资料 */
+export function listByCandidateId(candidateId: String, projectId: String) {
+  return http.get<any[]>(`${BASE_URL}/listByCandidateId`, { candidateId, projectId })
+}

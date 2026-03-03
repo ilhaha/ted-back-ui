@@ -113,6 +113,14 @@
          <template #examType="{ record }">
         <span>{{ getexamTypeName(record.examType) }}</span>
       </template>
+      <template #applyMaterial="{ record }">
+        <a-link
+          @click="onViewApplyMaterial(record.candidatesId, record.projectId)"
+          title="查看报考资料"
+        >
+          查看
+        </a-link>
+      </template>
     </GiTable>
 
     <SpecialCertificationApplicantAddModal
@@ -123,6 +131,7 @@
       ref="SpecialCertificationApplicantDetailDrawerRef"
       :candidate-name-map="{}"
     />
+    <ApplyMaterialModal ref="ApplyMaterialModalRef" />
 
     <a-modal
       v-model:visible="batchAuditVisible"
@@ -166,6 +175,7 @@
 <script setup lang="ts">
 import SpecialCertificationApplicantAddModal from "./SpecialCertificationApplicantAddModal.vue";
 import SpecialCertificationApplicantDetailDrawer from "./SpecialCertificationApplicantDetailDrawer.vue";
+import ApplyMaterialModal from "./ApplyMaterialModal.vue";
 import {
   type SpecialCertificationApplicantResp,
   type SpecialCertificationApplicantQuery,
@@ -297,6 +307,7 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
   },
   { title: "申请表", dataIndex: "imageUrl", slotName: "previewImage" },
+  { title: "报考资料", dataIndex: "applyMaterial", slotName: "applyMaterial" },
   { title: "状态", dataIndex: "status", slotName: "status" },
   { title: "申请时间", dataIndex: "updateTime", slotName: "updateTime" },
 
@@ -357,6 +368,22 @@ const onDetail = (record: SpecialCertificationApplicantResp) => {
 const onAudit = (record: SpecialCertificationApplicantResp) => {
   SpecialCertificationApplicantAddModalRef.value?.onAudit(record.id);
 };
+
+const ApplyMaterialModalRef = ref<InstanceType<typeof ApplyMaterialModal>>();
+// 查看报考资料
+const onViewApplyMaterial = (candidatesId: String, projectId: String) => {
+  if (!candidatesId) {
+    Message.warning("考生ID不存在");
+    return;
+  }
+  if (!projectId) {
+    Message.warning("项目ID不存在");
+    return;
+  }
+  // 通过 API 获取该考生的报考资料
+  ApplyMaterialModalRef.value?.open(candidatesId, projectId);
+};
+
 
 // 批量审核弹窗相关
 const batchAuditVisible = ref(false);
