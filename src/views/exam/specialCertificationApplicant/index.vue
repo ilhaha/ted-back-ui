@@ -110,8 +110,17 @@
       <template #projectLevel="{ record }">
         <span>{{ getProjectLevelName(record.projectLevel) }}</span>
       </template>
-         <template #examType="{ record }">
-        <span>{{ getexamTypeName(record.examType) }}</span>
+      <template #examType="{ record }">
+        <template v-if="record.examType === 0">
+          <a-link
+            @click="onViewFirstScore(record.candidatesId, record.projectId)"
+          >
+            初考成绩
+          </a-link>
+        </template>
+        <template v-else>
+          <span>{{ getexamTypeName(record.examType) }}</span>
+        </template>
       </template>
       <template #applyMaterial="{ record }">
         <a-link
@@ -132,7 +141,57 @@
       :candidate-name-map="{}"
     />
     <ApplyMaterialModal ref="ApplyMaterialModalRef" />
+    <a-modal
+      v-model:visible="firstScoreVisible"
+      title="初考成绩"
+      :footer="null"
+      width="600px"
+      @cancel="firstScoreVisible = false"
+    >
+      <div v-if="firstScoreLoading" class="text-center">
+        <a-spin />
+      </div>
 
+      <div v-else-if="firstScoreData">
+        <a-descriptions bordered :column="2" size="middle">
+          <a-descriptions-item label="计划名称">
+            {{ firstScoreData.planName }}
+          </a-descriptions-item>
+
+          <a-descriptions-item label="项目名称">
+            {{ firstScoreData.projectName }}
+          </a-descriptions-item>
+
+          <a-descriptions-item label="考生名字">
+            {{ firstScoreData.candidateName }}
+          </a-descriptions-item>
+
+          <a-descriptions-item label="理论成绩">
+            <a-tag color="blue"> {{ firstScoreData.examScores }} 分 </a-tag>
+          </a-descriptions-item>
+
+          <a-descriptions-item label="实操成绩">
+            <a-tag color="green"> {{ firstScoreData.operScores }} 分 </a-tag>
+          </a-descriptions-item>
+
+          <a-descriptions-item label="考试状态">
+            <a-tag
+              :color="firstScoreData.examResultStatus === 0 ? 'red' : 'green'"
+            >
+              {{ firstScoreData.examResultStatus === 0 ? "未通过" : "已通过" }}
+            </a-tag>
+          </a-descriptions-item>
+
+          <a-descriptions-item label="创建时间">
+            {{ firstScoreData.createTime }}
+          </a-descriptions-item>
+        </a-descriptions>
+      </div>
+
+      <div v-else class="text-center">
+        <a-empty description="暂无成绩" />
+      </div>
+    </a-modal>
     <a-modal
       v-model:visible="batchAuditVisible"
       title="批量审核"
@@ -184,6 +243,7 @@ import {
   listSpecialCertificationApplicant,
   batchAuditSpecialCertificationApplicant,
 } from "@/apis/exam/specialCertificationApplicant";
+import { getFirstExamScore } from "@/apis/exam/examRecords";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
 import { useDict } from "@/hooks/app";
@@ -268,12 +328,10 @@ const getProjectLevelName = (type: number | undefined) => {
   return projectLevelsMap[type];
 };
 
-
-
-//定义项目考试等级映射关系
+// 定义项目考试等级映射关系
 const examTypeMap = {
-  0: "首考",
-  1: "补考",
+  1: "初考", // 1 对应初考
+  2: "初考", // 2 对应初考
 };
 
 // 根据数字获取种类类型中文名称
@@ -284,8 +342,6 @@ const getexamTypeName = (type: number | undefined) => {
   }
   return examTypeMap[type];
 };
-
-
 
 const columns = ref<TableInstanceColumns[]>([
   { title: "考生名称", dataIndex: "candidateName", slotName: "candidateName" },
@@ -299,7 +355,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 120,
     align: "center",
   },
-    {
+  {
     title: "考试场次",
     dataIndex: "examType",
     slotName: "examType",
@@ -383,7 +439,32 @@ const onViewApplyMaterial = (candidatesId: String, projectId: String) => {
   // 通过 API 获取该考生的报考资料
   ApplyMaterialModalRef.value?.open(candidatesId, projectId);
 };
+// 首考成绩相关
+const firstScoreVisible = ref(false);
+const firstScoreLoading = ref(false);
+const firstScoreData = ref<any>(null);
 
+const onViewFirstScore = async (candidatesId: number, projectId: number) => {
+  if (!candidatesId) {
+    Message.warning("考生ID不存在");
+    return;
+  }
+  if (!projectId) {
+    Message.warning("项目ID不存在");
+    return;
+  }
+  firstScoreLoading.value = true;
+  try {
+    const res = await getFirstExamScore(candidatesId, projectId);
+    firstScoreData.value = res.data;
+    firstScoreVisible.value = true;
+  } catch (e) {
+    Message.error("查询首考成绩失败");
+    console.error(e);
+  } finally {
+    firstScoreLoading.value = false;
+  }
+};
 
 // 批量审核弹窗相关
 const batchAuditVisible = ref(false);

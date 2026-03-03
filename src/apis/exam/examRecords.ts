@@ -105,6 +105,11 @@ export function getExamRecords(id: string) {
   return http.get<ExamRecordsDetailResp>(`${BASE_URL}/getRecordsById/${id}`)
 }
 
+/** @desc 查询考生首考成绩 */
+export function getFirstExamScore(candidateId: number, projectId: number) {
+  return http.get<any>(`${BASE_URL}/firstScore`, { candidateId, projectId });
+}
+
 /** @desc 新增考试记录 */
 export function addExamRecords(data: any) {
   return http.post(`${BASE_URL}`, data)
