@@ -122,12 +122,58 @@ const columns: ColumnItem[] = reactive([
     },
   },
   {
+    required: true,
     label: '监考考试类型',
     field: 'examSupervisionType',
     type: 'radio-group',
     span: 24,
     props: {
       options: ExamSupervisionTypeList,
+    },
+  },
+  {
+    label: '身份证号',
+    field: 'invigilatorIdNumber',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 18,
+    },
+  },
+  {
+    label: '银行卡开户行',
+    field: 'invigilatorBankName',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 50,
+    },
+  },
+  {
+    label: '银行帐号',
+    field: 'invigilatorBankAccount',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 19,
+    },
+  },
+  {
+    label: '单位名称',
+    field: 'invigilatorUnit',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 50,
+    },
+  },
+  {
+    label: '职称',
+    field: 'invigilatorTitle',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 50,
     },
   },
 ])
@@ -150,6 +196,31 @@ const save = async () => {
       Message.error("请输入正确的手机号")
       return false
     }
+
+    if (form.invigilatorIdNumber) {
+      const isIdNumerValid = /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9X]$/
+      if (!isIdNumerValid.test(form.invigilatorIdNumber)) {
+        Message.error("请输入正确的身份证号码")
+        return false
+      }
+    }
+
+    if(form.invigilatorBankName && !form.invigilatorBankAccount) {
+      Message.error("填写开户行时，银行账号不能为空")
+      return false
+    }
+
+    if(form.invigilatorBankAccount) {
+      const isBankAccountValid = /^\d{16,19}$/.test(form.invigilatorBankAccount)
+      if (!isBankAccountValid) {
+        Message.error("请输入正确的银行账号")
+        return false
+      }else if (!form.invigilatorBankName) {
+        Message.error("填写银行账号时，开户行不能为空")
+        return false
+      }
+    }
+
 
     // -------- 固定值 --------
     form.roleIds = ['547888897925840935'] // 考务角色

@@ -116,6 +116,10 @@ export function deleteExamStaff(id: string) {
   return http.del(`${BASE_URL}/examStaff/${id}`);
 }
 /** @desc 导出监考人员劳务费 */
-export function exportExamStaffFee(params: { userId: string }) {
+export function exportExamStaffFee(params: { userId: string, exportDate: string }) {
   return http.download(`${BASE_URL}/examStaff/exportFee`, params)
+}
+/** @desc 批量导出监考人员劳务费 */
+export async function batchExportExamStaffFee(exportDate: string) {
+  return http.download(`${BASE_URL}/examStaff/exportFee/batch`, { exportDate })
 }

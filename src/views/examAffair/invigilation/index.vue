@@ -13,6 +13,12 @@
           <template #default>新增</template>
         </a-button>
       </template>
+      <template #toolbar-right>
+        <a-button @click="openBatchExport" v-permission="['examAffair:invigilation:exportFee']">
+          <template #icon><icon-download /></template>
+          <template #default>批量导出劳务费</template>
+        </a-button>
+      </template>
       <template #nickname="{ record }">
         <GiCellAvatar :avatar="record.avatar" :name="record.nickname" />
       </template>
@@ -40,7 +46,7 @@
             @click="onAddQualification(record)">
             资质上传
           </a-link>
-          <a-link v-permission="['examAffair:invigilation:exportFee']" @click="onExportFee(record)">
+          <a-link v-permission="['examAffair:invigilation:exportFee']" @click="openSingleExport(record)">
             劳务费导出
           </a-link>
           <a-dropdown>
@@ -63,6 +69,48 @@
         </a-space>
       </template>
     </GiTable>
+
+    <a-modal :visible="singleVisible" :title="singleTitle" width="30%" :footer="false" @cancel="onCancelSingle">
+      <div class="import-modal-content">
+        <a-alert>请选择开始月份和结束月份，系统将按所选月份区间生成报表数据。</a-alert>
+        <div class="cascader-container">
+          <a-form layout="vertical">
+            <a-form-item label="所需导出月份">
+              <a-month-picker v-model="singleRange" mode="month" />
+            </a-form-item>
+          </a-form>
+        </div>
+        <div class="action-buttons">
+          <a-button type="dashed" @click="singleExport" :loading="exproLoadding">
+            <template #icon>
+              <icon-download />
+            </template>
+            导出
+          </a-button>
+        </div>
+      </div>
+    </a-modal>
+
+    <a-modal :visible="batchVisible" title="劳务费导出" width="30%" :footer="false" @cancel="onCancelBatch">
+      <div class="import-modal-content">
+        <a-alert>请选择开始月份和结束月份，系统将按所选月份区间生成报表数据。</a-alert>
+        <div class="cascader-container">
+          <a-form layout="vertical">
+            <a-form-item label="所需导出月份">
+              <a-month-picker v-model="batchRange" mode="month" />
+            </a-form-item>
+          </a-form>
+        </div>
+        <div class="action-buttons">
+          <a-button type="dashed" @click="batchExport" :loading="exproLoadding">
+            <template #icon>
+              <icon-download />
+            </template>
+            导出
+          </a-button>
+        </div>
+      </div>
+    </a-modal>
 
     <UserAddDrawer ref="UserAddDrawerRef" @save-success="search" />
     <UserImportDrawer ref="UserImportDrawerRef" @save-success="search" />
@@ -87,6 +135,7 @@ import {
   listExamStaff,
   deleteExamStaff,
   exportExamStaffFee,
+  batchExportExamStaffFee
 } from "@/apis/system/user";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { DisEnableStatusList } from "@/constant/common";
@@ -94,6 +143,7 @@ import { useDownload, useResetReactive, useTable } from "@/hooks";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import type { ColumnItem } from "@/components/GiForm";
+import { Message, Modal } from "@arco-design/web-vue";
 
 defineOptions({ name: "SystemUser" });
 
@@ -254,6 +304,17 @@ const forbiddenRoleIds = [
   "547888897925840935",
 ];
 
+const singleVisible = ref(false);
+const singleTitle = ref("");
+const singleRecord = ref<UserResp>();
+// 绑定月份范围
+const singleRange = ref('')
+const exproLoadding = ref(false);
+
+const batchVisible = ref(false);
+const batchRange = ref('')
+
+
 const canShowUpdate = computed(() => {
   return (roleIds: string[]) => {
     return roleIds?.every((id) => !forbiddenRoleIds.includes(id));
@@ -301,14 +362,96 @@ const onExport = () => {
   useDownload(() => exportUser(queryForm));
 };
 
-// 单人劳务费导出
-const onExportFee = (record: UserResp) => {
-  useDownload(
-    () => exportExamStaffFee({ userId: record.id }),
-    false,
-    `${record.nickname}-劳务费`
-  );
+
+const openSingleExport = (record: UserResp) => {
+  singleRecord.value = record;
+  singleTitle.value = `${record.nickname}-劳务费导出`;
+  singleVisible.value = true;
 };
+
+
+const openBatchExport = () => {
+  batchVisible.value = true;
+};
+
+
+const singleExport = () => {
+
+  if (!singleRange.value) {
+    Message.error("请选择导出月份");
+    return;
+  }
+
+  onExportFee(singleRecord.value!, singleRange.value);
+
+};
+const batchExport = async () => {
+
+  if (!batchRange.value) {
+    Message.error("请选择导出月份");
+    return;
+  }
+
+  try {
+    exproLoadding.value = true;
+    const res = await batchExportExamStaffFee(batchRange.value);
+
+    // 文件名
+    const fileName = `劳动费支出表（检验检测人员）${batchRange.value}.xlsx`;
+
+    // 正确的 Excel MIME 类型
+    const blob = new Blob(
+      [res.data],
+      { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+    );
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    Message.success("已导出");
+
+  } catch (err) {
+  } finally {
+    exproLoadding.value = false;
+  }
+};
+
+
+// 单人劳务费导出
+const onExportFee = (record: UserResp, exportDate: string) => {
+  try {
+    exproLoadding.value = true
+    useDownload(
+      () => exportExamStaffFee({ userId: record.id, exportDate }),
+      false,
+      `${record.nickname}-劳务费`
+    );
+  } finally {
+    exproLoadding.value = false;
+  }
+
+};
+
+const onCancelSingle = () => {
+  singleVisible.value = false;
+  singleRecord.value = undefined;
+  singleRange.value = '';
+};
+
+const onCancelBatch = () => {
+  batchVisible.value = false;
+  batchRange.value = '';
+};
+
 
 
 // 根据选中部门查询
@@ -366,5 +509,18 @@ const onUpdateRole = (record: UserResp) => {
 .page_content {
   flex: 1;
   overflow: auto;
+}
+
+.import-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 15px;
 }
 </style>
