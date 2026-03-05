@@ -239,6 +239,28 @@ const columns: ColumnItem[] = reactive([
       max: 10,
     },
   },
+    {
+    label: "考试备注",
+    prop: "description", 
+    field: "description", 
+    type: "textarea", 
+    span: 24,
+    props: {
+      placeholder: "请输入考试备注（如考试规则、注意事项等）",
+      rows: 4, 
+      maxLength: 500, // 对应后端字段长度500，限制输入字数
+      showWordLimit: true, // 显示字数统计/限制提示
+      disabled: false, // 默认可编辑，若需根据场景禁用可改为computed
+      // 如需根据修改/新增状态控制禁用，可改为computed：
+      // ...computed(() => ({
+      //   disabled: isUpdate.value, // 例如：修改时禁用，新增时可编辑
+      //   placeholder: "请输入考试计划说明（如考试规则、注意事项等）",
+      //   rows: 4,
+      //   maxLength: 500,
+      //   showWordLimit: true,
+      // })),
+    },
+   },
 ]);
 
 const auditColumns: ColumnItem[] = reactive([
