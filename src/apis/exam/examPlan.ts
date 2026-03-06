@@ -133,6 +133,14 @@ export function getCascaderProjectPlan(planType: number) {
   return res
 }
 
+/**
+ * 根据考试项目id查询考试计划（选择器）
+ * @param projectId
+ */
+export function getCascaderPlanByProjectId(projectId: number) {
+  return http.get<[]>(`${BASE_URL}/plan/cascader/${projectId}`);
+}
+
 
 /**
  * 获取当前计划可用监考员

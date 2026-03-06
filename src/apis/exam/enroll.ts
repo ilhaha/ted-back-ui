@@ -72,3 +72,17 @@ export function deleteEnroll(id: string) {
 export function exportEnroll(query: EnrollQuery) {
   return http.download(`${BASE_URL}/export`, query)
 }
+
+/** @desc 通过考试项目id或者是考试计划id获取考试报名成功的考生列表（已生成准考证且能正常考试） */
+export function getExamCandidatesByPlanOrProject(query: { planId?: number; projectId?: number } & PageQuery) {
+  return http.get<PageRes<EnrollResp[]>>(`${BASE_URL}/getExamCandidatesByPlanOrProject`, query)
+}
+
+/**
+ * @desc 导出通过考试项目或考试计划的考生列表
+ * @param query.projectId 考试项目ID
+ * @param query.planId 考试计划ID
+ */
+export function exportExamCandidatesByPlanOrProject(query: { projectId?: number; planId?: number }) {
+  return http.download(`${BASE_URL}/exportExamCandidatesByPlanOrProject`, query)
+}

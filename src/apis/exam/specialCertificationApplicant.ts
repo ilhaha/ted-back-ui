@@ -36,6 +36,9 @@ export interface SpecialCertificationApplicantDetailResp {
   planName: string
 }
 export interface SpecialCertificationApplicantQuery {
+  examProjectId?: any | undefined
+  examPlanId?: any | undefined
+  examPlanName?: string | undefined
   createTime: string | undefined
   updateTime: string | undefined
   sort: Array<string>
