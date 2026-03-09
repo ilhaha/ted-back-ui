@@ -28,7 +28,7 @@
         </a-tag>
       </template>
       <template #action="{ record }">
-        <a-space v-if="!isFinalConfirmedFlag">
+        <a-space>
           <a-link v-permission="['exam:examPlan:updateInvigilator']" status="danger" @click="updateInvigilator(record)">
             更改
           </a-link>

@@ -84,7 +84,7 @@ export function adjustPlanTimeApi(data: any, planId: number) {
 /** @desc 中心主任确认考试 */
 export function centerDirectorConform(planId: number, isFinalConfirmed: number) {
   return http.post(`${BASE_URL}/conform/${planId}/${isFinalConfirmed}`, {
-    timeout: 300000,
+    timeout: 3600000,
   })
 }
 

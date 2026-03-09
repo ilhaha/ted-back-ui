@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="作业人员报名资料管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="作业人员缴费审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
       @select-all="selectAll">

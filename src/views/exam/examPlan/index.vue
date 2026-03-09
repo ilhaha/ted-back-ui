@@ -2,7 +2,8 @@
   <div class="gi_table_page">
     <GiTable title="作业人员考试计划管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" @refresh="search" @select="test">
+      :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
+      @select-all="selectAll">
       <template #examType="{ record }">
         <a-tag :color="getExamTypeColor(record.examType)" bordered>{{
           getExamTypeText(record.examType)
@@ -28,6 +29,11 @@
         <a-button @click="onImport" v-permission="['exam:examPlan:import']">
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
+        </a-button>
+        <a-button @click="openConfirmedModel" v-permission="['exam:examPlan:zxzrConfirmed']"
+          :disabled="selectedKeys.length === 0 || queryForm.isFinalConfirmed != '1' || userInfo.id === 1">
+          <template #icon><icon-check /></template>
+          <template #default>批量确认计划</template>
         </a-button>
         <!-- <a-button v-permission="['exam:examPlan:export']" @click="onExport">
               <template #icon><icon-download /></template>
@@ -62,7 +68,15 @@
             <a-option value="5">已开考</a-option>
             <a-option value="6">已结束</a-option>
           </a-select>
+          <a-select v-model="queryForm.isFinalConfirmed" placeholder="计划确认状态" allow-clear class="search-input ml-2"
+            @change="search" style="margin-left: 8px;">
+            <a-option value="0">待管理员确定</a-option>
+            <a-option value="1">待中心主任确定</a-option>
+            <a-option value="2">中心主任已确定</a-option>
+            <a-option value="3">中心主任已驳回</a-option>
+          </a-select>
           <a-space class="ml-2">
+
             <!-- <a-button type="primary" @click="search">
               <template #icon><icon-search /></template>
 搜索
@@ -230,11 +244,6 @@ const { width } = useWindowSize()
 
 const conformVisible = ref(false);
 
-const rowSelection = reactive({
-  type: "checkbox",
-  showCheckedAll: true,
-  onlyCurrent: false,
-});
 
 const [form, resetForm] = useResetReactive({
   isFinalConfirmed: 2,
@@ -247,9 +256,22 @@ const {
   pagination,
   search,
   handleDelete,
+  selectedKeys,
+  select,
+  selectAll
 } = useTable((page) => listExamPlan({ ...queryForm, ...page }), {
   immediate: true,
 });
+
+const rowSelection = reactive({
+  type: 'checkbox',
+  showCheckedAll: true,
+  onlyCurrent: false,
+  selectedRowKeys: selectedKeys,
+  onChange: (keys: string[]) => {
+    selectedKeys.value = keys
+  }
+})
 
 const columns = ref<TableInstanceColumns[]>([
   { title: "计划名称", dataIndex: "examPlanName", slotName: "examPlanName" },
@@ -283,6 +305,7 @@ const columns = ref<TableInstanceColumns[]>([
   },
 ]);
 
+
 const formRef = ref()
 
 const ExamPlanImportModalRef =
@@ -293,6 +316,35 @@ const onImport = () => {
 };
 
 
+const openConfirmedModel = () => {
+  if (!selectedKeys.value.length) {
+    Message.warning("请选择需要确认的考试计划")
+    return
+  }
+
+  const invalidPlans: string[] = []
+
+  selectedKeys.value.forEach(id => {
+    const plan = dataList.value.find(item => item.id === id)
+    if (!plan) return
+    if (plan.status != '3') {
+      invalidPlans.push(`${plan.examPlanName || plan.id}（状态不是已生效）`)
+    } else if (plan.isFinalConfirmed != '1') {
+      invalidPlans.push(`${plan.examPlanName || plan.id}（状态不是待中心主任确认）`)
+    }
+  })
+
+  if (invalidPlans.length > 0) {
+    Message.warning(
+      `以下考试计划无法批量确认：\n${invalidPlans.join('，')}`
+    )
+    return
+  }
+
+  // 都符合条件，打开弹窗
+  conformVisible.value = true
+}
+
 const ApplyListRef = ref<InstanceType<typeof ApplyList>>();
 // 打开报考人员列表
 const openApplyList = (record: any) => {
@@ -301,17 +353,53 @@ const openApplyList = (record: any) => {
 
 // 中心主任确认考试
 const conformExam = async () => {
-  try {
-    await formRef.value?.validate()
-    const res = await centerDirectorConform(form.id, form.isFinalConfirmed)
-    if (!res.data) return false
-    Message.success("已确定")
+  const isSingle = selectedKeys.value.length === 0
+  let successCount = 0
+  let failCount = 0
+
+  if (isSingle) {
+    try {
+      await formRef.value?.validate()
+      const res = await centerDirectorConform(form.id, form.isFinalConfirmed)
+      if (res?.data) {
+        successCount++
+        Message.success("已确定")
+        conformVisible.value = false
+        form.isFinalConfirmed = 2
+        search()
+        return true
+      } else {
+        return false
+      }
+    } catch (e) {
+      return false
+    }
+  } else {
+    // 批量确认
+    for (const id of selectedKeys.value) {
+      try {
+        // 如果每条都需要校验，可以放这里
+        await formRef.value?.validate()
+
+        const res = await centerDirectorConform(id, form.isFinalConfirmed)
+        if (res?.data) {
+          successCount++
+        } else {
+          failCount++
+        }
+      } catch (e) {
+        failCount++
+      }
+    }
+
+    // 批量完成后统一刷新 UI
     conformVisible.value = false
     form.isFinalConfirmed = 2
     search()
+
+    Message.success(`批量确认完成：成功 ${successCount} 条，失败 ${failCount} 条`)
+
     return true
-  } catch (e) {
-    return false
   }
 }
 
@@ -468,10 +556,6 @@ const ExamPlanAdjustTimeScheduleRef = ref<InstanceType<typeof ExamPlanAdjustTime
 const adjustTimeSchedule = (record: CandidateCertificateResp) => {
   ExamPlanAdjustTimeScheduleRef.value?.onUpdate(record.id)
 }
-
-// todo上传
-const test = (selectedRows: ProjectResp[]) => {
-};
 
 const ExamPlanInvigilatorListRef = ref<InstanceType<typeof ExamPlanInvigilatorList>>();
 // 查看监考员列表
