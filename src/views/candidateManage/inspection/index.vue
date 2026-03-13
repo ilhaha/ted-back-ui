@@ -161,14 +161,12 @@
     >
       <CandidateExamRecords ref="CandidateExamRecordsRef" />
     </a-modal>
-    <CandidateTypeDetailDrawer ref="CandidateTypeDetailDrawerRef" />
     <PasswordResetModal ref="PasswordResetModalRef" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { Message, Modal } from "@arco-design/web-vue";
-import CandidateTypeDetailDrawer from "./CandidateTypeDetailDrawer.vue";
 import CandidateExamRecords from "./CandidateExamRecords.vue";
 import PasswordResetModal from "./PasswordResetModal.vue";
 import {
@@ -182,7 +180,6 @@ import {
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable, useExamPlanProject } from "@/hooks";
 
-import { useDict } from "@/hooks/app";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
 const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();

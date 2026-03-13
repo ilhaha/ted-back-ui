@@ -15,9 +15,15 @@
           </a-button>
         </a-space>
       </template>
-      <template #examPaper="{ record }">
-        <a-link @click="showFormattedExamPaper(record)">查阅</a-link>
-      </template>
+<template #examPaper="{ record }">
+  <a-link
+    v-if="record.examPaper"
+    @click="showFormattedExamPaper(record)"
+  >
+    查阅
+  </a-link>
+  <span v-else class="text-gray">—</span>
+</template>
       <template #examResultStatus="{ record }">
         <a-tag :color="getExamResultStatusColor(Number(record.examResultStatus))">
           {{ getExamResultStatusText(Number(record.examResultStatus)) }}
@@ -114,6 +120,7 @@
       </div>
     </a-modal>
   </div>
+  
 </template>
 
 <script setup lang="ts">
@@ -128,7 +135,9 @@ defineOptions({ name: 'ExamRecords' })
 
 // 在script部分添加以下内容
 const examPaperVisible = ref(false)
-const formattedExamPaper = ref('')
+const formattedExamPaper = ref<any>({
+  questions: []
+})
 
 
 // 修改现有的formatExamPaper方法
@@ -190,7 +199,12 @@ const getOptionChar = (index: number) => {
 
 // 显示格式化JSON弹窗
 const showFormattedExamPaper = (record: ExamRecordsResp) => {
-  formattedExamPaper.value = formatExamPaper(record.examPaper)
+  if (!record.examPaper) return
+
+  const data = formatExamPaper(record.examPaper)
+
+  formattedExamPaper.value = data || { questions: [] }
+
   examPaperVisible.value = true
 }
 const queryForm = reactive<ExamRecordsQuery>({
