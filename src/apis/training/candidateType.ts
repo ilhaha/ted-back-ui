@@ -48,9 +48,14 @@ export function blacklistSwitch(data: any) {
   return http.post(`${BASE_URL}/blacklist/switch`, data)
 }
 
-/** @desc 查询考生类型列表 */
+/** @desc 查询作业考生类型列表 */
 export function listCandidateType(query: CandidateTypePageQuery) {
   return http.get<PageRes<CandidateTypeResp[]>>(`${BASE_URL}`, query)
+}
+
+/** @desc 查询检验考生类型列表 */
+export function listInspectionCandidateType(query: CandidateTypePageQuery) {
+  return http.get<PageRes<CandidateTypeResp[]>>(`${BASE_URL}/inspection`, query)
 }
 
 /** @desc 查询考生类型详情 */
@@ -76,4 +81,12 @@ export function deleteCandidateType(id: string) {
 /** @desc 导出考生类型 */
 export function exportCandidateType(query: CandidateTypeQuery) {
   return http.download(`${BASE_URL}/export`, query)
+}
+
+/** 重置考生密码 */
+export function resetCandidatePassword(params: {
+  candidateId: number
+  phone: string
+}) {
+  return http.post(`${BASE_URL}/inspection/password/reset`, params)
 }
