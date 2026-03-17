@@ -101,70 +101,35 @@ const columns: ColumnItem[] = reactive([
     field: 'socialCode',
     type: 'input',
     span: 24,
-    rules: [
-      { required: true, message: '请输入统一社会信用代码' },
-      {
-        validator: (value, callback) => {
-          // 修正后的正则表达式
-          const reg = /^[0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10}$/;;
-          if (!reg.test(value)) {
-            callback('请输入有效的18位统一社会信用代码');
-          } else {
-            callback();
-          }
-        }
-      }
-    ],
   },
   {
     label: '地点',
     field: 'location',
     type: 'input',
     span: 24,
-    rules: [{ required: true, message: '请输入地点' }],
   },
   {
     label: '法人',
     field: 'legalPerson',
     type: 'input',
     span: 24,
-    rules: [{ required: true, message: '请输入法人' }],
   },
   {
     label: '机构规模大小',
     field: 'scale',
-    type: 'input', // 改为输入框类型
+    type: 'input-number', // 改为输入框类型
     span: 24,
     props: {
-      type: 'number', // 设置为数字输入类型[2](@ref)
       placeholder: '请输入员工人数',
       min: 1, // 最小员工数[1](@ref)
       max: 100000 // 最大员工数[1](@ref)
-    },
-    rules: [
-      { required: true, message: '请输入机构规模大小' },
-      // 添加数字验证规则[6,7](@ref)
-      {
-        validator: (value, callback) => {
-          if (!/^\d+$/.test(value)) {
-            callback('请输入有效的数字');
-          } else if (value < 1) {
-            callback('机构规模不能小于1人');
-          } else if (value > 100000) {
-            callback('机构规模不能超过100000人');
-          } else {
-            callback();
-          }
-        }
-      }
-    ]
+    }
   },
   {
     label: '营业执照',
     field: 'businessLicense',
     type: 'upload',
     span: 24,
-    rules: [{ required: true, message: '请上传营业执照' }],
     // props: {
     //   max: 1,
     //   limit: 1,
@@ -314,6 +279,12 @@ const save = async () => {
   try {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
+    const validation = validateFormFields(form);
+    if (!validation.valid) {
+      Message.error(validation.message);
+      return false;
+    }
+
     if (isUpdate.value) {
       await updateOrg(form, dataId.value)
       Message.success('修改成功')
@@ -349,6 +320,31 @@ const save = async () => {
   }
 }
 
+// 校验方法
+const validateFormFields = (form: any) => {
+  // 1. 统一社会信用代码
+  const socialCodeReg = /^[0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10}$/;
+  if (form.socialCode && !socialCodeReg.test(form.socialCode)) {
+    return { valid: false, message: '请输入有效的18位统一社会信用代码' };
+  }
+
+  // 2. 机构规模大小
+  if (form.scale) {
+    if (!/^\d+$/.test(form.scale)) {
+      return { valid: false, message: '请输入有效的数字' };
+    }
+    const scaleNum = Number(form.scale);
+    if (scaleNum < 1) {
+      return { valid: false, message: '机构规模不能小于1人' };
+    }
+    if (scaleNum > 100000) {
+      return { valid: false, message: '机构规模不能超过100000人' };
+    }
+  }
+
+  return { valid: true };
+};
+
 // 新增
 const onAdd = async () => {
   reset()
@@ -367,14 +363,16 @@ const onUpdate = async (id: string) => {
   categorySelect.value = res.data || []
   const { data } = await getOrg(id)
   Object.assign(form, data)
-  form.businessLicenseFileList = [{
+  if (data.businessLicense) {
+    form.businessLicense = data.businessLicense
+    form.businessLicenseFileList = [{
     uid: String(Date.now()),
     name: data.name || '营业执照',
     url: data.businessLicense,
     status: 'done',
     response: { url: data.businessLicense }
   }]
-  console.log(form.businessLicenseFileList);
+  }
 
 }
 

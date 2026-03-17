@@ -12,12 +12,6 @@ export const systemRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
-    path: '/worker/apply/upload',
-    name: 'WorkerApplyUpload',
-    component: () => import('@/views/worker/apply/index.vue'),
-    meta: { hidden: true },
-  },
-  {
     path: '/testysy',
     name: 'Testysy',
     component: () => import('@/views/testysy.vue'),

@@ -68,8 +68,19 @@
 
             <template v-for="col in docColumns" :key="col.title" #[`doc_${col.title}`]="{ record }">
                 <span v-if="record.docMap && record.docMap[col.title]" class="preview-image">
-                    <a-image v-for="(path, index) in record.docMap[col.title].split(',')" :key="index" width="80"
-                        height="60" :src="path" :preview-props="{ zoomRate: 1.5 }" fit="cover" />
+
+                    <template v-for="(path, index) in record.docMap[col.title].split(',')" :key="index">
+
+                        <!-- 如果是图片 -->
+                        <a-image v-if="isImage(path)" width="80" height="60" :src="path"
+                            :preview-props="{ zoomRate: 1.5 }" style="margin-right:6px" />
+
+                        <!-- 如果是PDF -->
+                        <a-link v-else title="预览文件" @click="getPreviewUrl(path)" style="margin-right:8px">
+                            PDF预览
+                        </a-link>
+                    </template>
+
                 </span>
                 <span v-else>-</span>
             </template>
@@ -197,6 +208,7 @@ const columns = computed(() => {
         }
     ]
 })
+
 const rowSelection = reactive({
     type: 'checkbox',
     showCheckedAll: true,
