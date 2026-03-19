@@ -30,8 +30,19 @@
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
         </a-button>
+        <a-button @click="openZxzrReviewModel" v-permission="['exam:examPlan:zxzrreview']"
+          :disabled="selectedKeys.length === 0 || queryForm.status != '1' || userInfo.id === 1" v-if="userInfo.id != 1">
+          <template #icon><icon-check /></template>
+          <template #default>批量审核计划</template>
+        </a-button>
+        <a-button @click="openSjjdgljReviewModel" v-permission="['exam:examPlan:sjjdgljreview']"
+          :disabled="selectedKeys.length === 0 || queryForm.status != '2' || userInfo.id === 1" v-if="userInfo.id != 1">
+          <template #icon><icon-check /></template>
+          <template #default>批量审核计划</template>
+        </a-button>
         <a-button @click="openConfirmedModel" v-permission="['exam:examPlan:zxzrConfirmed']"
-          :disabled="selectedKeys.length === 0 || queryForm.isFinalConfirmed != '1' || userInfo.id === 1">
+          :disabled="selectedKeys.length === 0 || queryForm.isFinalConfirmed != '1' || userInfo.id === 1"
+          v-if="userInfo.id != 1">
           <template #icon><icon-check /></template>
           <template #default>批量确认计划</template>
         </a-button>
@@ -177,11 +188,35 @@
       <a-table :dataSource="locationList" :columns="locationColumns" :pagination="false" rowKey="locationId" bordered
         expandable="{ expandedRowRender }" />
     </a-modal>
+    <!-- 中心主任审核计划 -->
+    <a-modal v-model:visible="reviewZxzrVisible" title="中心主任审核计划" :mask-closable="false" :esc-to-close="false"
+      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="zxzrReviewPlan" :closable="null">
+      <a-form ref="formRef" :model="form" layout="vertical">
+        <a-form-item field="status" label="审核结果" :rules="[{ required: true, message: '请选择审核结果' }]">
+          <a-radio-group v-model="form.status">
+            <a-radio :value="1">审核通过</a-radio>
+            <a-radio :value="0">审核驳回</a-radio>
+          </a-radio-group>
+        </a-form-item>
+      </a-form>
+    </a-modal>
+    <!-- 市场监督管理局审核计划 -->
+    <a-modal v-model:visible="reviewSjjdgljVisible" title="市场监督管理局审核计划" :mask-closable="false" :esc-to-close="false"
+      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="sjjdgljReviewPlan" :closable="null">
+      <a-form ref="formRef" :model="form" layout="vertical">
+        <a-form-item field="status" label="审核结果" :rules="[{ required: true, message: '请选择审核结果' }]">
+          <a-radio-group v-model="form.status">
+            <a-radio :value="1">审核通过</a-radio>
+            <a-radio :value="0">审核驳回</a-radio>
+          </a-radio-group>
+        </a-form-item>
+      </a-form>
+    </a-modal>
     <!-- 中心主任确认考试 -->
     <a-modal v-model:visible="conformVisible" title="中心主任确认考试" :mask-closable="false" :esc-to-close="false"
       :width="width >= 600 ? 600 : '100%'" draggable @before-ok="conformExam" :closable="null">
       <a-form ref="formRef" :model="form" layout="vertical">
-        <a-form-item field="isFinalConfirmed" label="确认结果" :rules="[{ required: true, message: '请选择审核结果' }]">
+        <a-form-item field="isFinalConfirmed" label="确认结果" :rules="[{ required: true, message: '请选择确认结果' }]">
           <a-radio-group v-model="form.isFinalConfirmed">
             <a-radio :value="2">确认通过</a-radio>
             <a-radio :value="3">驳回</a-radio>
@@ -215,6 +250,7 @@ import {
   deleteExamPlan,
   exportExamPlan,
   listExamPlan,
+  reviewPlanApi,
   centerDirectorConform
 } from "@/apis/exam/examPlan";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
@@ -243,10 +279,12 @@ const queryForm = reactive<ExamPlanQuery>({
 const { width } = useWindowSize()
 
 const conformVisible = ref(false);
-
+const reviewZxzrVisible = ref(false)
+const reviewSjjdgljVisible = ref(false)
 
 const [form, resetForm] = useResetReactive({
   isFinalConfirmed: 2,
+  status: 1,
   id: undefined
 })
 
@@ -315,6 +353,59 @@ const onImport = () => {
   ExamPlanImportModalRef.value?.onOpen();
 };
 
+const openSjjdgljReviewModel = () => {
+  if (!selectedKeys.value.length) {
+    Message.warning("请选择需要审核的考试计划")
+    return
+  }
+
+  const invalidPlans: string[] = []
+
+  selectedKeys.value.forEach(id => {
+    const plan = dataList.value.find(item => item.id === id)
+    if (!plan) return
+    if (plan.status != '2') {
+      invalidPlans.push(`${plan.examPlanName || plan.id}（状态不是待市场监督管理局审批）`)
+    }
+  })
+
+  if (invalidPlans.length > 0) {
+    Message.warning(
+      `以下考试计划无法批量审核：\n${invalidPlans.join('，')}`
+    )
+    return
+  }
+
+  // 都符合条件，打开弹窗
+  reviewSjjdgljVisible.value = true
+}
+
+const openZxzrReviewModel = () => {
+  if (!selectedKeys.value.length) {
+    Message.warning("请选择需要审核的考试计划")
+    return
+  }
+
+  const invalidPlans: string[] = []
+
+  selectedKeys.value.forEach(id => {
+    const plan = dataList.value.find(item => item.id === id)
+    if (!plan) return
+    if (plan.status != '1') {
+      invalidPlans.push(`${plan.examPlanName || plan.id}（状态不是待主任审批）`)
+    }
+  })
+
+  if (invalidPlans.length > 0) {
+    Message.warning(
+      `以下考试计划无法批量审核：\n${invalidPlans.join('，')}`
+    )
+    return
+  }
+
+  // 都符合条件，打开弹窗
+  reviewZxzrVisible.value = true
+}
 
 const openConfirmedModel = () => {
   if (!selectedKeys.value.length) {
@@ -350,6 +441,70 @@ const ApplyListRef = ref<InstanceType<typeof ApplyList>>();
 const openApplyList = (record: any) => {
   ApplyListRef.value?.onOpen(record.id, record.examProjectId, record.isFinalConfirmed);
 };
+// 市场监督管理局审核计划
+const sjjdgljReviewPlan = async () => {
+  if (selectedKeys.value.length === 0) {
+    Message.warning("请选择需要审核的考试计划")
+    return false
+  }
+  let successCount = 0
+  let failCount = 0
+  // 批量确认
+  for (const id of selectedKeys.value) {
+    try {
+      // 如果每条都需要校验，可以放这里
+      await formRef.value?.validate()
+
+      const res = await reviewPlanApi(id, form.status)
+      if (res?.data) {
+        successCount++
+      } else {
+        failCount++
+      }
+    } catch (e) {
+      failCount++
+    }
+  }
+
+  // 批量完成后统一刷新 UI
+  reviewZxzrVisible.value = false
+  form.status = 1
+  search()
+  Message.success(`批量审核完成：成功 ${successCount} 条，失败 ${failCount} 条`)
+  return true
+}
+// 中心主任审核计划
+const zxzrReviewPlan = async () => {
+  if (selectedKeys.value.length === 0) {
+    Message.warning("请选择需要审核的考试计划")
+    return false
+  }
+  let successCount = 0
+  let failCount = 0
+  // 批量确认
+  for (const id of selectedKeys.value) {
+    try {
+      // 如果每条都需要校验，可以放这里
+      await formRef.value?.validate()
+
+      const res = await reviewPlanApi(id, form.status)
+      if (res?.data) {
+        successCount++
+      } else {
+        failCount++
+      }
+    } catch (e) {
+      failCount++
+    }
+  }
+
+  // 批量完成后统一刷新 UI
+  reviewZxzrVisible.value = false
+  form.status = 1
+  search()
+  Message.success(`批量审核完成：成功 ${successCount} 条，失败 ${failCount} 条`)
+  return true
+}
 
 // 中心主任确认考试
 const conformExam = async () => {

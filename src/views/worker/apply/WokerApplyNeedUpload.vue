@@ -33,7 +33,7 @@
         <div class="tips-card idCard-warning-tips">
             <div class="tips-icon">⚠️</div>
             <div class="tips-text">
-                请上传身份证及一寸免冠照片，用于考试身份验证。<br>
+                请上传身份证及二寸免冠照片，用于考试身份验证。<br>
                 <span class="warning-tag">证件信息不符将影响正常考试。</span>
             </div>
         </div>
@@ -87,7 +87,7 @@
 
             <div class="upload-item">
                 <div class="doc-info">
-                    <span class="doc-name">一寸免冠照</span>
+                    <span class="doc-name">二寸免冠照</span>
                 </div>
                 <div class="upload-wrapper">
                     <a-upload :action="`${uploadUrl}2`" list-type="picture-card" :file-list="faceFileList"
@@ -516,7 +516,7 @@ const handleFaceSuccess = (file: any) => {
     }
     form.value.facePhoto = res.data.url
     faceFileList.value = [file]
-    Message.success('一寸免冠照 上传成功')
+    Message.success('二寸免冠照 上传成功')
 }
 
 // 图片类资料上传

@@ -173,7 +173,7 @@ const baseColumns = ref<TableInstanceColumns[]>([
     { title: '来源', dataIndex: 'applyType', slotName: 'applyType' },
     { title: '身份证住址', dataIndex: 'idCardAddress', slotName: 'idCardAddress' },
     { title: '身份证信息', dataIndex: 'idCardPhotoFront', slotName: 'idCardPhotoFront', width: 200, align: 'center' },
-    { title: '一寸免冠照', dataIndex: 'facePhoto', slotName: 'facePhoto', width: 100, align: 'center', },
+    { title: '二寸免冠照', dataIndex: 'facePhoto', slotName: 'facePhoto', width: 100, align: 'center', },
     { title: '资格申请表', dataIndex: 'qualificationPath', slotName: 'qualificationPath', width: 100, align: 'center', },
 ])
 

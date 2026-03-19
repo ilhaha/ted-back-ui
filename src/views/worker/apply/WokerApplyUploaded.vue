@@ -88,7 +88,7 @@
 
             <div class="upload-item">
                 <div class="doc-info">
-                    <span class="doc-name">一寸免冠照</span>
+                    <span class="doc-name">二寸免冠照</span>
                 </div>
                 <div class="upload-wrapper">
                     <a-image :src="workerUploadedDocs.facePhoto" width="80" height="80" style="object-fit: cover;"

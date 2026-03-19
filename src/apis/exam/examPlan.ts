@@ -209,7 +209,7 @@ export function getExamPlanId(id: string) {
   return http.get<ExamPlanDetailResp>(`${BASE_URL}/${id}`)
 }
 /** @desc 考试计划审核 */
-export function getExamPlanvalid(id: string, status: number) {
+export function reviewPlanApi(id: string, status: number) {
   return http.post<string>(`${BASE_URL}/valid/${id}/${status}`)
 }
 

@@ -16,7 +16,7 @@ import {
   customizAddExamPlan,
   getExamPlan,
   getExamPlanId,
-  getExamPlanvalid,
+  reviewPlanApi,
   updateExamPlan,
   inspectorUpdate,
   updateExamPlanClassroom,
@@ -370,7 +370,7 @@ const onAuditConfirm = async () => {
       Message.error("请选择审核状态");
       return;
     }
-    const response = await getExamPlanvalid(dataId.value, form.statusa);
+    const response = await reviewPlanApi(dataId.value, form.statusa);
     if (response.success) {
       emit("save-success");
       Message.success("审核成功");

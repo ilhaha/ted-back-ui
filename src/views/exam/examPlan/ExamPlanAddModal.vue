@@ -16,7 +16,7 @@ import {
   customizAddExamPlan,
   getExamPlan,
   getExamPlanId,
-  getExamPlanvalid,
+  reviewPlanApi,
   updateExamPlan,
   updateExamPlanClassroom,
   getExamClassroom,
@@ -228,8 +228,8 @@ const auditColumns: ColumnItem[] = reactive([
     rules: [{ required: true, message: "请选择审核状态" }],
     props: {
       options: [
-        { label: "未通过", value: 0 },
-        { label: "已通过", value: 1 },
+        { label: "审核驳回", value: 0 },
+        { label: "审核通过", value: 1 },
       ],
       allowSearch: true,
     },
@@ -324,7 +324,7 @@ const onAuditConfirm = async () => {
       Message.error("请选择审核状态");
       return;
     }
-    const response = await getExamPlanvalid(dataId.value, form.statusa);
+    const response = await reviewPlanApi(dataId.value, form.statusa);
     if (response.success) {
       emit("save-success");
       Message.success("审核成功");

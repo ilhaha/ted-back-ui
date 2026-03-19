@@ -95,11 +95,11 @@ const columns: ColumnItem[] = reactive([
     rules: [{ required: true, message: '请输入身份证反面存储地址' }]
   },
   {
-    label: '一寸免冠照存储地址',
+    label: '二寸免冠照存储地址',
     field: 'facePhoto',
     type: 'input',
     span: 24,
-    rules: [{ required: true, message: '请输入一寸免冠照存储地址' }]
+    rules: [{ required: true, message: '请输入二寸免冠照存储地址' }]
   },
 ])
 
