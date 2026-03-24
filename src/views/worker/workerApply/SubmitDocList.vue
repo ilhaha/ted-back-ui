@@ -36,17 +36,19 @@
             </template>
             <template #idCardPhotoFront="{ record }">
                 <a-space v-if="record.idCardPhotoFront">
-                    <a-image width="80" height="60" :src="record.idCardPhotoFront" :preview-props="{ zoomRate: 1.5 }"
-                        class="preview-image" fit="cover" />
-                    <a-image width="80" height="60" :src="record.idCardPhotoBack" :preview-props="{ zoomRate: 1.5 }"
-                        class="preview-image" fit="cover" />
+                    <img width="80" height="60" :src="record.idCardPhotoFront" class="preview-image"
+                        style="object-fit: cover; cursor: pointer;"
+                        @click="openRowPreview(record, record.idCardPhotoFront)" />
+                    <img width="80" height="60" :src="record.idCardPhotoBack" class="preview-image"
+                        style="object-fit: cover; cursor: pointer;"
+                        @click="openRowPreview(record, record.idCardPhotoBack)" />
                 </a-space>
                 <span v-else>-</span>
             </template>
             <template #facePhoto="{ record }">
                 <a-space v-if="record.facePhoto">
-                    <a-image width="80" height="60" :src="record.facePhoto" :preview-props="{ zoomRate: 1.5 }"
-                        class="preview-image" fit="cover" />
+                    <img width="80" height="60" :src="record.facePhoto" class="preview-image"
+                        style="object-fit: cover; cursor: pointer;" @click="openRowPreview(record, record.facePhoto)" />
                 </a-space>
                 <span v-else>-</span>
             </template>
@@ -54,9 +56,9 @@
                 <!-- 文件存在 -->
                 <template v-if="record.qualificationPath">
                     <!-- 图片显示缩略图 -->
-                    <a-image v-if="isImage(record.qualificationPath)" width="80" height="60"
-                        :src="record.qualificationPath" :preview-props="{ zoomRate: 1.5 }" class="preview-image"
-                        fit="cover" />
+                    <img v-if="isImage(record.qualificationPath)" width="80" height="60" :src="record.qualificationPath"
+                        class="preview-image" style="object-fit: cover; cursor: pointer;"
+                        @click="openRowPreview(record, record.qualificationPath)" />
                     <!-- PDF 显示预览按钮 -->
                     <a-link v-else title="预览报名资格申请表" @click="getPreviewUrl(record.qualificationPath)">
                         预览
@@ -68,19 +70,16 @@
 
             <template v-for="col in docColumns" :key="col.title" #[`doc_${col.title}`]="{ record }">
                 <span v-if="record.docMap && record.docMap[col.title]" class="preview-image">
-
                     <template v-for="(path, index) in record.docMap[col.title].split(',')" :key="index">
-
                         <!-- 如果是图片 -->
-                        <a-image v-if="isImage(path)" width="80" height="60" :src="path"
-                            :preview-props="{ zoomRate: 1.5 }" style="margin-right:6px" />
-
+                        <img v-if="isImage(path)" width="80" height="60" :src="path"
+                            style="margin-right: 6px; object-fit: cover; cursor: pointer;"
+                            @click="openRowPreview(record, path)" />
                         <!-- 如果是PDF -->
                         <a-link v-else title="预览文件" @click="getPreviewUrl(path)" style="margin-right:8px">
                             PDF预览
                         </a-link>
                     </template>
-
                 </span>
                 <span v-else>-</span>
             </template>
@@ -119,6 +118,30 @@
                         allow-clear />
                 </a-form-item>
             </a-form>
+        </a-modal>
+
+        <!-- 图片组预览弹窗 -->
+        <a-modal v-model:visible="previewVisible" :footer="false" width="50%" modal-class="image-preview-modal"
+            @close="closePreview">
+            <template #title>
+                <span>图片预览 ({{ previewIndex + 1 }} / {{ previewList.length }})</span>
+            </template>
+            <div class="preview-wrapper">
+                <div class="preview-actions">
+                    <a-button v-if="previewList.length > 1" @click="prevImage" :disabled="previewIndex === 0">
+                        <template #icon><icon-left /></template>
+                        上一张
+                    </a-button>
+                    <a-button v-if="previewList.length > 1" @click="nextImage"
+                        :disabled="previewIndex === previewList.length - 1">
+                        下一张
+                        <template #icon><icon-right /></template>
+                    </a-button>
+                </div>
+                <div class="preview-scroll-area">
+                    <a-image :src="previewList[previewIndex]" alt="预览图片" width="650" height="650"/>
+                </div>
+            </div>
         </a-modal>
     </div>
 </template>
@@ -222,6 +245,74 @@ const rowSelection = reactive({
 const reviewIds = ref<any[]>([]);
 const reviewVisible = ref(false);
 const formRef = ref()
+
+// 图片预览相关
+const previewVisible = ref(false)
+const previewList = ref<string[]>([])
+const previewIndex = ref(0)
+const previewRecord = ref<any>(null)
+const rotation = ref(0)
+
+// 旋转图片
+const rotateImage = () => {
+    rotation.value = (rotation.value + 90) % 360
+}
+
+// 重置旋转
+const resetRotation = () => {
+    rotation.value = 0
+}
+
+// 打开行图片预览
+const openRowPreview = (record: WorkerApplyResp, currentImage: string) => {
+    // 收集该行所有图片
+    const images: string[] = []
+    if (record.idCardPhotoFront && isImage(record.idCardPhotoFront)) images.push(record.idCardPhotoFront)
+    if (record.idCardPhotoBack && isImage(record.idCardPhotoBack)) images.push(record.idCardPhotoBack)
+    if (record.facePhoto && isImage(record.facePhoto)) images.push(record.facePhoto)
+    if (record.qualificationPath && isImage(record.qualificationPath)) images.push(record.qualificationPath)
+
+    // 收集 docMap 中的图片
+    if (record.docMap) {
+        Object.values(record.docMap).forEach((paths: any) => {
+            const pathList = String(paths).split(',')
+            pathList.forEach((p: string) => {
+                if (isImage(p) && !images.includes(p)) images.push(p)
+            })
+        })
+    }
+
+    if (images.length === 0) {
+        Message.warning('暂无图片可预览')
+        return
+    }
+
+    previewRecord.value = record
+    previewList.value = images
+    previewIndex.value = images.indexOf(currentImage)
+    if (previewIndex.value === -1) previewIndex.value = 0
+    previewVisible.value = true
+}
+
+// 上一张
+const prevImage = () => {
+    if (previewIndex.value > 0) {
+        previewIndex.value--
+    }
+}
+
+// 下一张
+const nextImage = () => {
+    if (previewIndex.value < previewList.value.length - 1) {
+        previewIndex.value++
+    }
+}
+
+// 关闭预览
+const closePreview = () => {
+    previewVisible.value = false
+    previewRecord.value = null
+}
 const [form, resetForm] = useResetReactive({
     status: 1,
     remark: undefined,
@@ -410,5 +501,33 @@ defineExpose({ onOpen })
     /* 空间不足自动换行 */
     gap: 8px;
     /* 图片间距，可调 */
+}
+
+/* 图片预览弹窗样式 */
+.preview-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 680px;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 16px;
+    padding: 12px 0;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.preview-scroll-area {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.preview-main-image {
+    object-fit: contain;
+    display: block;
 }
 </style>

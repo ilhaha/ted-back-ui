@@ -132,6 +132,8 @@ const logout = () => {
     onBeforeOk: async () => {
       try {
         await userStore.logout()
+        console.log(111);
+        
         await router.replace('/login')
         return true
       } catch (error) {
