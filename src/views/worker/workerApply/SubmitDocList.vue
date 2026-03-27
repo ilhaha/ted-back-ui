@@ -83,6 +83,9 @@
                 </span>
                 <span v-else>-</span>
             </template>
+            <template #uploadException="{ record }">
+                <GiCellTag :value="record.uploadException" :dict="worker_exception" />
+            </template>
             <template #status="{ record }">
                 <a-tag :color="getStatusColor(record.status)">
                     {{ getStatusText(record.status) }}
@@ -139,7 +142,7 @@
                     </a-button>
                 </div>
                 <div class="preview-scroll-area">
-                    <a-image :src="previewList[previewIndex]" alt="预览图片" width="650" height="650"/>
+                    <a-image :src="previewList[previewIndex]" alt="预览图片" width="650" height="650" />
                 </div>
             </div>
         </a-modal>
@@ -156,6 +159,8 @@ import has from '@/utils/has'
 import { Message } from '@arco-design/web-vue'
 import { useResetReactive } from '@/hooks'
 import { useWindowSize } from '@vueuse/core'
+
+const { worker_exception } = useDict('worker_exception')
 
 const emit = defineEmits<{
     (e: 'showModel', payload: any): void
@@ -184,17 +189,18 @@ const {
 } = useTable((page) => listWorkerApply({ ...queryForm, ...page }), { immediate: false })
 
 const baseColumns = ref<TableInstanceColumns[]>([
+    { title: '序号', dataIndex: 'sort', slotName: 'sort', },
     { title: '姓名', dataIndex: 'candidateName', slotName: 'candidateName', },
-    { title: '性别', dataIndex: 'gender', slotName: 'gender' },
+    // { title: '性别', dataIndex: 'gender', slotName: 'gender' },
     { title: '身份证号', dataIndex: 'idCardNumber', slotName: 'idCardNumber' },
     { title: '学历', dataIndex: 'education', slotName: 'education' },
-    { title: '联系电话', dataIndex: 'phone', slotName: 'phone' },
+    // { title: '联系电话', dataIndex: 'phone', slotName: 'phone' },
     { title: '工作单位', dataIndex: 'workUnit', slotName: 'workUnit' },
-    { title: '工作区域', dataIndex: 'address', slotName: 'address' },
-    { title: '政治面貌', dataIndex: 'politicalStatus', slotName: 'politicalStatus' },
+    // { title: '工作区域', dataIndex: 'address', slotName: 'address' },
+    // { title: '政治面貌', dataIndex: 'politicalStatus', slotName: 'politicalStatus' },
     // { title: '报考项目', dataIndex: 'projectName', slotName: 'projectName' },
-    { title: '来源', dataIndex: 'applyType', slotName: 'applyType' },
-    { title: '身份证住址', dataIndex: 'idCardAddress', slotName: 'idCardAddress' },
+    // { title: '来源', dataIndex: 'applyType', slotName: 'applyType' },
+    // { title: '身份证住址', dataIndex: 'idCardAddress', slotName: 'idCardAddress' },
     { title: '身份证信息', dataIndex: 'idCardPhotoFront', slotName: 'idCardPhotoFront', width: 200, align: 'center' },
     { title: '二寸免冠照', dataIndex: 'facePhoto', slotName: 'facePhoto', width: 100, align: 'center', },
     { title: '资格申请表', dataIndex: 'qualificationPath', slotName: 'qualificationPath', width: 100, align: 'center', },
@@ -203,8 +209,6 @@ const baseColumns = ref<TableInstanceColumns[]>([
 
 const columns = computed(() => {
     const columnsTemp: TableInstanceColumns[] = [...baseColumns.value]
-    console.log(isWelding.value);
-
     if (isWelding.value) {
         columnsTemp.push({
             title: '焊接资格项目',
@@ -215,12 +219,13 @@ const columns = computed(() => {
     return [
         ...columnsTemp,
         ...docColumns.value,
-        { title: '状态', dataIndex: 'status', slotName: 'status' },
+        // { title: '状态', dataIndex: 'status', slotName: 'status' },
         {
             title: '审核意见',
             dataIndex: 'remark',
             slotName: 'remark'
-        }, {
+        }, { title: '资料异常', dataIndex: 'uploadException', slotName: 'uploadException' },
+        {
             title: '操作',
             dataIndex: 'action',
             slotName: 'action',

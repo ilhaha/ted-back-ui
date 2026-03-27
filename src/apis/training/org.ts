@@ -47,9 +47,25 @@ export interface OrgQuery {
   code: string | undefined
   sort: Array<string>
 }
+
+export interface ProjectCategoryVO {
+  label: string
+  value: number
+  parentId?: number
+  children?: ProjectCategoryVO[]
+}
+
 export interface OrgPageQuery extends OrgQuery, PageQuery { }
 
+/** @desc 获取机构对应的分类-项目-班级级联选择 */
+export function getSelectCategoryProjectClass(orgId: string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project/class`, { orgId })
+}
 
+/** @desc 获取机构考核项目种类-项目级联选择器 */
+export function getSelectCategoryProject(orgId: string) {
+  return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project`, { orgId })
+}
 
 /** @desc 获取机构对应的项目-班级-考生级联选择 */
 export function getSelectOrgProjectClass(type: number) {
