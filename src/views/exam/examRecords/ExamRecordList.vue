@@ -2,7 +2,7 @@
   <div class="gi_table_page">
     <GiTable row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']"  @refresh="search">
+      :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
         <a-space>
           <a-input-search @search="search" v-model="queryForm.candidateName" placeholder="搜索考生姓名" allow-clear
@@ -72,10 +72,17 @@
         </a-space>
       </template>
       <template #examPaper="{ record }">
-        <a-link @click="showFormattedExamPaper(record)" v-if="record.examPaper">查阅</a-link>
-        <a-tag color="red" v-else>
-          缺考
-        </a-tag>
+        <a-space v-if="record.isTheoryExempt == 0">
+          <a-link @click="showFormattedExamPaper(record)" v-if="record.examPaper">查阅</a-link>
+          <a-tag color="red" v-else>
+            缺考
+          </a-tag>
+        </a-space>
+        <a-space v-if="record.isTheoryExempt == 1">
+          <a-tag color="blue">
+            免考
+          </a-tag>
+        </a-space>
       </template>
       <template #registrationProgress="{ record }">
         <a-tag :color="getProgressColor(Number(record.registrationProgress))">
@@ -111,7 +118,8 @@
       </template>
       <template #operScores="{ record }">
         <!-- 焊接项目 -->
-        <span v-if="record.projectId === 110 || record.projectId === 111">
+        <span
+          v-if="record.projectId === 110 || record.projectId === 111 || record.projectId === 173 || record.projectId === 174 || record.projectId === 175 || record.projectId === 177">
           <a-space direction="vertical" style="width: 100%;">
             <div v-for="item in record.weldingOperScoreVoList" :key="item.id">
               <span>{{ item.projectCode }} <a-divider direction="vertical" />
@@ -442,7 +450,7 @@ const saveOperScores = async () => {
   // 判断要保存的是哪种类型
   const firstItem = targetList[0]
 
-  if (firstItem.projectId === 110 || firstItem.projectId === 111) {
+  if (firstItem.projectId === 110 || firstItem.projectId === 111 || firstItem.projectId === 173 || firstItem.projectId === 174 || firstItem.projectId === 175 || firstItem.projectId === 177) {
     // 焊接项目
     const weldingScoresList = targetList
       .flatMap(item =>
@@ -469,7 +477,7 @@ const saveOperScores = async () => {
   } else {
     // 普通项目
     const normalScoresList = targetList
-      .filter(item => item.projectId !== 110 && item.projectId !== 111)
+      .filter(item => item.projectId !== 110 && item.projectId !== 111 && item.projectId !== 173 && item.projectId !== 174 && item.projectId !== 175 && item.projectId !== 177)
       .map(item => ({
         recordId: item.id,
         scores: item.operScores

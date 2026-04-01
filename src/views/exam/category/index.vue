@@ -121,11 +121,11 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center"
   },
   { title: "题目数量", dataIndex: "topicNumber", slotName: "topicNumber" },
-  {
-    title: "警示短片",
-    dataIndex: "videoUrl",
-    slotName: "video",
-  },
+  // {
+  //   title: "警示短片",
+  //   dataIndex: "videoUrl",
+  //   slotName: "video",
+  // },
   {
     title: "违规行为提醒",
     dataIndex: "enableProctorWarning",

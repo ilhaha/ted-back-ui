@@ -21,7 +21,7 @@
             </a-space>
           </template>
           <template #operScores="{ record }">
-            <span v-if="record.projectId === 110 || record.projectId === 111">
+            <span v-if="record.projectId === 110 || record.projectId === 111 || record.projectId === 173 || record.projectId === 174 || record.projectId === 175 || record.projectId === 177">
               <a-space direction="vertical" style="width: 100%;">
                 <div v-for="item in record.weldingOperScoreVoList" :key="item.id">
                   <span>{{ item.projectCode }} <a-divider direction="vertical" />

@@ -62,7 +62,8 @@ const [form, resetForm] = useResetReactive({
   invigilatorCount: 1,
   theoryClassroomId: [],
   operationClassroomId: [],
-  statusa: 1
+  statusa: 1,
+  hasTheory: 1,
 });
 
 const projectBindingDocList = ref([]);
@@ -264,7 +265,7 @@ const save = async () => {
     if (isInvalid) return false
 
     // 计算考场总数
-    const theoryLen = 1;
+    const theoryLen = form.hasTheory == 1 ? 1 : 0;
     const operationLen = form.operationClassroomId?.length || 0;
     const totalClassroom = theoryLen + operationLen;
 
@@ -291,7 +292,11 @@ const save = async () => {
     // 封装参数（兜底格式）
     const submitForm = {
       ...form,
-      theoryClassroomId: Array.isArray(form.theoryClassroomId) ? form.theoryClassroomId : [form.theoryClassroomId],
+      theoryClassroomId: Array.isArray(form.theoryClassroomId)
+        ? form.theoryClassroomId.filter(v => v != null)
+        : form.theoryClassroomId != null
+          ? [form.theoryClassroomId]
+          : [],
       operationClassroomId: form.operationClassroomId || [],
       invigilatorCount: invigilatorCount
     };
@@ -357,6 +362,8 @@ const onUpdate = async (id: string) => {
   try {
     // 1. 获取考试计划详情
     const { data: examPlanData } = await getExamPlan(id);
+
+
     // 2. 获取部门项目列表（父项目数组）
     await getExamProjectOptions(examPlanData.planType);
     const parentProjects = examProjectOptions.value;
@@ -378,14 +385,16 @@ const onUpdate = async (id: string) => {
 
     // 容错：如果没找到子项目，提示并终止后续逻辑
     if (!targetSubProject) {
-      console.warn(`未找到ID为${subProjectId}的子项目`);
       Object.assign(form, examPlanData);
       return;
     }
 
     // 4. 加载理论考场（用子项目ID）
-    await getProjectClassRoomSelect(subProjectId, 0);
-    columns.find((item) => item.field === "theoryClassroomId")!.show = true;
+    if (examPlanData.hasTheory === 1) {
+      await getProjectClassRoomSelect(subProjectId, 0);
+      columns.find((item) => item.field === "theoryClassroomId")!.show = true;
+    }
+
 
     // 5. 加载实操考场（如果子项目是实操类型）
     if (targetSubProject.isOperation === 1) {
@@ -398,8 +407,6 @@ const onUpdate = async (id: string) => {
     Object.assign(form, examPlanData);
 
   } catch (e) {
-    console.error("考试计划回显失败：", e);
-    // 可加错误提示，比如ElMessage.error('数据加载失败')
   }
 };
 const mapRoomIdsToPaths = (roomIds: number[], options: any[]) => {

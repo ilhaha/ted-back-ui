@@ -16,7 +16,17 @@
         </a-space>
       </template>
       <template #examPaper="{ record }">
-        <a-link @click="showFormattedExamPaper(record)">查阅</a-link>
+        <a-space v-if="record.isTheoryExempt == 0">
+          <a-link @click="showFormattedExamPaper(record)" v-if="record.examPaper">查阅</a-link>
+          <a-tag color="red" v-else>
+            缺考
+          </a-tag>
+        </a-space>
+        <a-space v-if="record.isTheoryExempt == 1">
+          <a-tag color="blue">
+            免考
+          </a-tag>
+        </a-space>
       </template>
       <template #examResultStatus="{ record }">
         <a-tag :color="getExamResultStatusColor(Number(record.examResultStatus))">

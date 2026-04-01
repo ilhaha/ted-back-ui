@@ -134,20 +134,20 @@ const baseColumns: ColumnItem[] = [
     span: 24,
     rules: [{ required: true, message: '请输入题目数量' }],
   },
-  {
-    label: '警示短片',
-    field: 'videoUrl',
-    type: 'upload',
-    span: 24,
-    props: {
-      accept: 'video/*',
-      limit: 1,
-      showFileList: false,
-      fileList: computed(() =>
-        form.videoUrl ? [{ uid: '-1', name: '视频', url: form.videoUrl }] : []
-      ),
-    },
-  },
+  // {
+  //   label: '警示短片',
+  //   field: 'videoUrl',
+  //   type: 'upload',
+  //   span: 24,
+  //   props: {
+  //     accept: 'video/*',
+  //     limit: 1,
+  //     showFileList: false,
+  //     fileList: computed(() =>
+  //       form.videoUrl ? [{ uid: '-1', name: '视频', url: form.videoUrl }] : []
+  //     ),
+  //   },
+  // },
 ]
 
 // 动态计算列：根据焊接只读状态控制字段禁用，全部字段保留显示
