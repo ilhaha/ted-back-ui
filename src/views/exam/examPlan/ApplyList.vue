@@ -14,20 +14,13 @@
                     <template #default>重置</template>
                 </a-button>
             </template>
-            <!-- <template #toolbar-right>
-                <a-button v-permission="['worker:examineePaymentAudit:download']" @click="batchDownloadAuditNotice"
-                    :disabled="!queryForm.classId || !dataList || dataList.length === 0"
-                    :loading="batchDownloadLodding">
+            <template #toolbar-right>
+                <a-button v-permission="['download:summary:table']" @click="downloadSummary"
+                    :disabled="!dataList || dataList.length === 0" :loading="downloadSummaryLodding">
                     <template #icon><icon-download /></template>
-                    <template #default>下载班级缴费通知单</template>
+                    <template #default>下载成绩单</template>
                 </a-button>
-                <a-button v-permission="['exam:download:ticket']" @click="batchDownloadTicket"
-                    :disabled="!queryForm.classId || !dataList || dataList.length === 0"
-                    :loading="batchDownloadTicketLodding">
-                    <template #icon><icon-download /></template>
-                    <template #default>下载班级准考证</template>
-                </a-button>
-            </template> -->
+            </template>
             <template #paymentProofUrl="{ record }">
                 <div v-if="record.paymentProofUrl" class="image-list">
                     <a-image v-for="(path, index) in record.paymentProofUrl.split(',')" :key="index" width="80"
@@ -38,7 +31,7 @@
             <template #auditStatus="{ record }">
                 <a-tag :color="getStatusColor(record.auditStatus)">{{
                     getStatusText(record.auditStatus)
-                    }}</a-tag>
+                }}</a-tag>
             </template>
             <!-- <template #auditNoticeUrl="{ record }">
                 <a-link @click="getPreviewUrl(record.auditNoticeUrl)"
@@ -49,7 +42,7 @@
             <template #theoryScoreReused="{ record }">
                 <a-tag :color="getTheoryScoreReusedColor(record.theoryScoreReused)">{{
                     getTheoryScoreReusedText(record.theoryScoreReused)
-                    }}</a-tag>
+                }}</a-tag>
             </template>
             <template #ticketUrl="{ record }">
                 <div v-if="record.ticketUrl">
@@ -89,6 +82,9 @@ import {
     downloadBatchAuditNotice,
     downloadBatchTicket
 } from "@/apis/plan/enroll";
+import {
+    downloadSummaryApi
+} from "@/apis/training/org";
 import { getSelectClassByProject } from '@/apis/training/orgClass'
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -109,6 +105,7 @@ const queryForm = reactive<EnrollQuery>({
     isOrgQuery: false,
     planType: 0
 });
+const downloadSummaryLodding = ref(false)
 
 const openPlanId = ref()
 const openProjectId = ref()
@@ -170,6 +167,56 @@ const handClose = () => {
     reset();
     visible.value = false
 }
+
+// 下载成绩单
+const downloadSummary = async () => {
+    try {
+        downloadSummaryLodding.value = true;
+
+        const res = await downloadSummaryApi(queryForm.planId);
+
+        // 1. 获取后端返回的 Content-Disposition
+        const disposition = res.headers['content-disposition'] || '';
+        let fileName = '111';
+
+        // 2. 尝试解析 filename*=UTF-8''xxx
+        const utf8Match = disposition.match(/filename\*=UTF-8''(.+)/);
+        if (utf8Match && utf8Match[1]) {
+            fileName = decodeURIComponent(utf8Match[1]);
+        } else {
+            // fallback: filename="xxx"
+            const fallbackMatch = disposition.match(/filename="(.+)"/);
+            if (fallbackMatch && fallbackMatch[1]) {
+                fileName = fallbackMatch[1];
+            }
+        }
+
+        // 3. 获取后端返回的 Content-Type
+        const contentType = res.headers['content-type'] || 'application/octet-stream';
+
+        const blob = new Blob([res.data], { type: contentType });
+
+        // 4. 根据 Content-Type 或文件后缀判断是否为压缩包
+        const isZip = contentType === 'application/zip' || fileName.toLowerCase().endsWith('.zip');
+        if (isZip && !fileName.toLowerCase().endsWith('.zip')) {
+            fileName += '.zip';
+        }
+
+        // 5. 创建链接下载
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+
+        Message.success('下载成功');
+    } catch (err) {
+    } finally {
+        downloadSummaryLodding.value = false;
+    }
+};
 
 // 删除
 const onDelete = (record: EnrollResp) => {

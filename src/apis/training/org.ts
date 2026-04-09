@@ -57,6 +57,15 @@ export interface ProjectCategoryVO {
 
 export interface OrgPageQuery extends OrgQuery, PageQuery { }
 
+/**
+ * 下载成绩单
+ * @param planId 
+ * @returns 
+ */
+export function downloadSummaryApi(planId: number) {
+  return http.download(`${BASE_URL}/download/summary/${planId}`)
+}
+
 /** @desc 获取机构对应的分类-项目-班级级联选择 */
 export function getSelectCategoryProjectClass(orgId: string) {
   return http.get<ProjectCategoryVO[]>(`${BASE_URL}/select/category/project/class`, { orgId })

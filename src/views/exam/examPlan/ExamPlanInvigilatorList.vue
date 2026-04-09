@@ -165,7 +165,7 @@ const onReRandom = async () => {
 // 更改监考员
 const updateInvigilator = async (record: any) => {
   // 查询可选监考员
-  const res = await getAvailableInvigilator(currentPlanId.value, record.invigilatorId)
+  const res = await getAvailableInvigilator(currentPlanId.value, record.examType)
   availableInvigilators.value = res.data.map(inv => ({
     value: inv.id,
     label: inv.nickname
