@@ -85,6 +85,12 @@ export interface ProjectQuery {
 }
 export interface ProjectPageQuery extends ProjectQuery, PageQuery { }
 
+/** @desc 无损检验、作业人员根据种类类型和考试级别，获取出对应的项目 */
+export function getInspectionProjectList(categoryId: string, examLevel: number) {
+  return http.get(`${BASE_URL}/inspection/list/${categoryId}/${examLevel}`)
+}
+
+
 /** @desc 查询项目列表 */
 export function getProjectsWithClassrooms() {
   return http.get(`${BASE_URL}/with-classrooms`)
@@ -135,8 +141,8 @@ export function bindingBindingDocument(id: string, documentList?: string[]) {
 }
 
 /** @desc 查询项目未绑定的资料 */
-export function getNotBindingDocument(projectId: string) {
-  return http.post(`${NOT_BINDING_DOCUMENT}/${projectId}`)
+export function getNotBindingDocument(projectId: string, personnelType: string) {
+  return http.post(`${NOT_BINDING_DOCUMENT}/${projectId}/${personnelType}`)
 }
 
 /** @desc 查询项目未绑定的地址 */

@@ -1,14 +1,6 @@
 <template>
-  <a-modal
-      v-model:visible="visible"
-      :title="title"
-      :mask-closable="false"
-      :esc-to-close="false"
-      :width="width >= 600 ? 600 : '100%'"
-      draggable
-      @before-ok="save"
-      @close="reset"
-  >
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns" />
   </a-modal>
 </template>
@@ -41,14 +33,14 @@ const [form, resetForm] = useResetReactive({
 // 窗口打开，获取所有地址列表
 watch(() => visible.value, async (newProvinceId, oldProvinceId) => {
   if (newProvinceId === true) {
-    await getNotBindingDocumentFun(dataId.value)
+    await getNotBindingDocumentFun(dataId.value, "0")
     if (notBindingDocumentList.value.length === 0) {
       visible.value = false
       // 提示
       Message.info('暂无可绑定资料')
     }
   }
-},{ immediate: false })
+}, { immediate: false })
 
 
 const columns: ColumnItem[] = reactive([
@@ -97,5 +89,4 @@ const onBinding = async (id: string) => {
 defineExpose({ onBinding })
 </script>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

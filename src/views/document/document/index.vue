@@ -86,6 +86,7 @@ const queryForm = reactive<DocumentQuery>({
   docPath: undefined,
   typeId: undefined,
   createUser: undefined,
+  
   sort: ["id,desc"],
 });
 // 默认加载下拉框内容

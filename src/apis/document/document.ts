@@ -55,8 +55,8 @@ export function listDocument(query: DocumentPageQuery) {
 }
 
 /** @desc 获取所有资料种类 */
-export function getDocumentType() {
-  return http.get(`${TYPE_NAME_URL}`)
+export function getDocumentType(personnelType: number) {
+  return http.get(`${TYPE_NAME_URL}/${personnelType}`)
 }
 /** @desc 查询资料核心存储详情 */
 export function getDocument(id: string) {

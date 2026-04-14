@@ -24,7 +24,7 @@ export function useDocument(options?: { onSuccess?: () => void }) {
     const getTypeNameList = async () => {
         try {
             loading.value = true
-            const res = await getDocumentType()
+            const res = await getDocumentType(0)
             typeNameList.value = res.data
             options?.onSuccess && options.onSuccess()
         } finally {

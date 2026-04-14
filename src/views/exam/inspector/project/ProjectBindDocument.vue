@@ -41,7 +41,7 @@ const [form, resetForm] = useResetReactive({
 // 窗口打开，获取所有地址列表
 watch(() => visible.value, async (newProvinceId, oldProvinceId) => {
   if (newProvinceId === true) {
-    await getNotBindingDocumentFun(dataId.value)
+    await getNotBindingDocumentFun(dataId.value, '1')
     if (notBindingDocumentList.value.length === 0) {
       visible.value = false
       // 提示

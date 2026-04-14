@@ -62,10 +62,10 @@ export function useProject(options?: { onSuccess?: () => void }) {
   /**
    * 获取项目未绑定地址下拉框包含label(locationName)、value(id)
    */
-  const getNotBindingDocumentFun = async (projectId: string) => {
+  const getNotBindingDocumentFun = async (projectId: string, personnelType: string) => {
     try {
       loading.value = true
-      const res = await getNotBindingDocument(projectId)
+      const res = await getNotBindingDocument(projectId, personnelType)
       notBindingDocumentList.value = res.data
       options?.onSuccess && options.onSuccess()
     } finally {

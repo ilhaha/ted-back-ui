@@ -19,6 +19,11 @@
           getNeedUploadPersonText(record.needUploadPerson)
         }}</a-tag>
       </template>
+      <template #personnelType="{ record }">
+        <a-tag :color="getPersonnelTypeColor(record.personnelType)" bordered>{{
+          getPersonnelTypeText(record.personnelType)
+        }}</a-tag>
+      </template>
       <template #toolbar-right>
         <a-button v-permission="['document:documentType:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
@@ -73,6 +78,7 @@ const {
 } = useTable((page) => listDocumentType({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
   { title: '类型名称', dataIndex: 'typeName', slotName: 'typeName' },
+  { title: '人员上传类型', dataIndex: 'personnelType', slotName: 'personnelType' },
   { title: '资料上传适用人员', dataIndex: 'needUploadPerson', slotName: 'needUploadPerson' },
   { title: '创建时间', dataIndex: 'createTime', slotName: 'createTime' },
   {
@@ -122,6 +128,28 @@ const DocumentTypeDetailDrawerRef = ref<InstanceType<typeof DocumentTypeDetailDr
 const onDetail = (record: DocumentTypeResp) => {
   DocumentTypeDetailDrawerRef.value?.onOpen(record.id)
 }
+
+const getPersonnelTypeText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "作业人员";
+    case 1:
+      return "检验人员";
+    default:
+      return "未知人员";
+  }
+};
+
+const getPersonnelTypeColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue";
+    case 1:
+      return "orange";
+    default:
+      return "default";
+  }
+};
 
 const getNeedUploadPersonText = (status: number) => {
   switch (status) {

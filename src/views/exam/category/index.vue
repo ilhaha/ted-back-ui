@@ -11,6 +11,9 @@
       <template #categoryType="{ record }">
         <span>{{ getCategoryTypeName(record.categoryType) }}</span>
       </template>
+      <template #examType="{ record }">
+        <span>{{ getExamTypeName(record.examType) }}</span>
+      </template>
       <template #toolbar-left>
         <a-input-search v-model="queryForm.name" placeholder="请输入种类名称" allow-clear @search="search" />
         <a-button type="primary" class="ml-2" @click="search">
@@ -95,7 +98,7 @@ const {
 
 // 新增：定义种类类型映射关系
 const categoryTypeMap = {
-  1: '考核项目种类',
+  1: '八大类',
   2: '焊接',
   3: '无损检测',
   4: '检验人员'
@@ -109,6 +112,21 @@ const getCategoryTypeName = (type: number | undefined) => {
   return categoryTypeMap[type];
 };
 
+// 新增：定义种类类型映射关系
+const examTypeMap = {
+  1: '取证考试',
+  2: '换证考试',
+  3: '免考换证',
+};
+
+// 新增：根据数字获取种类类型中文名称
+const getExamTypeName = (type: number | undefined) => {
+  if (!type || !examTypeMap[type]) {
+    return '-'; // 无值时显示横线
+  }
+  return examTypeMap[type];
+};
+
 const columns = ref<TableInstanceColumns[]>([
   { title: "考核项目种类名称", dataIndex: "name", slotName: "name" },
   { title: "代号", dataIndex: "code", slotName: "code" },
@@ -117,6 +135,13 @@ const columns = ref<TableInstanceColumns[]>([
     title: "种类类型", 
     dataIndex: "categoryType", 
     slotName: "categoryType",
+    width: 120,
+    align: "center"
+  },
+  { 
+    title: "考试办理类型", 
+    dataIndex: "examType", 
+    slotName: "examType",
     width: 120,
     align: "center"
   },

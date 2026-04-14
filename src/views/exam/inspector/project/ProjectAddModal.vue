@@ -1,44 +1,24 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    :title="title"
-    :mask-closable="false"
-    :esc-to-close="false"
-    :width="width >= 600 ? 600 : '100%'"
-    draggable
-    @before-ok="save"
-    @close="reset"
-  >
-  <GiForm ref="formRef" v-model="form" :columns="currentColumns">
-  <!-- 考试等级 - 小圆点单选按钮 -->
-  <template #projectLevel>
-    <div class="project-type-radio">
-      <a-radio-group
-        v-model="form.projectLevel"
-        :disabled="isWeldingReadonly"
-      >
-        <div class="radio-item">
+  <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
+    <GiForm ref="formRef" v-model="form" :columns="currentColumns">
+      <!-- 考试等级 - 小圆点单选按钮 -->
+      <template #projectLevel>
+
+        <a-radio-group v-model="form.projectLevel" :disabled="isWeldingReadonly">
           <a-radio :value="0">无</a-radio>
-        </div>
-        <div class="radio-item">
-          <a-radio :value="1">一级</a-radio>
-        </div>
-        <div class="radio-item">
-          <a-radio :value="2">二级</a-radio>
-        </div>
-      </a-radio-group>
-    </div>
-  </template>
-</GiForm>
+          <a-radio :value="1">Ⅰ级</a-radio>
+          <a-radio :value="2">Ⅱ级</a-radio>
+        </a-radio-group>
+      </template>
+    </GiForm>
     <template #footer>
-      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm"
-        >确认审核</a-button
-      >
+      <a-button v-if="isAudit" type="primary" @click="onAuditConfirm">确认审核</a-button>
     </template>
   </a-modal>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts"> 
 import { Message } from "@arco-design/web-vue";
 import { useWindowSize } from "@vueuse/core";
 import {
@@ -75,45 +55,23 @@ const [form, resetForm] = useResetReactive({
   projectName: "",
   projectCode: "",
   examDuration: "",
+  examEndAge: 60,
   imageUrl: "",
   auditStatus: "2",
   projectStatus: "",
   categoryId: undefined,
   projectType: 1,
-  isOperation: 0,
+  isOperation: 1,
+  projectLevel: 0,
+  isTheory: 1,
+  examFee: 0,
 });
 
-// 上传图片
-const handleUpload = (options: RequestOption) => {
-  const controller = new AbortController();
-  (async function requestWrap() {
-    const { onProgress, onError, onSuccess, fileItem, name = "file" } = options;
-    onProgress(20);
-    const formData = new FormData();
-    formData.append(name as string, fileItem.file as Blob);
-    formData.append("type", "pic");
-    try {
-      const res = await upload(formData, {
-        signal: controller.signal,
-      });
-      Message.success("上传成功");
-      form.imageUrl = res.data.url;
-      onSuccess(res.data.thUrl);
-    } catch (error) {
-      onError(error);
-    }
-  })();
-  return {
-    abort() {
-      controller.abort();
-    },
-  };
-};
 
 const categorySelect = ref<LabelValueState[]>([]);
 
 const categoryDisabled = computed(() => {
-  return isUpdate.value; 
+  return isUpdate.value;
 });
 
 const columns: ColumnItem[] = reactive([
@@ -134,14 +92,6 @@ const columns: ColumnItem[] = reactive([
     span: 24,
   },
   {
-    label: "考试时长（分钟）",
-    prop: "examDuration",
-    field: "examDuration",
-    type: "input-number",
-    required: true,
-    span: 24,
-  },
-  {
     label: "所属种类",
     prop: "categoryId",
     field: "categoryId",
@@ -154,14 +104,35 @@ const columns: ColumnItem[] = reactive([
       disabled: categoryDisabled,
     },
   },
-    {
+  {
+    label: "考试时长（分钟）",
+    prop: "examDuration",
+    field: "examDuration",
+    type: "input-number",
+    required: true,
+    span: 24,
+  },
+  {
+    label: "考试年龄上限（岁）",
+    prop: "examEndAge",
+    field: "examEndAge",
+    type: "input-number",
+    required: true,
+    span: 24,
+    props: {
+      min: 60,
+      max: 80
+    }
+  },
+
+  {
     label: '考试等级',
     field: 'projectLevel',
     type: 'slot',
     span: 24,
     rules: [{ required: true, message: '请选择考试等级' }],
   },
-    {
+  {
     label: "理论考试",
     field: "isTheory",
     type: "select",
@@ -169,8 +140,8 @@ const columns: ColumnItem[] = reactive([
     required: true,
     props: {
       options: [
-        { label: "无", value: 0 },
         { label: "有", value: 1 },
+        { label: "无", value: 0 },
       ],
       placeholder: "请选择是否有理论考试",
     },
@@ -183,8 +154,8 @@ const columns: ColumnItem[] = reactive([
     required: true,
     props: {
       options: [
-        { label: "无", value: 0 },
         { label: "有", value: 1 },
+        { label: "无", value: 0 },
       ],
       placeholder: "请选择是否有实操考试",
     },
@@ -263,7 +234,7 @@ const reset = () => {
 // 核心判断：修改场景 + 考试等级为 1 或 2 → 只读
 // 修改场景 + 考试等级为 1 / 2 → 只读
 const isWeldingReadonly = computed(() => {
-  return isUpdate.value && [0,1, 2].includes(Number(form.projectLevel))
+  return isUpdate.value && [0, 1, 2].includes(Number(form.projectLevel))
 })
 // 保存
 const save = async () => {
@@ -347,21 +318,4 @@ const onExamineA = async (id: string) => {
 defineExpose({ onAdd, onUpdate, onExamineA });
 </script>
 
-<style scoped lang="scss">
-.project-type-radio {
-  padding: 8px 0;
-  
-  .radio-item {
-    display: inline-block;
-    margin-right: 24px;
-    line-height: 32px;
-  }
-
-  :deep(.arco-radio) {
-    :deep(.arco-radio-inner) {
-      width: 16px;
-      height: 16px;
-    }
-  }
-}
-</style>
+<style scoped lang="scss"></style>

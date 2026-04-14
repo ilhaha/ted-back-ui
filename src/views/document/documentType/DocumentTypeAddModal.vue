@@ -2,6 +2,12 @@
   <a-modal v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
     :width="width >= 600 ? 600 : '100%'" draggable @before-ok="save" @close="reset">
     <GiForm ref="formRef" v-model="form" :columns="columns">
+      <template #personnelType>
+        <a-radio-group v-model="form.personnelType">
+          <a-radio :value="0">作业人员</a-radio>
+          <a-radio :value="1">检验人员</a-radio>
+        </a-radio-group>
+      </template>
       <template #needUploadPerson>
         <a-radio-group v-model="form.needUploadPerson">
           <a-radio :value="2">仅非京籍人员需上传</a-radio>
@@ -37,7 +43,9 @@ const [form, resetForm] = useResetReactive({
   // todo 待补充
   needUploadPerson: 2,
   typeName: '',
+  personnelType: 0,
 })
+
 
 const columns: ColumnItem[] = reactive([
   {
@@ -48,6 +56,14 @@ const columns: ColumnItem[] = reactive([
     rules: [{ required: true, message: '请输入资料类型名称' }]
   },
   {
+    label: '人员上传类型',
+    field: 'personnelType',
+    type: 'radio',
+    span: 24,
+    soltName:'personnelType',
+    rules: [{ required: true, message: '请选择人员上传类型' }],
+  },
+  {
     label: '资料上传适用人员',
     field: 'needUploadPerson',
     type: 'radio',
@@ -55,7 +71,6 @@ const columns: ColumnItem[] = reactive([
     soltName: 'needUploadPerson',
     rules: [{ required: true, message: '请选择是否需要上传' }]
   }
-
 
 ])
 
@@ -78,7 +93,6 @@ const save = async () => {
         await addDocumentType(form)
         Message.success('新增成功')
       } catch (error: any) {
-        Message.error(error?.response.data.message || '新增失败')
         return false
       }
     }

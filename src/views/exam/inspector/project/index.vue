@@ -147,8 +147,8 @@ const {
 //定义项目考试等级映射关系
 const projectLevelsMap = {
   0: "无",
-  1: "一级",
-  2: "二级",
+  1: "Ⅰ级",
+  2: "Ⅱ级",
 };
 
 // 根据数字获取种类类型中文名称
@@ -161,6 +161,7 @@ const getProjectLevelName = (type: number | undefined) => {
 const columns = ref<TableInstanceColumns[]>([
   // { title: "项目展示图", dataIndex: "imageUrl", slotName: "imageUrl" },
   { title: "项目名称", dataIndex: "projectName", slotName: "projectName", align: "center" },
+  { title: "项目代码", dataIndex: "projectCode", slotName: "projectCode", align: "center" },
   { title: "所属种类", dataIndex: "categoryName", slotName: "categoryName", align: "center" },
       { 
     title: "考试等级", 
@@ -169,8 +170,8 @@ const columns = ref<TableInstanceColumns[]>([
     width: 120,
     align: "center"
   },
-  { title: "项目代码", dataIndex: "projectCode", slotName: "projectCode", align: "center" },
   { title: "考试时长（分钟）", dataIndex: "examDuration", slotName: "examDuration", align: "center" },
+  { title: "考试年龄上限（岁）", dataIndex: "examEndAge", slotName: "examEndAge", align: "center" },
   { title: "项目状态", dataIndex: "projectStatus", slotName: "projectStatus", align: "center" },
   { title: "理论考试", dataIndex: "isTheory", slotName: "isTheory", align: "center" },
   { title: "实操考试", dataIndex: "isOperation", slotName: "isOperation", align: "center" },

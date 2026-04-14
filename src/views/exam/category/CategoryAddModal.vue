@@ -26,22 +26,19 @@
 
       <!-- 种类类型 - 小圆点单选按钮：添加禁用控制 -->
       <template #categoryType>
-        <div class="category-type-radio">
-          <a-radio-group v-model="form.categoryType" :disabled="isWeldingReadonly">
-            <div class="radio-item">
-              <a-radio :value="1">八大类</a-radio>
-            </div>
-            <div class="radio-item">
-              <a-radio :value="2">焊接</a-radio>
-            </div>
-            <div class="radio-item">
-              <a-radio :value="3">无损检测</a-radio>
-            </div>
-            <div class="radio-item">
-              <a-radio :value="4">检验人员</a-radio>
-            </div>
-          </a-radio-group>
-        </div>
+        <a-radio-group v-model="form.categoryType" :disabled="isWeldingReadonly">
+          <a-radio :value="1">八大类</a-radio>
+          <a-radio :value="2">焊接</a-radio>
+          <a-radio :value="3">无损检测</a-radio>
+          <a-radio :value="4">检验人员</a-radio>
+        </a-radio-group>
+      </template>
+      <template #examType>
+        <a-radio-group v-model="form.examType" :disabled="!canChooseExamType">
+          <a-radio :value="1">取证考试</a-radio>
+          <a-radio :value="2">换证考试</a-radio>
+          <a-radio :value="3">免考换证</a-radio>
+        </a-radio-group>
       </template>
     </GiForm>
   </a-modal>
@@ -54,7 +51,7 @@ import { addCategory, getCategory, updateCategory } from '@/apis/exam/category'
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useResetReactive } from '@/hooks'
 import { upload } from "@/utils/upload";
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, watch } from 'vue'
 
 const emit = defineEmits<{
   (e: 'save-success'): void
@@ -71,6 +68,10 @@ const formRef = ref<InstanceType<typeof GiForm>>()
 // 核心判断：修改场景 + 种类类型为2（焊接）→ 只读控制
 const isWeldingReadonly = computed(() => {
   return isUpdate.value && form.categoryType === 2
+})
+
+const canChooseExamType = computed(() => {
+  return form.categoryType == 3 || form.categoryType == 4
 })
 
 const beforeUpload = (file) => {
@@ -102,6 +103,16 @@ const [form, resetForm] = useResetReactive({
   videoUrl: '',
   topicNumber: 0,
   categoryType: 1,
+  examType: 0,
+})
+
+// 监听 categoryType 变化，自动设置 examType
+watch(() => form.categoryType, (newVal) => {
+  if (newVal === 3 || newVal === 4) {
+    form.examType = 1
+  } else {
+    form.examType = 0
+  }
 })
 
 // 基础列配置（抽离公共配置）
@@ -126,6 +137,13 @@ const baseColumns: ColumnItem[] = [
     type: 'slot',
     span: 24,
     rules: [{ required: true, message: '请选择种类类型' }],
+  },
+  {
+    label: '考试办理类型',
+    field: 'examType',
+    type: 'slot',
+    span: 24,
+    rules: [{ required: true, message: '考试办理类型' }],
   },
   {
     label: '题目数量',
@@ -181,8 +199,7 @@ const save = async () => {
     if (isInvalid) return false
 
     // 额外校验题目数量（焊接场景核心必传）
-    if (form.topicNumber === 0 || form.topicNumber === undefined) {
-      Message.error('请输入题目数量')
+    if (form.topicNumber === undefined) {
       return false
     }
     // 非焊接场景：校验种类类型有效性
