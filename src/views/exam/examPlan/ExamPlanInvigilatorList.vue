@@ -61,7 +61,7 @@ import { useResetReactive } from "@/hooks";
 import { type ColumnItem, GiForm } from '@/components/GiForm'
 import { useWindowSize } from '@vueuse/core'
 
-const emit = defineEmits(["close-invigilator"]);
+// const emit = defineEmits(["close-invigilator"]);
 
 const { width } = useWindowSize()
 const currentPlanId = ref()
@@ -150,7 +150,7 @@ const currentColumns: ColumnItem[] = reactive([
 
 const closeInvigilator = () => {
   invigilateWindow.value = false
-  emit("close-invigilator")
+  // emit("close-invigilator")
 }
 // 重新分配监考员
 const onReRandom = async () => {

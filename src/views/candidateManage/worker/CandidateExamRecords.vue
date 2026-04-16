@@ -226,6 +226,8 @@ const {
 
 
 const columns = ref<TableInstanceColumns[]>([
+  { dataIndex: 'orgName', title: '所属机构' },
+  { dataIndex: 'className', title: '所属班级' },
   { dataIndex: 'projectName', title: '考试项目' },
   { dataIndex: 'planName', title: '考试计划' },
   { dataIndex: 'examScores', title: '理论成绩', align: 'center', },

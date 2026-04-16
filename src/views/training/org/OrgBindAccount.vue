@@ -80,7 +80,7 @@ const save = async () => {
     emit('save-success')
     return true
   } catch (error) {
-    Message.error('绑定失败')
+    // Message.error('绑定失败')
     return false
   }
 }

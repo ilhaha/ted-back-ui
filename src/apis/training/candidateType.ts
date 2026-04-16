@@ -41,7 +41,7 @@ export interface CandidateTypeQuery {
   candidateId: string | undefined
   sort: Array<string>
 }
-export interface CandidateTypePageQuery extends CandidateTypeQuery, PageQuery {}
+export interface CandidateTypePageQuery extends CandidateTypeQuery, PageQuery { }
 
 /** @desc 切换黑名单状态 */
 export function blacklistSwitch(data: any) {
@@ -50,7 +50,9 @@ export function blacklistSwitch(data: any) {
 
 /** @desc 查询作业考生类型列表 */
 export function listCandidateType(query: CandidateTypePageQuery) {
-  return http.get<PageRes<CandidateTypeResp[]>>(`${BASE_URL}`, query)
+  return http.get<PageRes<CandidateTypeResp[]>>(`${BASE_URL}`, query, {
+    timeout: 300000
+  })
 }
 
 /** @desc 查询检验考生类型列表 */

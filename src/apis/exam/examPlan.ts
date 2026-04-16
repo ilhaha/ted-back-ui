@@ -63,6 +63,16 @@ export interface ExamPlanQuery {
 export interface ExamPlanPageQuery extends ExamPlanQuery, PageQuery { }
 
 
+/** @desc 根据月份统计每个项目已经考试的人数（作业人员） */
+export function getStatisticsExamCompleted(query: any) {
+  return http.get<any[]>(`${BASE_URL}/statistics/exam/completed`, query)
+}
+/** @desc 统计当前系统每个项目已报名但未考试的人数（作业人员） */
+export function getStatisticsExamEnrolled() {
+  return http.get<any[]>(`${BASE_URL}/statistics/exam/enrolled`)
+}
+
+
 /** @desc 考试成绩确认 */
 export function scoreConfirmed(planId: number, classId: number) {
   return http.post(`${BASE_URL}/score/confirmed/${planId}/${classId}`)

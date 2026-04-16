@@ -63,7 +63,7 @@ export interface OrgPageQuery extends OrgQuery, PageQuery { }
  * @returns 
  */
 export function downloadSummaryApi(planId: number) {
-  return http.download(`${BASE_URL}/download/summary/${planId}`)
+  return http.download(`${BASE_URL}/back/download/summary/${planId}`)
 }
 
 /** @desc 获取机构对应的分类-项目-班级级联选择 */

@@ -231,7 +231,8 @@
     <ExamPlanOptionModal ref="ExamPlanOptionModalRef" />
     <ExamPlanLocaltionAndRoomModel ref="ExamPlanLocaltionAndRoomModelRef" />
     <ExamPlanImportModal ref="ExamPlanImportModalRef" @import-success="search" />
-    <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" @close-invigilator="search" />
+    <!-- <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" @close-invigilator="search" /> -->
+    <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" /> 
     <ApplyList ref="ApplyListRef" />
   </div>
 </template>
