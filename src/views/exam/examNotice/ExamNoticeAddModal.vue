@@ -17,17 +17,19 @@
               补考</a-tag>
             <a-tag v-else-if="project.examAttemptType === 1" color="blue">初试</a-tag>
             <a-tag v-else-if="project.examAttemptType === 2" color="blue">补考</a-tag>
-            <a-tag v-else-if="project.examAttemptType === 3" color="green">免考</a-tag>
+            <a-tag v-else-if="project.examAttemptType === 3" color="green">理论免考</a-tag>
             <span class="practical-type">
               <a-tag v-if="project.practicalType === 0" color="orange">实操</a-tag>
               <a-tag v-else-if="project.practicalType === 1" color="orange">拍片</a-tag>
               <a-tag v-else-if="project.practicalType === 2" color="orange">评片</a-tag>
               <a-tag v-else-if="project.practicalType === 3" color="orange">拍片 <a-divider direction="vertical" />
                 评片</a-tag>
-              <a-tag v-else-if="project.practicalType === 4" color="green">免考</a-tag>
+              <a-tag v-else-if="project.practicalType === 4" color="green">实操免考</a-tag>
             </span>
-            <a-date-picker v-model="project.examTime" value-format="YYYY-MM-DD HH:mm:ss" show-now-button
-              format="YYYY-MM-DD HH:mm:ss" placeholder="请选择考试时间" style="width: 200px;" />
+            <a-date-picker :model-value="project.examTime"
+              @update:model-value="(val) => handleExamTimeChange(project, val)" value-format="YYYY-MM-DD HH:mm:ss"
+              show-now-button format="YYYY-MM-DD HH:mm:ss" placeholder="请选择考试时间"
+              :disabled="form.categoryId == '41' || form.categoryId == '44'" style="width: 200px;" />
           </div>
           <a-empty v-if="needSelectTip" description="请先选择种类和考试等级" />
           <a-empty v-else-if="noProjectTip" description="该种类与考试等级下没有考试项目" />
@@ -47,6 +49,7 @@ import { useDict } from '@/hooks/app'
 import { selectOptions } from "@/apis/exam/category";
 import type { LabelValueState } from "@/types/global";
 import { getInspectionProjectList } from '@/apis/exam/project'
+import dayjs from 'dayjs'
 const emit = defineEmits<{
   (e: 'save-success'): void
 }>()
@@ -67,11 +70,11 @@ interface ProjectItem {
   practicalType?: number
 }
 
-const projectList = ref<ProjectItem[]>([]);
+const projectList = ref<ProjectItem[]>([])
 
 const needSelectTip = computed(() => !form.categoryId || form.examLevel === undefined)
 const noProjectTip = computed(() => projectList.value.length === 0 && !needSelectTip.value)
-
+const isEditing = ref(false)
 
 
 const [form, resetForm] = useResetReactive({
@@ -82,20 +85,41 @@ const [form, resetForm] = useResetReactive({
 watch(
   () => [form.categoryId, form.examLevel],
   async ([newCategoryId, newExamLevel]) => {
+
+
     if (newCategoryId && newExamLevel !== undefined) {
-      const { data } = await getInspectionProjectList(newCategoryId as string, newExamLevel as number)
-      projectList.value = (data || []).map((item: any) => ({
-        projectId: item.projectId,
-        projectCode: item.projectCode,
-        examTime: '',
-        examAttemptType: item.examAttemptType,
-        practicalType: item.practicalType
-      }))
+      const { data } = await getInspectionProjectList(
+        newCategoryId as string,
+        newExamLevel as number
+      )
+
+      // 用旧数据做映射
+      const oldMap = new Map(
+        projectList.value.map(p => [p.projectId, p])
+      )
+
+      projectList.value = (data || []).map((item: any) => {
+        const old = oldMap.get(item.projectId)
+
+        return {
+          projectId: item.projectId,
+          projectCode: item.projectCode,
+
+          // 如果之前有时间就保留，否则空
+          examTime: old?.examTime || '',
+
+          examAttemptType: item.examAttemptType,
+          practicalType: item.practicalType
+        }
+      })
+
     } else {
       projectList.value = []
     }
   }
 )
+
+
 
 const columns: ColumnItem[] = reactive([
   {
@@ -143,7 +167,11 @@ const columns: ColumnItem[] = reactive([
           callback('请选择种类和考试等级')
         } else if (!projectList.value.length) {
           callback('当前条件下无项目，请重新选择种类或考试等级')
-        } else if (projectList.value.some(p => !p.examTime)) {
+        } else if (
+          form.categoryId != '41' &&
+          form.categoryId != '44' &&
+          projectList.value.some(p => !p.examTime)
+        ) {
           callback('请为每个项目选择考试时间')
         } else {
           callback()
@@ -176,11 +204,22 @@ const save = async () => {
   try {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
+
+    // 准备提交数据
+    const submitData = {
+      ...form,
+      projectList: projectList.value.map(p => ({
+        projectId: p.projectId,
+        projectCode: p.projectCode,
+        examTime: p.examTime
+      }))
+    }
+
     if (isUpdate.value) {
-      await updateExamNotice(form, dataId.value)
+      await updateExamNotice(submitData, dataId.value)
       Message.success('修改成功')
     } else {
-      await addExamNotice(form)
+      await addExamNotice(submitData)
       Message.success('新增成功')
     }
     emit('save-success')
@@ -190,22 +229,46 @@ const save = async () => {
   }
 }
 
+const initProjectSelect = async () => {
+  const res = await selectOptions([3, 4]);
+  categorySelect.value = res.data || [];
+}
 // 新增
 const onAdd = async () => {
   reset()
   dataId.value = ''
   visible.value = true
-  const res = await selectOptions([3, 4]);
-  categorySelect.value = res.data || [];
+  initProjectSelect()
 }
 
 // 修改
 const onUpdate = async (id: string) => {
-  reset()
   dataId.value = id
   const { data } = await getExamNotice(id)
+
   Object.assign(form, data)
+
+  if (data.projectList) {
+    projectList.value = data.projectList.map((p: any) => ({
+      projectId: p.projectId,
+      examTime: p.examTime ? dayjs(p.examTime).format('YYYY-MM-DD HH:mm:ss') : '',
+    }))
+  } else {
+    projectList.value = []
+  }
+
+  initProjectSelect()
   visible.value = true
+}
+
+// 处理考试时间变更 - 将时间部分设置为09:00:00
+const handleExamTimeChange = (project: ProjectItem, dateTimeStr: string) => {
+  if (dateTimeStr) {
+    const datePart = dayjs(dateTimeStr).format('YYYY-MM-DD')
+    project.examTime = `${datePart} 09:00:00`
+  } else {
+    project.examTime = ''
+  }
 }
 
 defineExpose({ onAdd, onUpdate })
@@ -232,5 +295,12 @@ defineExpose({ onAdd, onUpdate })
 
 .practical-type {
   color: var(--color-text-3);
+}
+
+.no-project-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
 }
 </style>
