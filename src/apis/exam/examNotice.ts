@@ -73,3 +73,8 @@ export function deleteExamNotice(id: string) {
 export function exportExamNotice(query: ExamNoticeQuery) {
   return http.download(`${BASE_URL}/export`, query)
 }
+
+/** @desc 审核考试通知（单个或批量） */
+export function auditExamNotice(data: { ids: string[]; status: number }) {
+  return http.put(`${BASE_URL}/audit`, data)
+}
