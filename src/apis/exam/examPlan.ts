@@ -67,9 +67,15 @@ export interface ExamPlanPageQuery extends ExamPlanQuery, PageQuery { }
 export function getStatisticsExamCompleted(query: any) {
   return http.get<any[]>(`${BASE_URL}/statistics/exam/completed`, query)
 }
+
 /** @desc 统计当前系统每个项目已报名但未考试的人数（作业人员） */
 export function getStatisticsExamEnrolled() {
   return http.get<any[]>(`${BASE_URL}/statistics/exam/enrolled`)
+}
+
+/** @desc 统计当前系统每个项目资料通过审核但未报名人数（作业人员） */
+export function getStatisticsExamNoEnroll() {
+  return http.get<any[]>(`${BASE_URL}/statistics/exam/no/enroll`)
 }
 
 

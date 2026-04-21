@@ -7,14 +7,17 @@
       <div>
         <a-grid :cols="24" :col-gap="14" :row-gap="14">
           <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 24 }">
-            <WorkerStatisticsExamCompleted />
+            <WorkerStatisticsExamNoEnroll />
           </a-grid-item>
           <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 24 }">
             <WorkerStatisticsExamEnrolled />
           </a-grid-item>
+          <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 24 }">
+            <WorkerStatisticsExamCompleted />
+          </a-grid-item>
         </a-grid>
       </div>
-      
+
       <!-- <div>
         <a-grid :cols="24" :col-gap="16" :row-gap="16">
           <a-grid-item :span="{ xs: 24, sm: 24, md: 24, lg: 24, xl: 18, xxl: 18 }">
@@ -33,6 +36,7 @@
 import DataOverview from './components/DataOverview/index.vue'
 import WorkerStatisticsExamCompleted from './components/WorkerStatisticsExamCompleted.vue'
 import WorkerStatisticsExamEnrolled from './components/WorkerStatisticsExamEnrolled.vue'
+import WorkerStatisticsExamNoEnroll from './components/WorkerStatisticsExamNoEnroll.vue'
 import Os from './components/Os.vue'
 import Browser from './components/Browser.vue'
 import Module from './components/Module.vue'

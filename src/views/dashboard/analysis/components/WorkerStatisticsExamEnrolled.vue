@@ -1,6 +1,6 @@
 <template>
   <a-spin :loading="loading" style="width: 100%">
-    <a-card class="general-card" :title="`作业项目报名未考人数统计（总人数：${totalData.totalCount}）`">
+    <a-card class="general-card" :title="`作业项目已报名未参考人数统计（总人数：${totalData.totalCount}）`">
       <div class="content">
         <a-empty v-if="!loading && chartData.length === 0" description="暂无考试数据" />
         <div v-else class="chartContainer">
@@ -16,7 +16,6 @@ import type { EChartsOption } from 'echarts'
 import { getStatisticsExamEnrolled } from '@/apis/exam/examPlan'
 import { useChart } from '@/hooks'
 import { ref } from 'vue'
-import dayjs from 'dayjs'
 
 interface ChartData {
   projectName: string
@@ -32,13 +31,6 @@ interface TotalData {
 const chartRef = useTemplateRef('chartRef')
 const chartData = ref<ChartData[]>([])
 const totalData = ref<TotalData>({ totalCount: 0, totalName: '全部项目' })
-
-// 默认当前月第一天到今天
-const now = dayjs()
-const dateRange = ref([
-  now.startOf('month').format('YYYY-MM-DD'),
-  now.format('YYYY-MM-DD')
-])
 
 const { chartOption } = useChart((isDark: boolean) => {
   return {
@@ -61,11 +53,11 @@ const { chartOption } = useChart((isDark: boolean) => {
     },
     yAxis: {
       type: 'value',
-      name: '已考试人数',
+      name: '未考试人数',
     },
     series: [
       {
-        name: '已考试人数',
+        name: '未考试人数',
         type: 'line',
         data: chartData.value.map((item) => item.recordCount),
         smooth: true,
@@ -112,8 +104,6 @@ const loading = ref(false)
 const getChartData = async () => {
   try {
     loading.value = true
-    const startTime = dateRange.value?.[0] || ''
-    const endTime = dateRange.value?.[1] || ''
     const { data } = await getStatisticsExamEnrolled()
     chartData.value = data || []
     if (chartData.value.length > 0 && 'totalCount' in chartData.value[0]) {

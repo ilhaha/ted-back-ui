@@ -59,10 +59,13 @@
             <a-option :value="0">作业人员</a-option>
             <a-option :value="1">检验人员</a-option>
           </a-select> -->
+          <a-date-picker v-model="queryForm.startTime" placeholder="请选择考试开始时间" format="YYYY-MM-DD"
+            class="search-input ml-2" @change="search" />
           <a-input-search @search="search" v-model="queryForm.examPlanName" placeholder="搜索计划名称" allow-clear
             class="search-input ml-2" />
           <a-input-search @search="search" v-model="queryForm.projectName" placeholder="搜索项目名称" allow-clear
             class="search-input ml-2" />
+
           <!-- <a-year-picker
             v-model="queryForm.planYear"
             placeholder="选择年份"
@@ -162,9 +165,11 @@
               监考列表
             </a-link>
           </div> -->
-          <a-link v-permission="['exam:examPlan:delete']" v-if="record.status == 1 || record.status == 4"
-            status="danger" :disabled="record.disabled" :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)">
+          <a-link v-permission="['exam:examPlan:delete']" v-if="record.status == 1 || record.status == 4 ||
+            (record.enrolledCount <= 0
+              && record.enrollEndTime
+              && new Date(record.enrollEndTime).getTime() < Date.now())" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>
           <div v-if="record.isFinalConfirmed == 0 && record.status == 3">
@@ -232,7 +237,7 @@
     <ExamPlanLocaltionAndRoomModel ref="ExamPlanLocaltionAndRoomModelRef" />
     <ExamPlanImportModal ref="ExamPlanImportModalRef" @import-success="search" />
     <!-- <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" @close-invigilator="search" /> -->
-    <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" /> 
+    <ExamPlanInvigilatorList ref="ExamPlanInvigilatorListRef" />
     <ApplyList ref="ApplyListRef" />
   </div>
 </template>
@@ -667,6 +672,7 @@ const reset = () => {
   queryForm.planYear = undefined;
   queryForm.locationName = undefined;
   queryForm.status = undefined;
+  queryForm.startTime = undefined;
   queryForm.planType = 0
   search();
 };
