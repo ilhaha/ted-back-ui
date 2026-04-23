@@ -2,10 +2,13 @@
   <div class="gi_table_page">
     <GiTable title="人员及许可证书信息管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" :row-selection="rowSelection" @refresh="search" @select="select"
-      @select-all="selectAll">
+      :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
+        <a-date-picker v-model="queryForm.applyDate" placeholder="申请日期" format="YYYY-MM-DD" class="search-input ml-2"
+          @change="search" />
+        <a-input-search v-model="queryForm.psnlcnsItemCode" placeholder="证书项目代码" allow-clear @search="search" />
         <a-input-search v-model="queryForm.psnName" placeholder="请输入姓名" allow-clear @search="search" />
+
         <a-input-search v-model="queryForm.idcardNo" placeholder="请输入身份证号" allow-clear @search="search" />
         <a-select v-model="queryForm.address" placeholder="工作区域" allow-clear class="search-input ml-2" @change="search">
           <a-option value="东城区">东城区</a-option>
@@ -25,6 +28,16 @@
           <a-option value="密云区">密云区</a-option>
           <a-option value="延庆区">延庆区</a-option>
         </a-select>
+        <a-select v-model="queryForm.certGenerated" placeholder="许可状态" allow-clear class="search-input ml-2"
+          @change="search">
+          <a-option value="0">待许可</a-option>
+          <a-option value="1">已许可</a-option>
+        </a-select>
+        <a-select v-model="queryForm.approvalType" placeholder="许可类型" allow-clear class="search-input ml-2"
+          @change="search">
+          <a-option value="0">初审</a-option>
+          <a-option value="1">复审</a-option>
+        </a-select>
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -40,22 +53,38 @@
           {{ getCertGeneratedText(record.certGenerated) }}
         </a-tag>
       </template>
-      <!-- <template #toolbar-right>
-        <a-button v-permission="['exam:certificate:download']" :disabled="!selectedKeys.length" :loading="downloading"
-          type="primary" @click="handleBatchDownload">
+      <template #toolbar-right>
+        <a-button v-permission="['exam:certificate:download']" :loading="downloading" type="primary"
+          @click="handleBatchDownload">
           <template #icon><icon-download /></template>
           <template #default>批量下载资格证</template>
         </a-button>
-      </template> -->
-      <!-- <template #action="{ record }">
+      </template>
+      <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:certificate:download']" title="下载资格证" :loading="downloading"
             @click="downloadQualificationCertificate(record)">
             下载
           </a-link>
         </a-space>
-      </template> -->
+      </template>
     </GiTable>
+
+    <a-modal v-model:visible="visible" title="批量下载资格证" :on-before-ok="handleOk" unmountOnClose>
+      <a-form :model="formState" layout="vertical">
+
+        <!-- 考试项目（必选） -->
+        <a-form-item label="考核项目种类" required>
+          <a-select v-model="formState.categoryId" placeholder="请选择考核项目种类" :options="examProjectOptions" allow-clear>
+          </a-select>
+        </a-form-item>
+        <!-- 时间范围（非必须） -->
+        <a-form-item label="申请时间范围">
+          <a-range-picker v-model="formState.dateRange" style="width: 100%" />
+        </a-form-item>
+
+      </a-form>
+    </a-modal>
 
     <LicenseCertificateAddModal ref="LicenseCertificateAddModalRef" @save-success="search" />
     <LicenseCertificateDetailDrawer ref="LicenseCertificateDetailDrawerRef" />
@@ -69,8 +98,10 @@ import { type LicenseCertificateResp, type LicenseCertificateQuery, deleteLicens
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import {
   downloadQualificationCertificate as downloadQualificationCertificateApi,
+  downloadQualificationCertificateByCategory
 } from '@/apis/exam/examRecords'
-import { useDownload, useTable } from '@/hooks'
+
+import { useDownload, useTable, useExamPlanProject, useResetReactive } from '@/hooks'
 import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
@@ -83,10 +114,22 @@ defineOptions({ name: 'LicenseCertificate' })
 const queryForm = reactive<LicenseCertificateQuery>({
   psnName: undefined,
   idcardNo: undefined,
-  sort: ['id,desc']
+  certGenerated: undefined,
+  approvalType: undefined,
+  psnlcnsItemCode: undefined,
+  applyDate: undefined,
+  sort: ['certGenerated,asc', 'applyDate,desc']
 })
 const downloading = ref(false);
 
+const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
+
+const visible = ref(false);
+
+const formState = ref({
+  categoryId: undefined,
+  dateRange: [] as any[],
+});
 
 const {
   tableData: dataList,
@@ -94,9 +137,6 @@ const {
   pagination,
   search,
   handleDelete,
-  selectedKeys,
-  select,
-  selectAll
 } = useTable((page) => listLicenseCertificate({ ...queryForm, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
   // { title: '数据来源', dataIndex: 'datasource', slotName: 'datasource' },
@@ -107,7 +147,6 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '单位名称', dataIndex: 'comName', slotName: 'comName' },
   { title: '工作区域', dataIndex: 'address', slotName: 'address' },
   // { title: '申请类型', dataIndex: 'applyType', slotName: 'applyType' },
-  { title: '申请日期', dataIndex: 'applyDate', slotName: 'applyDate' },
   // { title: '是否审核', dataIndex: 'isVerify', slotName: 'isVerify' },
   // { title: '是否操作', dataIndex: 'isOpr', slotName: 'isOpr' },
   { title: '证书类别', dataIndex: 'lcnsKind', slotName: 'lcnsKind' },
@@ -117,6 +156,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '许可状态', dataIndex: 'certGenerated', slotName: 'certGenerated' },
   // { title: '证书分类', dataIndex: 'lcnsCategory', slotName: 'lcnsCategory' },
   { title: '证书编号', dataIndex: 'lcnsNo', slotName: 'lcnsNo' },
+  { title: '申请日期', dataIndex: 'applyDate', slotName: 'applyDate' },
   { title: '证书签发日期', dataIndex: 'certDate', slotName: 'certDate' },
   { title: '授权日期', dataIndex: 'authDate', slotName: 'authDate' },
   { title: '证书有效期', dataIndex: 'endDate', slotName: 'endDate' },
@@ -144,33 +184,35 @@ const columns = ref<TableInstanceColumns[]>([
   }
 ]);
 
-
-const rowSelection = reactive({
-  type: 'checkbox',
-  showCheckedAll: true,
-  onlyCurrent: false,
-  selectedRowKeys: selectedKeys,
-  onChange: (keys: string[]) => {
-    selectedKeys.value = keys
-  }
-})
+const getProjectList = async (planType: number) => {
+  await getExamProjectOptions(planType);
+};
 
 // 批量下载资格证按钮点击
 const handleBatchDownload = async () => {
-  if (selectedKeys.value.length === 0) {
-    Message.warning('请先选择要下载资格证的记录')
-    return
-  }
-  try {
-    // 1. 筛选出被选中的记录
-    const selectedRecords = dataList.value.filter(item =>
-      selectedKeys.value.includes(item.id)
-    );
+  getProjectList(2);
+  formState.value.categoryId = undefined;
+  formState.value.dateRange = [];
+  visible.value = true;
+}
 
-    // 2. 获取对应的 recordId 列表
-    const selectedRecordIds = selectedRecords.map(item => item.recordId);
-    downloading.value = true;
-    const res = await downloadQualificationCertificateApi(selectedRecordIds, 0);
+// 点击确认批量
+const handleOk = async () => {
+  if (!formState.value.categoryId) {
+    Message.warning("请选择考核项目种类");
+    return false;
+  }
+
+  downloading.value = true;
+  try {
+    const [startDate, endDate] = formState.value.dateRange || [];
+
+    const params = {
+      categoryId: formState.value.categoryId,
+      applyStartDate: startDate,
+      applyEndDate: endDate,
+    };
+    const res = await downloadQualificationCertificateByCategory(params);
     const blob = new Blob([res], { type: "application/octet-stream" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -184,18 +226,19 @@ const handleBatchDownload = async () => {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-    selectedKeys.value = [];
-  } catch (error) {
+  } catch (e) {
+    downloading.value = false;
+    return false;
   } finally {
     downloading.value = false;
   }
-}
+};
 
 // 下载资格证
 const downloadQualificationCertificate = async (record: any) => {
   try {
     downloading.value = true;
-    const res = await downloadQualificationCertificateApi([record.recordId], 0);
+    const res = await downloadQualificationCertificateApi([record.recordId]);
     const blob = new Blob([res], { type: "application/octet-stream" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -219,6 +262,10 @@ const downloadQualificationCertificate = async (record: any) => {
 const reset = () => {
   queryForm.psnName = undefined
   queryForm.idcardNo = undefined
+  queryForm.certGenerated = undefined
+  queryForm.approvalType = undefined
+  queryForm.psnlcnsItemCode = undefined
+  queryForm.applyDate = undefined
   search()
 }
 

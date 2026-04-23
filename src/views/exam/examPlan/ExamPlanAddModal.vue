@@ -182,12 +182,12 @@ const columns: ColumnItem[] = reactive([
     type: "date-picker",
     required: true,
     span: 24,
-    props: computed(() => ({
-      showTime: isUpdate.value, // 修改时显示时间选择，新增时仅显示日期
-      format: isUpdate.value ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD",
-      valueFormat: "YYYY-MM-DD HH:mm:ss", // 统一传递带时间的格式，新增时默认00:00:00
-      placeholder: isUpdate.value ? "请选择日期时间" : "请选择日期",
-    })),
+    props: {
+      showTime: true, 
+      format: "YYYY-MM-DD HH:mm", 
+      valueFormat: "YYYY-MM-DD HH:mm:ss", 
+      placeholder: "请选择日期时间",
+    },
   },
   {
     label: "考试人数上限",
@@ -307,7 +307,6 @@ const save = async () => {
       Message.success("已确定");
     } else {
       submitForm.enrollList = [submitForm.enrollList[0].slice(0, 10) + " 09:00:00", submitForm.enrollList[1].slice(0, 10) + " 17:00:00"]
-      submitForm.startTime = submitForm.startTime.slice(0, 10) + " 09:00:00"
       await customizAddExamPlan(submitForm);
       Message.success("新增成功");
     }

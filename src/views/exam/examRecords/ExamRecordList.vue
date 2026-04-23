@@ -752,6 +752,7 @@ const getExamResultStatusColor = (status: number) => {
     0: 'red', // 不及格
     1: 'green', // 及格
     2: 'blue', // 待录入
+    3: 'orange', // 实操未全及格
   }
   return colorMap[status] || 'gray'
 }
@@ -762,6 +763,7 @@ const getExamResultStatusText = (status: number) => {
     0: '不及格',
     1: '及格',
     2: '待录入',
+    3:'实操未全及格'
   }
   return textMap[status] || '未知状态'
 }
