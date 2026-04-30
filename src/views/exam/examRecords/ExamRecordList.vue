@@ -423,7 +423,7 @@ const saveExamScores = async () => {
     await updateExamScores(inputScoresForm.value)
     Message.success('理论成绩已修改')
     isShowInputExamScore.value = false
-    search()
+    refresh()
   } finally {
     saveScoresLoading.value = false
   }
@@ -502,7 +502,7 @@ const saveOperScores = async () => {
 
   // 关闭弹窗 & 刷新列表
   isShowInputOperScore.value = false
-  search()
+  refresh()
 }
 
 
@@ -529,7 +529,7 @@ const saveRoadScores = async () => {
     await inputScores(inputScoresForm.value)
     Message.success('道路成绩已保存')
     isShowInputRoadScore.value = false
-    search()
+    refresh()
   } finally {
     saveScoresLoading.value = false
   }
@@ -651,6 +651,7 @@ const {
   loading,
   pagination,
   search,
+  refresh,
   selectedKeys
 } = useTable(
   (page) => listExamRecords(

@@ -98,7 +98,7 @@ const onDetail = (record: any) => {
 }
 
 const handleClose = () => {
-  search()
+  refresh()
   ExamRecordListRef.value?.afterClose();
 }
 
@@ -114,6 +114,7 @@ const {
   loading,
   pagination,
   search,
+  refresh,
 } = useTable(
   (page) => getClassExamStatsPage(
     { ...queryForm, ...page },
