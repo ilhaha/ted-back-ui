@@ -2,7 +2,7 @@
   <a-drawer v-model:visible="visible" title="无损检测、检验人员考试通知详情" :width="width >= 600 ? 600 : '100%'" :footer="false">
     <a-descriptions :column="2" size="large" class="general-description">
       <a-descriptions-item label="主键ID">{{ dataDetail?.id }}</a-descriptions-item>
-      <a-descriptions-item label="标题">{{ dataDetail?.title }}</a-descriptions-item>
+      <a-descriptions-item label="通知内容">{{ dataDetail?.title }}</a-descriptions-item>
       <a-descriptions-item label="报名截止时间">{{ dataDetail?.applyDeadline }}</a-descriptions-item>
       <a-descriptions-item label="所属类别">{{ dataDetail?.categoryId }}</a-descriptions-item>
       <a-descriptions-item label="考试等级  0-无 1一级 2 二级">{{ dataDetail?.examLevel }}</a-descriptions-item>

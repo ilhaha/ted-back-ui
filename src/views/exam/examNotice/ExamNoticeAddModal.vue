@@ -123,14 +123,14 @@ watch(
 
 const columns: ColumnItem[] = reactive([
   {
-    label: '标题',
+    label: '通知内容',
     field: 'title',
     type: 'textarea',
     props: {
       autoSize: true
     },
     span: 24,
-    rules: [{ required: true, message: '请输入标题' }]
+    rules: [{ required: true, message: '请输入通知内容' }]
   },
   {
     label: '报名截止时间',

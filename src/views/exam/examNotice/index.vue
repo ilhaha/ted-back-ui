@@ -5,7 +5,7 @@
       :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
       @select-all="selectAll">
       <template #toolbar-left>
-        <a-input-search v-model="queryForm.title" placeholder="请输入标题" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.title" placeholder="请输入通知内容" allow-clear @search="search" />
         <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2" @change="search"
           style="margin-left: 8px;">
           <a-option value="0">待审</a-option>
@@ -120,7 +120,7 @@ const rowSelection = reactive({
 
 const columns = ref<TableInstanceColumns[]>([
   // { title: '主键ID', dataIndex: 'id', slotName: 'id' },
-  { title: '标题', dataIndex: 'title', slotName: 'title' },
+  { title: '通知内容', dataIndex: 'title', slotName: 'title' },
   { title: '报名截止时间', dataIndex: 'applyDeadline', slotName: 'applyDeadline' },
   { title: '所属类别', dataIndex: 'categoryName', slotName: 'categoryName' },
   { title: '考试项目', dataIndex: 'projectCodes', slotName: 'projectCodes' },
