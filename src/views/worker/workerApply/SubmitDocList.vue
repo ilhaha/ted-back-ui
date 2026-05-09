@@ -1,7 +1,7 @@
 <template>
     <div class="gi_table_page">
         <GiTable row-key="id" :data="dataList" :columns="columns" :loading="loading"
-            :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+            :scroll="{ x: '100%', y: 'calc(100vh - 200px)' }" :pagination="pagination" :disabled-tools="['size']"
             :disabled-column-keys="['name']" @refresh="search" :key="JSON.stringify(columns)"
             :row-selection="rowSelection" @select="select" @select-all="selectAll">
             <template #toolbar-left>

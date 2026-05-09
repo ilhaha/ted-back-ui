@@ -29,7 +29,7 @@
     </GiTable>
 
     <a-modal v-model:visible="showDocListVisible" :title="title" :mask-closable="false" :esc-to-close="false"
-      width="95%" draggable :footer="null" modal-class="no-padding-modal" @close="search">
+      width="95%"  draggable :footer="null" modal-class="no-padding-modal" @close="search">
       <SubmitDocList ref="submitDocListRef" />
     </a-modal>
   </div>
