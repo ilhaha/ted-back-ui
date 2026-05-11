@@ -6,7 +6,7 @@
       @select-all="selectAll">
       <template #toolbar-left>
         <a-input-search v-model="queryForm.title" placeholder="请输入通知内容" allow-clear @search="search" />
-        <a-select v-model="queryForm.status" placeholder="计划状态" allow-clear class="search-input ml-2" @change="search"
+        <a-select v-model="queryForm.status" placeholder="通知状态" allow-clear class="search-input ml-2" @change="search"
           style="margin-left: 8px;">
           <a-option value="0">待审</a-option>
           <a-option value="1">已发布</a-option>

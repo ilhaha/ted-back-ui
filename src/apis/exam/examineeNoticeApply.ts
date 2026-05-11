@@ -35,6 +35,11 @@ export interface ExamineeNoticeApplyQuery {
 }
 export interface ExamineeNoticeApplyPageQuery extends ExamineeNoticeApplyQuery, PageQuery {}
 
+/** @desc 获取通知对应的考生报名列表 */
+export function getNoticeApplyCandidatePage(query: ExamineeNoticeApplyPageQuery) {
+  return http.get<PageRes<ExamineeNoticeApplyResp[]>>(`${BASE_URL}/candidate/page`, query)
+}
+
 /** @desc 查询考生资料关系列表 */
 export function listExamineeNoticeApply(query: ExamineeNoticeApplyPageQuery) {
   return http.get<PageRes<ExamineeNoticeApplyResp[]>>(`${BASE_URL}`, query)

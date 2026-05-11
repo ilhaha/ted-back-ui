@@ -44,6 +44,11 @@ export interface ExamNoticeQuery {
 }
 export interface ExamNoticePageQuery extends ExamNoticeQuery, PageQuery {}
 
+/** @desc 查询无损检测、检验人员考试报名审核通知列表 */
+export function applyAuditPage(query: ExamNoticePageQuery) {
+  return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/apply/audit/page`, query)
+}
+
 /** @desc 查询无损检测、检验人员考试通知列表 */
 export function listExamNotice(query: ExamNoticePageQuery) {
   return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}`, query)
