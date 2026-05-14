@@ -28,19 +28,28 @@ const dataDetail = ref<ExamineeNoticeApplyDetailResp>()
 const visible = ref(false)
 
 // 查询详情
-const getDataDetail = async () => {
-  const { data } = await getDetail(dataId.value)
+const getDataDetail = async (id?: string) => {
+  const targetId = id || dataId.value
+  if (!targetId) return
+  const { data } = await getDetail(targetId)
   dataDetail.value = data
 }
 
-// 打开
+// 打开（仅使用ID，内部请求）
 const onOpen = async (id: string) => {
   dataId.value = id
   await getDataDetail()
   visible.value = true
 }
 
-defineExpose({ onOpen })
+// 打开（直接传入数据）
+const onOpenWithData = (id: string, data: ExamineeNoticeApplyDetailResp) => {
+  dataId.value = id
+  dataDetail.value = data
+  visible.value = true
+}
+
+defineExpose({ onOpen, onOpenWithData })
 </script>
 
 <style scoped lang="scss"></style>

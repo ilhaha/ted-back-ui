@@ -1,32 +1,33 @@
 <template>
-  <a-drawer v-model:visible="visible" :title="title" :width="width >= 1300 ? 1300 : '100%'" :footer="false">
-    <ExamNoticeApplyTable :notice-id="dataId" />
+  <a-drawer v-model:visible="visible" :title="title" :width="width >= 1300 ? 1300 : '100%'" :footer="false"
+    @close="handleCancel">
+    <ExamNoticeApplyTable :notice-id="dataId" ref="examNoticeApplyTableRef"/>
   </a-drawer>
 </template>
 
 <script setup lang="ts">
 import ExamNoticeApplyTable from '@/views/exam/examineeNoticeApply/index.vue'
 import { useWindowSize } from '@vueuse/core'
-import { type ExamNoticeDetailResp, getExamNotice as getDetail } from '@/apis/exam/examNotice'
 
 const { width } = useWindowSize()
 
 const dataId = ref('')
 const title = ref('')
-const dataDetail = ref<ExamNoticeDetailResp>()
 const visible = ref(false)
 
-// 查询详情
-const getDataDetail = async () => {
-  const { data } = await getDetail(dataId.value)
-  dataDetail.value = data
-  title.value = dataDetail.value.title + " - 报名学员详情"
+const examNoticeApplyTableRef = ref<InstanceType<typeof ExamNoticeApplyTable>>()
+
+// 关闭
+const handleCancel = () => {
+  visible.value = false
+  examNoticeApplyTableRef.value?.onDrawerClose()
 }
 
+
 // 打开
-const onOpen = async (id: string) => {
+const onOpen = async (id: string, parTitle: string) => {
   dataId.value = id
-  await getDataDetail()
+  title.value = parTitle + " - 报名学员详情"
   visible.value = true
 }
 

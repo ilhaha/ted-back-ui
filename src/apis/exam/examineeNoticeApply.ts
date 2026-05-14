@@ -33,7 +33,12 @@ export interface ExamineeNoticeApplyQuery {
   status: string | undefined
   sort: Array<string>
 }
-export interface ExamineeNoticeApplyPageQuery extends ExamineeNoticeApplyQuery, PageQuery {}
+export interface ExamineeNoticeApplyPageQuery extends ExamineeNoticeApplyQuery, PageQuery { }
+
+/** @desc 获取考生报考详情 */
+export function getCandidateApplyDetail(applyId: string) {
+  return http.get<any>(`${BASE_URL}/apply/detail/${applyId}`)
+}
 
 /** @desc 获取通知对应的考生报名列表 */
 export function getNoticeApplyCandidatePage(query: ExamineeNoticeApplyPageQuery) {
@@ -68,4 +73,9 @@ export function deleteExamineeNoticeApply(id: string) {
 /** @desc 导出考生资料关系 */
 export function exportExamineeNoticeApply(query: ExamineeNoticeApplyQuery) {
   return http.download(`${BASE_URL}/export`, query)
+}
+
+/** @desc 审核 */
+export function auditExamineeNoticeApply(data: any) {
+  return http.post(`${BASE_URL}/audit`, data)
 }

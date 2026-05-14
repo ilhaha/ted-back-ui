@@ -31,16 +31,18 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['exam:examineeNoticeApply:detail']" title="查看" @click="onDetail(record)">查看</a-link>
+          <a-link v-permission="['exam:examineeNoticeApply:detail']" title="查看" @click="onDetail(record)"
+            :loading="detailLoading">查看</a-link>
         </a-space>
       </template>
     </GiTable>
-
+    <ExamineeNoticeApplyDetailModal ref="ExamineeNoticeApplyDetailModalRef" @refresh-list="refresh" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { type ExamineeNoticeApplyResp, type ExamineeNoticeApplyQuery, getNoticeApplyCandidatePage } from '@/apis/exam/examineeNoticeApply'
+import ExamineeNoticeApplyDetailModal from './ExamineeNoticeApplyDetailModal.vue'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
@@ -72,6 +74,7 @@ const {
   loading,
   pagination,
   search,
+  refresh,
 } = useTable((page) => getNoticeApplyCandidatePage({ ...queryForm, ...page }), { immediate: false })
 const columns = ref<TableInstanceColumns[]>([
   { title: '序号', dataIndex: 'sort', slotName: 'sort', width: 80 },
@@ -130,11 +133,18 @@ const getProjectColor = (isApply: boolean, examAttemptType: number | null) => {
   return 'green'
 }
 
-const ExamineeNoticeApplyDetailDrawerRef = ref<InstanceType<typeof ExamineeNoticeApplyDetailDrawer>>()
+const ExamineeNoticeApplyDetailModalRef = ref<InstanceType<typeof ExamineeNoticeApplyDetailModal>>()
+
 // 详情
 const onDetail = (record: ExamineeNoticeApplyResp) => {
-  ExamineeNoticeApplyDetailDrawerRef.value?.onOpen(record.id)
+  ExamineeNoticeApplyDetailModalRef.value?.onOpen(record.id)
 }
+const onDrawerClose = () => {
+  reset()
+}
+defineExpose({
+  onDrawerClose
+})
 </script>
 
 <style scoped lang="scss"></style>

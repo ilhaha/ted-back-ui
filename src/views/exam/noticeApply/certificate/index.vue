@@ -96,7 +96,7 @@ const columns = ref<TableInstanceColumns[]>([
 const NoticeApplyDetailRef = ref<InstanceType<typeof NoticeApplyDetail>>()
 // 详情
 const onDetail = (record: ExamNoticeResp) => {
-  NoticeApplyDetailRef.value?.onOpen(record.id)
+  NoticeApplyDetailRef.value?.onOpen(record.id,record.title)
 }
 
 // 重置

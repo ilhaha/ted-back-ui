@@ -4,32 +4,42 @@
     <GiForm ref="formRef" v-model="form" :columns="columns">
       <template #examLevel>
         <a-radio-group v-model="form.examLevel">
-          <a-radio :value="0">无</a-radio>
           <a-radio :value="1">Ⅰ级</a-radio>
           <a-radio :value="2">Ⅱ级</a-radio>
+          <a-radio :value="0">无</a-radio>
+        </a-radio-group>
+      </template>
+      <template #examAttemptType>
+        <a-radio-group v-model="form.examAttemptType">
+          <a-radio :value="0">初考、补考</a-radio>
+          <a-radio :value="1">初考</a-radio>
+          <a-radio :value="2">补考</a-radio>
+          <a-radio :value="3">无</a-radio>
         </a-radio-group>
       </template>
       <template #projectList>
         <div class="project-list">
           <div v-for="project in projectList" :key="project.projectId" class="project-item">
+            <a-checkbox v-model="project.selected" />
             <span class="project-code">{{ project.projectCode }}</span>
-            <a-tag v-if="project.examAttemptType === 0" color="blue">初试 <a-divider direction="vertical" />
+            <!-- <a-tag v-if="project.examAttemptType === 0" color="blue">初试 <a-divider direction="vertical" />
               补考</a-tag>
             <a-tag v-else-if="project.examAttemptType === 1" color="blue">初试</a-tag>
             <a-tag v-else-if="project.examAttemptType === 2" color="blue">补考</a-tag>
-            <a-tag v-else-if="project.examAttemptType === 3" color="green">理论免考</a-tag>
-            <span class="practical-type">
+            <a-tag v-else-if="project.examAttemptType === 3" color="green">理论免考</a-tag> -->
+            <!-- <span class="practical-type">
               <a-tag v-if="project.practicalType === 0" color="orange">实操</a-tag>
               <a-tag v-else-if="project.practicalType === 1" color="orange">拍片</a-tag>
               <a-tag v-else-if="project.practicalType === 2" color="orange">评片</a-tag>
               <a-tag v-else-if="project.practicalType === 3" color="orange">拍片 <a-divider direction="vertical" />
                 评片</a-tag>
               <a-tag v-else-if="project.practicalType === 4" color="green">实操免考</a-tag>
-            </span>
+            </span> -->
             <a-date-picker :model-value="project.examTime"
               @update:model-value="(val) => handleExamTimeChange(project, val)" value-format="YYYY-MM-DD HH:mm:ss"
               show-now-button format="YYYY-MM-DD HH:mm:ss" placeholder="请选择考试时间"
-              :disabled="form.categoryId == '41' || form.categoryId == '44'" style="width: 200px;" />
+              :disabled="!project.selected || form.categoryId == '41' || form.categoryId == '44'" style="width: 200px;"
+              :style="{ opacity: project.selected ? 1 : 0.5 }" />
           </div>
           <a-empty v-if="needSelectTip" description="请先选择种类和考试等级" />
           <a-empty v-else-if="noProjectTip" description="该种类与考试等级下没有考试项目" />
@@ -68,6 +78,7 @@ interface ProjectItem {
   examTime?: string
   examAttemptType?: number
   practicalType?: number
+  selected?: boolean
 }
 
 const projectList = ref<ProjectItem[]>([])
@@ -78,7 +89,8 @@ const isEditing = ref(false)
 
 
 const [form, resetForm] = useResetReactive({
-  examLevel: 0,
+  examLevel: 1,
+  examAttemptType: 0,
   categoryId: undefined as string | undefined
 })
 // 监听 categoryId 和 examLevel 变化，重新获取项目列表
@@ -109,7 +121,10 @@ watch(
           examTime: old?.examTime || '',
 
           examAttemptType: item.examAttemptType,
-          practicalType: item.practicalType
+          practicalType: item.practicalType,
+
+          // 保留之前的选中状态，默认选中
+          selected: old?.selected !== undefined ? old.selected : true
         }
       })
 
@@ -158,6 +173,12 @@ const columns: ColumnItem[] = reactive([
     rules: [{ required: true, message: '请选择考试等级' }],
   },
   {
+    label: '考试类型',
+    field: 'examAttemptType',
+    span: 24,
+    rules: [{ required: true, message: '请选择考试类型' }],
+  },
+  {
     label: '考试项目',
     field: 'projectList',
     span: 24,
@@ -167,14 +188,19 @@ const columns: ColumnItem[] = reactive([
           callback('请选择种类和考试等级')
         } else if (!projectList.value.length) {
           callback('当前条件下无项目，请重新选择种类或考试等级')
-        } else if (
-          form.categoryId != '41' &&
-          form.categoryId != '44' &&
-          projectList.value.some(p => !p.examTime)
-        ) {
-          callback('请为每个项目选择考试时间')
         } else {
-          callback()
+          const selectedProjects = projectList.value.filter(p => p.selected)
+          if (!selectedProjects.length) {
+            callback('请至少选择一个考试项目')
+          } else if (
+            form.categoryId != '41' &&
+            form.categoryId != '44' &&
+            selectedProjects.some(p => !p.examTime)
+          ) {
+            callback('请为每个已选项目选择考试时间')
+          } else {
+            callback()
+          }
         }
       },
       trigger: 'change'
@@ -205,10 +231,10 @@ const save = async () => {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
 
-    // 准备提交数据
+    // 准备提交数据，只提交选中的项目
     const submitData = {
       ...form,
-      projectList: projectList.value.map(p => ({
+      projectList: projectList.value.filter(p => p.selected).map(p => ({
         projectId: p.projectId,
         projectCode: p.projectCode,
         examTime: p.examTime
