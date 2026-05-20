@@ -1,0 +1,298 @@
+<template>
+  <a-drawer v-model:visible="visible" :title="title" :mask-closable="false" :esc-to-close="false"
+    :width="width >= 500 ? 500 : '100%'" @before-ok="save" @close="reset">
+    <GiForm ref="formRef" v-model="form" :columns="columns" />
+  </a-drawer>
+</template>
+
+<script setup lang="ts">
+import { Message, type TreeNodeData } from '@arco-design/web-vue'
+import { useWindowSize } from '@vueuse/core'
+import { addUser, getUser, updateUser, getUserByUserName, getVerifyPhone } from '@/apis/system/user'
+import { type ColumnItem, GiForm } from '@/components/GiForm'
+import type { Gender, Status } from '@/types/global'
+import { GenderList, ExamSupervisionTypeList } from '@/constant/common'
+import { useResetReactive } from '@/hooks'
+import { useDept, useRole } from '@/hooks/app'
+import { encryptByRsa } from '@/utils/encrypt'
+
+const emit = defineEmits<{
+  (e: 'save-success'): void
+}>()
+
+const { width } = useWindowSize()
+
+const dataId = ref('')
+const visible = ref(false)
+const isUpdate = computed(() => !!dataId.value)
+const title = computed(() => (isUpdate.value ? '修改监考员' : '新增监考员'))
+const formRef = ref<InstanceType<typeof GiForm>>()
+const { roleList, getRoleList } = useRole()
+const { deptList, getDeptList } = useDept()
+
+const [form, resetForm] = useResetReactive({
+  gender: 1 as Gender,
+  status: 1 as Status,
+  examSupervisionType: 0,
+})
+
+const columns: ColumnItem[] = reactive([
+  {
+    label: '用户名',
+    field: 'username',
+    type: 'input',
+    span: 24,
+    required: true,
+    props: {
+      maxLength: 64,
+    },
+    hide: () => isUpdate.value,
+  },
+  {
+    label: '昵称',
+    field: 'nickname',
+    type: 'input',
+    span: 24,
+    required: true,
+    props: {
+      maxLength: 30,
+    },
+  },
+  {
+    label: '密码',
+    field: 'password',
+    type: 'input-password',
+    span: 24,
+    required: true,
+    props: {
+      maxLength: 32,
+      showWordLimit: true,
+    },
+    hide: () => isUpdate.value,
+  },
+  {
+    label: '手机号码',
+    field: 'phone',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 11,
+    },
+    rules: [
+      { required: true, message: '请填写手机号码' },
+    ]
+  },
+
+  {
+    label: '邮箱',
+    field: 'email',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 255,
+    },
+  },
+  {
+    label: '性别',
+    field: 'gender',
+    type: 'radio-group',
+    span: 24,
+    props: {
+      options: GenderList,
+    },
+  },
+
+  {
+    label: '描述',
+    field: 'description',
+    type: 'textarea',
+    span: 24,
+  },
+  {
+    label: '状态',
+    field: 'status',
+    type: 'switch',
+    span: 24,
+    props: {
+      type: 'round',
+      checkedValue: 1,
+      uncheckedValue: 2,
+      checkedText: '启用',
+      uncheckedText: '禁用',
+    },
+  },
+  {
+    required: true,
+    label: '监考考试类型',
+    field: 'examSupervisionType',
+    type: 'radio-group',
+    span: 24,
+    props: {
+      options: ExamSupervisionTypeList,
+    },
+  },
+  {
+    label: '身份证号',
+    field: 'invigilatorIdNumber',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 18,
+    },
+  },
+  {
+    label: '银行卡开户行',
+    field: 'invigilatorBankName',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 50,
+    },
+  },
+  {
+    label: '银行帐号',
+    field: 'invigilatorBankAccount',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 19,
+    },
+  },
+  {
+    label: '单位名称',
+    field: 'invigilatorUnit',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 50,
+    },
+  },
+  {
+    label: '职称',
+    field: 'invigilatorTitle',
+    type: 'input',
+    span: 24,
+    props: {
+      maxLength: 50,
+    },
+  },
+])
+
+// 重置
+const reset = () => {
+  formRef.value?.formRef?.resetFields()
+  resetForm()
+}
+
+// 保存
+const save = async () => {
+  const rawPassword = form.password
+  let backUsername = form.username
+  try {
+    const isInvalid = await formRef.value?.formRef?.validate()
+    if (isInvalid) return false
+    const isPhoneValid = /^1[3-9]\d{9}$/.test(form.phone)
+    if (!isPhoneValid) {
+      Message.error("请输入正确的手机号")
+      return false
+    }
+
+    if (form.invigilatorIdNumber) {
+      const isIdNumerValid = /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9X]$/
+      if (!isIdNumerValid.test(form.invigilatorIdNumber)) {
+        Message.error("请输入正确的身份证号码")
+        return false
+      }
+    }
+
+    if(form.invigilatorBankName && !form.invigilatorBankAccount) {
+      Message.error("填写开户行时，银行账号不能为空")
+      return false
+    }
+
+    if(form.invigilatorBankAccount) {
+      const isBankAccountValid = /^\d{16,19}$/.test(form.invigilatorBankAccount)
+      if (!isBankAccountValid) {
+        Message.error("请输入正确的银行账号")
+        return false
+      }else if (!form.invigilatorBankName) {
+        Message.error("填写银行账号时，开户行不能为空")
+        return false
+      }
+    }
+
+
+    // -------- 固定值 --------
+    form.roleIds = ['547888897925840935'] // 考务角色
+    form.deptId = 1                     // 考试中心部门
+    // -----------------------
+
+    if (isUpdate.value) {
+      await updateUser(form, dataId.value)
+      Message.success('修改成功')
+    } else {
+      let backPassword = rawPassword
+      if (rawPassword) {
+        form.password = encryptByRsa(rawPassword) || ''
+      }
+
+      form.username = encryptByRsa(form.username) || ''
+      const res = await getUserByUserName({ username: form.username })
+      if (res.data) {
+        form.username = backUsername
+        form.password = backPassword
+        Message.error('用户名已存在')
+        return false;
+      }
+      await addUser(form)
+      Message.success('新增成功')
+    }
+    emit('save-success')
+    return true
+  } catch (error) {
+    form.username = backUsername
+    form.password = rawPassword
+    return false
+  }
+}
+
+// 新增
+const onAdd = async () => {
+  // reset()
+  if (!deptList.value.length) {
+    await getDeptList()
+  }
+  if (!roleList.value.length) {
+    await getRoleList()
+  }
+  dataId.value = ''
+  visible.value = true
+}
+
+// 修改
+const onUpdate = async (id: string) => {
+  reset()
+  dataId.value = id
+  if (!deptList.value.length) {
+    await getDeptList()
+  }
+  if (!roleList.value.length) {
+    await getRoleList()
+  }
+  const { data } = await getUser(id)
+  Object.assign(form, data)
+  if (data.phone) {
+    // 获取用户解密之后脱敏的手机号
+    const result = await getVerifyPhone(data.phone);
+
+    form.phone = result.data;
+
+  }
+
+  visible.value = true
+}
+
+defineExpose({ onAdd, onUpdate })
+</script>
+
+<style scoped lang="scss"></style>

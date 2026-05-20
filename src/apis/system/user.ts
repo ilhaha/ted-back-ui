@@ -26,6 +26,11 @@ export function listExamStaff(query: T.UserPageQuery) {
   return http.get<PageRes<T.UserResp[]>>(`${BASE_URL}/examStaff/page`, query)
 }
 
+/** @desc 查询检验检测考务人员列表 */
+export function listExamStaffInspection(query: T.UserPageQuery) {
+  return http.get<PageRes<T.UserResp[]>>(`${BASE_URL}/inspection/examStaff/page`, query)
+}
+
 
 /** @desc 查询所有用户列表 */
 export function listAllUser(query: Partial<T.UserPageQuery>) {
