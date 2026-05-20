@@ -31,6 +31,8 @@ export interface PlanApplyClassDetailResp {
 }
 export interface PlanApplyClassQuery {
   planName: string | undefined
+  examStartDate: string | undefined
+  examEndDate: string | undefined
 }
 export interface PlanApplyClassPageQuery extends PlanApplyClassQuery, PageQuery {}
 

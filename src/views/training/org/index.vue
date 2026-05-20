@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="机构信息管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="机构管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #previewImage="{ record }">
@@ -37,6 +37,13 @@
           {{ record.creditScore }}
         </a-tag>
       </template>
+      <template #limitDate="{ record }">
+        <a-space>
+          <a-date-picker v-model="limitDateMap[record.id]" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
+            placeholder="选择日期" style="width: 130px" />
+          <a-button size="mini" @click="onSaveLimitDate(record.id)" type="outline">保存</a-button>
+        </a-space>
+      </template>
       <template #action="{ record }">
         <a-space>
           <!-- <a-link v-permission="['training:org:update']" title="查看账号" @click="showAccount(record)"
@@ -67,7 +74,8 @@ import OrgAddModal from './OrgAddModal.vue'
 import OrgDetailDrawer from './OrgDetailDrawer.vue'
 import OrgAccountModal from './OrgAccountModal.vue'
 import UserResetPwdModal from '@/views/system/user/UserResetPwdModal.vue'
-import { type OrgResp, type OrgQuery, deleteOrg, exportOrg, listOrg } from '@/apis/training/org'
+import { Message } from '@arco-design/web-vue'
+import { type OrgResp, type OrgQuery, deleteOrg, exportOrg, listOrg, updateOrgLimitDate } from '@/apis/training/org'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
@@ -104,6 +112,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '信誉分', dataIndex: 'creditScore', slotName: 'creditScore' },
   { title: '机构账号', dataIndex: 'username', slotName: 'username' },
   { title: '联系电话', dataIndex: 'phone', slotName: 'phone' },
+  { title: '违规限制日期', dataIndex: 'limitDate', slotName: 'limitDate', width: 220 },
   {
     title: '操作',
     dataIndex: 'action',
@@ -117,7 +126,6 @@ const columns = ref<TableInstanceColumns[]>([
 const UserResetPwdModalRef = ref<InstanceType<typeof UserResetPwdModal>>()
 // 重置密码
 const onResetPwd = (record: any) => {
-  console.log(111);
 
   UserResetPwdModalRef.value?.onOpen(record.userId)
 }
@@ -186,6 +194,16 @@ const getCreditColor = (score?: number) => {
   }
   return 'orange'; // 70-79 可选
 };
+
+// 违规限制日期 Map
+const limitDateMap = ref<Record<string, string>>({})
+
+// 保存违规限制日期
+const onSaveLimitDate = async (id: string) => {
+  const date = limitDateMap.value[id]
+  await updateOrgLimitDate(id, date)
+  search()
+}
 
 
 </script>

@@ -19,8 +19,9 @@ export interface OrgResp {
   createUserString: string
   updateUserString: string
   disabled: boolean
-  CandidateName: string[]
+  candidateName: string[]
   creditScore: number
+  limitDate: string | null
 }
 export interface OrgDetailResp {
   id: string
@@ -139,4 +140,9 @@ export function bindUserToOrg(orgId: string, userId: string) {
 /**@desc 绑定机构用户 */
 export function unbindOrgAccount(orgId: string) {
   return http.post(`${BASE_URL}/unbind-user/${orgId}`)
+}
+
+/** @desc 修改机构违规限制日期 */
+export function updateOrgLimitDate(id: string, limitDate: string) {
+  return http.put(`${BASE_URL}/limitDate/${id}`, { limitDate })
 }

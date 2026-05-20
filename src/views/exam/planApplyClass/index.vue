@@ -4,6 +4,11 @@
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
+        <a-range-picker v-model="examDateRange" format="YYYY-MM-DD" value-format="YYYY-MM-DD" class="search-input"
+          style="width: 260px" @change="search" />
+        <a-select v-model="queryForm.categoryId" placeholder="考核项目种类" allow-clear class="search-input ml-2"
+          @change="search" :options="categoryOptions">
+        </a-select>
         <a-input-search v-model="queryForm.planName" placeholder="请输入考试计划名称" allow-clear @search="search" />
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
@@ -53,12 +58,34 @@ import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
+import { selectOptions } from "@/apis/exam/category";
 
 defineOptions({ name: 'PlanApplyClass' })
 
 
 const queryForm = reactive<PlanApplyClassQuery>({
-  planName: undefined
+  planName: undefined,
+  examStartDate: undefined,
+  examEndDate: undefined,
+  categoryId: undefined
+})
+
+const categoryOptions = ref<any[]>([]);
+
+
+const examDateRange = ref<[string, string] | undefined>(undefined)
+
+// 格式化查询参数
+const formattedQueryParams = computed(() => {
+  const params: PlanApplyClassQuery = { ...queryForm }
+  if (examDateRange.value && examDateRange.value.length === 2) {
+    params.examStartDate = examDateRange.value[0] + ' 00:00:00'
+    params.examEndDate = examDateRange.value[1] + ' 23:59:59'
+  } else {
+    params.examStartDate = undefined
+    params.examEndDate = undefined
+  }
+  return params
 })
 
 const {
@@ -67,7 +94,7 @@ const {
   pagination,
   search,
   handleDelete
-} = useTable((page) => listPlanApplyClass({ ...queryForm, ...page }), { immediate: true })
+} = useTable((page) => listPlanApplyClass({ ...formattedQueryParams.value, ...page }), { immediate: true })
 const columns = ref<TableInstanceColumns[]>([
   { title: '考试计划名称', dataIndex: 'examPlanName', slotName: 'examPlanName' },
   { title: '项目名称', dataIndex: 'projectName', slotName: 'projectName' },
@@ -89,6 +116,10 @@ const columns = ref<TableInstanceColumns[]>([
 // 重置
 const reset = () => {
   queryForm.planName = undefined
+  queryForm.examStartDate = undefined
+  queryForm.examEndDate = undefined
+  queryForm.categoryId = undefined
+  examDateRange.value = undefined
   search()
 }
 
@@ -106,6 +137,15 @@ const PlanApplyClassDetailDrawerRef = ref<InstanceType<typeof PlanApplyClassDeta
 const onDetail = (record: PlanApplyClassResp) => {
   PlanApplyClassDetailDrawerRef.value?.onOpen(record.planId, record.examPlanName)
 }
+
+const getcategoryOptions = async () => {
+  const res = await selectOptions([1, 2]);
+  categoryOptions.value = res.data || [];
+};
+
+onMounted(() => {
+  getcategoryOptions();
+});
 </script>
 
 <style scoped lang="scss"></style>

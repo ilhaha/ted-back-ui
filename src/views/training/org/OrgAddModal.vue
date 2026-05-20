@@ -97,6 +97,18 @@ const columns: ColumnItem[] = reactive([
     ],
   },
   {
+    label: '信誉分',
+    field: 'creditScore',
+    type: 'input-number',
+    span: 24,
+    props: {
+      min: 0,
+      max: 100,
+
+    },
+    show: () => dataId.value
+  },
+  {
     label: '统一社会信用代码',
     field: 'socialCode',
     type: 'input',
@@ -366,12 +378,12 @@ const onUpdate = async (id: string) => {
   if (data.businessLicense) {
     form.businessLicense = data.businessLicense
     form.businessLicenseFileList = [{
-    uid: String(Date.now()),
-    name: data.name || '营业执照',
-    url: data.businessLicense,
-    status: 'done',
-    response: { url: data.businessLicense }
-  }]
+      uid: String(Date.now()),
+      name: data.name || '营业执照',
+      url: data.businessLicense,
+      status: 'done',
+      response: { url: data.businessLicense }
+    }]
   }
 
 }

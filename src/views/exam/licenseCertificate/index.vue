@@ -4,8 +4,14 @@
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
-        <a-date-picker v-model="queryForm.applyDate" placeholder="申请日期" format="YYYY-MM-DD" class="search-input ml-2"
-          @change="search" />
+        <a-range-picker v-model="applyDateRange" format="YYYY-MM-DD" class="search-input ml-2"
+          @change="handleDateChange" value-format="YYYY-MM-DD" />
+        <a-select v-model="queryForm.lcnsKind" placeholder="证书类别" allow-clear class="search-input ml-2"
+          @change="(value) => chooseLcnsKind(value)" :options="lcnsKindOptions">
+        </a-select>
+        <a-select v-model="queryForm.psnlcnsItem" placeholder="证书项目" allow-clear class="search-input ml-2"
+          @change="search" :options="lcnsItemOptions" :field-names="{ value: 'label', label: 'label' }">
+        </a-select>
         <a-input-search v-model="queryForm.psnlcnsItemCode" placeholder="证书项目代码" allow-clear @search="search" />
         <a-input-search v-model="queryForm.psnName" placeholder="请输入姓名" allow-clear @search="search" />
 
@@ -75,7 +81,7 @@
 
         <!-- 考试项目（必选） -->
         <a-form-item label="考核项目种类" required>
-          <a-select v-model="formState.categoryId" placeholder="请选择考核项目种类" :options="examProjectOptions" allow-clear>
+          <a-select v-model="formState.categoryId" placeholder="请选择考核项目种类" :options="lcnsKindOptions" allow-clear>
           </a-select>
         </a-form-item>
         <!-- 时间范围（非必须） -->
@@ -100,7 +106,8 @@ import {
   downloadQualificationCertificate as downloadQualificationCertificateApi,
   downloadQualificationCertificateByCategory
 } from '@/apis/exam/examRecords'
-
+import { selectOptions } from "@/apis/exam/category";
+import { selectOptions as selectProjectOptions } from '@/apis/exam/project'
 import { useDownload, useTable, useExamPlanProject, useResetReactive } from '@/hooks'
 import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
@@ -117,15 +124,22 @@ const queryForm = reactive<LicenseCertificateQuery>({
   certGenerated: undefined,
   approvalType: undefined,
   psnlcnsItemCode: undefined,
-  applyDate: undefined,
+  psnlcnsItem: undefined,
+  address: undefined,
+  applyDateStart: undefined,
+  lcnsKind: undefined,
+  applyDateEnd: undefined,
   sort: ['certGenerated,asc', 'applyDate,desc']
 })
+
+// 用于绑定日期选择器
+const applyDateRange = ref<string[] | undefined>()
 const downloading = ref(false);
 
-const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
 
 const visible = ref(false);
-
+const lcnsKindOptions = ref<any[]>([]);
+const lcnsItemOptions = ref<any[]>([]);
 const formState = ref({
   categoryId: undefined,
   dateRange: [] as any[],
@@ -150,7 +164,7 @@ const columns = ref<TableInstanceColumns[]>([
   // { title: '是否审核', dataIndex: 'isVerify', slotName: 'isVerify' },
   // { title: '是否操作', dataIndex: 'isOpr', slotName: 'isOpr' },
   { title: '证书类别', dataIndex: 'lcnsKind', slotName: 'lcnsKind' },
-  { title: '证书项目名称', dataIndex: 'psnlcnsItem', slotName: 'psnlcnsItem' },
+  { title: '证书项目', dataIndex: 'psnlcnsItem', slotName: 'psnlcnsItem' },
   { title: '证书项目代码', dataIndex: 'psnlcnsItemCode', slotName: 'psnlcnsItemCode' },
   { title: '许可类型', dataIndex: 'approvalType', slotName: 'approvalType' },
   { title: '许可状态', dataIndex: 'certGenerated', slotName: 'certGenerated' },
@@ -184,13 +198,39 @@ const columns = ref<TableInstanceColumns[]>([
   }
 ]);
 
-const getProjectList = async (planType: number) => {
-  await getExamProjectOptions(planType);
+const chooseLcnsKind = (value: any) => {
+  // 清空时 value 为 null 或 undefined
+  if (value === null || value === undefined || value === '') {
+    getProjectOptions(undefined)
+    queryForm.psnlcnsItem = undefined
+    return
+  }
+  // 手动从选项数组中查找选中的完整对象
+  const option = lcnsKindOptions.value.find((item: any) => item.value === value)
+  queryForm.lcnsKind = option.label
+  queryForm.psnlcnsItem = undefined
+  search()
+  getProjectOptions(option.value)
+}
+
+const getLcnsKindOptions = async () => {
+  const res = await selectOptions([1, 2]);
+  lcnsKindOptions.value = res.data || [];
 };
+
+const getProjectOptions = async (categoryId: any) => {
+  const res = await selectProjectOptions(0, categoryId);
+  lcnsItemOptions.value = res.data || [];
+};
+
+onMounted(() => {
+  getLcnsKindOptions();
+  getProjectOptions(undefined);
+});
 
 // 批量下载资格证按钮点击
 const handleBatchDownload = async () => {
-  getProjectList(2);
+
   formState.value.categoryId = undefined;
   formState.value.dateRange = [];
   visible.value = true;
@@ -265,7 +305,24 @@ const reset = () => {
   queryForm.certGenerated = undefined
   queryForm.approvalType = undefined
   queryForm.psnlcnsItemCode = undefined
-  queryForm.applyDate = undefined
+  queryForm.address = undefined
+  queryForm.applyDateStart = undefined
+  queryForm.applyDateEnd = undefined
+  queryForm.lcnsKind = undefined
+  queryForm.psnlcnsItem = undefined
+  applyDateRange.value = undefined
+  search()
+}
+
+// 日期范围变化
+const handleDateChange = (date: string[] | undefined) => {
+  if (date && date.length === 2) {
+    queryForm.applyDateStart = date[0]
+    queryForm.applyDateEnd = date[1]
+  } else {
+    queryForm.applyDateStart = undefined
+    queryForm.applyDateEnd = undefined
+  }
   search()
 }
 
@@ -343,6 +400,7 @@ const getApprovalTypeText = (status: number) => {
       return "未知";
   };
 }
+
 
 </script>
 

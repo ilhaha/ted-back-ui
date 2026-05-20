@@ -76,6 +76,12 @@ export interface LicenseCertificateDetailResp {
 export interface LicenseCertificateQuery {
   psnName: string | undefined
   idcardNo: string | undefined
+  psnlcnsItemCode: string | undefined
+  certGenerated: string | undefined
+  approvalType: string | undefined
+  address: string | undefined
+  applyDateStart: string | undefined
+  applyDateEnd: string | undefined
   sort: Array<string>
 }
 export interface LicenseCertificatePageQuery extends LicenseCertificateQuery, PageQuery {}

@@ -86,7 +86,9 @@ export function scoreConfirmed(planId: number, classId: number) {
 
 /** @desc 根据班级列表获取每个班级在考试计划下的报名人数、考试人数、及格人数、成绩录入情况和证书生成情况 */
 export function getClassExamStatsPage(query: ExamPlanPageQuery) {
-  return http.get<PageRes<ExamPlanResp[]>>(`${BASE_URL}/class-stats`, query)
+  return http.get<PageRes<ExamPlanResp[]>>(`${BASE_URL}/class-stats`, query, {
+    timeout: 300000
+  })
 }
 
 

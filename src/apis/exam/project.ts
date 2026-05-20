@@ -101,8 +101,8 @@ export function listProject(query: ProjectPageQuery) {
   return http.get<PageRes<ProjectResp[]>>(`${BASE_URL}`, query)
 }
 
-export function selectOptions() {
-  return http.get(`${SELECT_OPTIONS}`)
+export function selectOptions(projectType: any, categoryId: any) {
+  return http.get(`${SELECT_OPTIONS}`, { projectType, categoryId })
 }
 
 /** @desc 项目绑定的地址 */
