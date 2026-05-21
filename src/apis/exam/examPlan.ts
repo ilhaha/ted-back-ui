@@ -78,7 +78,6 @@ export function getStatisticsExamNoEnroll() {
   return http.get<any[]>(`${BASE_URL}/statistics/exam/no/enroll`)
 }
 
-
 /** @desc 考试成绩确认 */
 export function scoreConfirmed(planId: number, classId: number) {
   return http.post(`${BASE_URL}/score/confirmed/${planId}/${classId}`)
