@@ -125,6 +125,6 @@ export function exportExamStaffFee(params: { userId: string, exportDate: string 
   return http.download(`${BASE_URL}/examStaff/exportFee`, params)
 }
 /** @desc 批量导出监考人员劳务费 */
-export async function batchExportExamStaffFee(exportDate: string) {
-  return http.download(`${BASE_URL}/examStaff/exportFee/batch`, { exportDate })
+export async function batchExportExamStaffFee(startDate: string, endDate: string, categoryIds?: string[]) {
+  return http.download(`${BASE_URL}/examStaff/exportFee/batch`, { startDate, endDate, categoryIds })
 }

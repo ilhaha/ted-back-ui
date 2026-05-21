@@ -1,6 +1,6 @@
 <template>
   <a-spin :loading="loading" style="width: 100%">
-    <a-card class="general-card" :title="`作业项目已考试人数统计（总人数：${totalCount}）`">
+    <a-card class="general-card" :title="`作业项目已考试人员统计（总人数：${totalCount}）`">
       <template #extra>
         <a-range-picker v-model="dateRange" value-format="YYYY-MM-DD" @change="getChartData" />
       </template>

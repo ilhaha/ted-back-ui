@@ -1,6 +1,6 @@
 <template>
   <a-spin :loading="loading" style="width: 100%">
-    <a-card class="general-card" :title="`作业项目资料审核通过未报名人员统计（总人数：${totalCount}）`">
+    <a-card class="general-card" :title="`作业项目未报名人员统计（总人数：${totalCount}）`">
       <div class="content">
         <a-empty v-if="!loading && chartData.length === 0" description="暂无考试数据" />
         <div v-else class="chartContainer">
@@ -54,9 +54,6 @@ const { chartOption } = useChart((isDark: boolean) => {
   return {
     tooltip: {
       trigger: 'axis',
-      axisPointer: {
-        type: 'cross',
-      },
       position: (pos: number[] | undefined) => {
         return [pos![0] - 150, pos![1] + 10]
       },

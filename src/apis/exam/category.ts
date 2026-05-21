@@ -44,6 +44,14 @@ export interface CategoryQuery {
 }
 export interface CategoryPageQuery extends CategoryQuery, PageQuery { }
 
+/**
+ * 获取有对应分类资质的监考员和分类的级联选择器
+ * @param categoryType 
+ * @returns 
+ */
+export function getHasQualificationSelectOptions(categoryType) {
+  return http.get(`${BASE_URL}/has/qualification`, { categoryType });
+}
 
 export function selectOptions(categoryType) {
   return http.get(SELECT_OPTIONS, { categoryType });

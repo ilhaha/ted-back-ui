@@ -46,8 +46,11 @@
             @click="onAddQualification(record)">
             资质上传
           </a-link>
-          <a-link v-permission="['examAffair:invigilation:exportFee']" @click="openSingleExport(record)">
+          <!-- <a-link v-permission="['examAffair:invigilation:exportFee']" @click="openSingleExport(record)">
             劳务费导出
+          </a-link> -->
+          <a-link v-permission="['exam:examLaborFeeDetail:list']" @click="openEnterDetails(record)">
+            明细列表
           </a-link>
           <a-dropdown>
             <a-button
@@ -93,11 +96,15 @@
 
     <a-modal :visible="batchVisible" title="劳务费导出" width="30%" :footer="false" @cancel="onCancelBatch">
       <div class="import-modal-content">
-        <a-alert>请选择开始月份和结束月份，系统将按所选月份区间生成报表数据。</a-alert>
+        <a-alert>请选择开始日期和结束日期，系统将按所选日期区间生成报表数据。</a-alert>
         <div class="cascader-container">
           <a-form layout="vertical">
-            <a-form-item label="所需导出月份">
-              <a-month-picker v-model="batchRange" mode="month" />
+            <a-form-item label="监考日期">
+              <a-range-picker v-model="batchRange" />
+            </a-form-item>
+            <a-form-item label="监考类型">
+              <a-select v-model="categoryIds" placeholder="请选择资料类型" class="type-select" :options="categoryOptions"
+                :field-names="{ label: 'label', value: 'value' }" allow-clear multiple />
             </a-form-item>
           </a-form>
         </div>
@@ -112,23 +119,33 @@
       </div>
     </a-modal>
 
+    <a-modal :visible="enterDetailsVisible" title="录入劳务费明细" width="70%" :footer="false"
+      @cancel="enterDetailsVisible = false">
+      <EnterLaborFeeDetails ref="EnterLaborFeeDetailsRef" />
+    </a-modal>
+
+
+
+
     <UserAddDrawer ref="UserAddDrawerRef" @save-success="search" />
     <UserImportDrawer ref="UserImportDrawerRef" @save-success="search" />
     <UserDetailDrawer ref="UserDetailDrawerRef" />
     <UserResetPwdModal ref="UserResetPwdModalRef" />
     <UserUpdateRoleModal ref="UserUpdateRoleModalRef" @save-success="search" />
     <QualificationModal ref="qualificationModalRef" />
+
   </div>
 </template>
 
 <script setup lang="ts">
 import UserAddDrawer from "./UserAddDrawer.vue";
-
+import EnterLaborFeeDetails from "../../exam/examLaborFeeDetail/index.vue";
 import UserImportDrawer from "./UserImportDrawer.vue";
 import UserDetailDrawer from "./UserDetailDrawer.vue";
 import UserResetPwdModal from "./UserResetPwdModal.vue";
 import UserUpdateRoleModal from "./UserUpdateRoleModal.vue";
 import QualificationModal from "./QualificationModal.vue";
+import { selectOptions } from "@/apis/exam/category";
 import {
   type UserResp,
   exportUser,
@@ -147,6 +164,7 @@ import { Message, Modal } from "@arco-design/web-vue";
 
 defineOptions({ name: "SystemUser" });
 
+const enterDetailsVisible = ref(false);
 const [queryForm, resetForm] = useResetReactive({
   sort: ["t1.id,desc"],
 });
@@ -312,7 +330,8 @@ const singleRange = ref('')
 const exproLoadding = ref(false);
 
 const batchVisible = ref(false);
-const batchRange = ref('')
+const batchRange = ref<[string, string]>(['', ''])
+const categoryIds = ref<string[]>([])
 
 
 const canShowUpdate = computed(() => {
@@ -362,6 +381,12 @@ const onExport = () => {
   useDownload(() => exportUser(queryForm));
 };
 
+const EnterLaborFeeDetailsRef = ref<InstanceType<typeof EnterLaborFeeDetails>>();
+
+const openEnterDetails = (record: UserResp) => {
+  EnterLaborFeeDetailsRef.value?.onOpen(record.id);
+  enterDetailsVisible.value = true;
+};
 
 const openSingleExport = (record: UserResp) => {
   singleRecord.value = record;
@@ -370,8 +395,11 @@ const openSingleExport = (record: UserResp) => {
 };
 
 
-const openBatchExport = () => {
+const categoryOptions = ref<any[]>([]);
+const openBatchExport = async () => {
   batchVisible.value = true;
+  const res = await selectOptions([1, 2]);
+  categoryOptions.value = res.data || [];
 };
 
 
@@ -387,17 +415,22 @@ const singleExport = () => {
 };
 const batchExport = async () => {
 
-  if (!batchRange.value) {
-    Message.error("请选择导出月份");
+  if (!batchRange.value || !batchRange.value[0] || !batchRange.value[1]) {
+    Message.error("请选择监考日期");
+    return;
+  }
+  if (categoryIds.value.length == 0) {
+    Message.error("请选择监考类型");
     return;
   }
 
   try {
     exproLoadding.value = true;
-    const res = await batchExportExamStaffFee(batchRange.value);
+    const [startDate, endDate] = batchRange.value;
+    const res = await batchExportExamStaffFee(startDate, endDate, categoryIds.value);
 
     // 文件名
-    const fileName = `劳动费支出表（检验检测人员）${batchRange.value}.xlsx`;
+    const fileName = `劳动费支出表（检验检测人员）${startDate}至${endDate}.xlsx`;
 
     // 正确的 Excel MIME 类型
     const blob = new Blob(
@@ -449,7 +482,8 @@ const onCancelSingle = () => {
 
 const onCancelBatch = () => {
   batchVisible.value = false;
-  batchRange.value = '';
+  batchRange.value = ['', ''];
+  categoryIds.value = [];
 };
 
 
