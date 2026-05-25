@@ -115,8 +115,7 @@ const queryForm = reactive<CandidateTypeQuery>({
   candidateName: undefined,
   idNumber: undefined,
   workUnit: undefined,
-  phone: undefined,
-  sort: ['id,desc']
+  phone: undefined
 })
 
 const {

@@ -19,7 +19,8 @@
         </a-image>
       </template>
       <template #maxCandidates="{ record }">
-        {{ record.maxCandidates }} / {{ record.enrolledCount }}
+        {{ record.maxCandidates }} / {{ record.enrolledCount }}<span v-if="record.exemptCount">（理论免考{{ record.exemptCount
+        }}人）</span>
       </template>
       <template #toolbar-right>
         <a-button v-permission="['exam:examPlan:add']" type="primary" @click="onAdd">
@@ -674,6 +675,7 @@ const reset = () => {
   queryForm.status = undefined;
   queryForm.startTime = undefined;
   queryForm.planType = 0
+  queryForm.isFinalConfirmed = undefined
   search();
 };
 

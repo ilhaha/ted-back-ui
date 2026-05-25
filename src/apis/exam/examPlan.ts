@@ -196,7 +196,7 @@ export function customizAddExamPlan(data: any) {
 
 /** @desc 修改考试计划 */
 export function updateExamPlan(data: any, id: string) {
-  return http.put(`${BASE_URL}/${id}`, data)
+  return http.put(`${BASE_URL}/${id}`, data, { timeout: 3600000 })
 }
 
 

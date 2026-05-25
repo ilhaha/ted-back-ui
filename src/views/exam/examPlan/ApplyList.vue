@@ -31,7 +31,7 @@
             <template #auditStatus="{ record }">
                 <a-tag :color="getStatusColor(record.auditStatus)">{{
                     getStatusText(record.auditStatus)
-                }}</a-tag>
+                    }}</a-tag>
             </template>
             <!-- <template #auditNoticeUrl="{ record }">
                 <a-link @click="getPreviewUrl(record.auditNoticeUrl)"
@@ -40,9 +40,9 @@
                     @click.prevent="downloadAuditNotice(record)" :loading="downloadLodding">下载</a-link>
             </template> -->
             <template #theoryScoreReused="{ record }">
-                <a-tag :color="getTheoryScoreReusedColor(record.theoryScoreReused)">{{
-                    getTheoryScoreReusedText(record.theoryScoreReused)
-                }}</a-tag>
+                <a-tag :color="getTheoryScoreReusedColor(record.theoryScoreReused, record.enrollStatus)">{{
+                    getTheoryScoreReusedText(record.theoryScoreReused, record.enrollStatus)
+                    }}</a-tag>
             </template>
             <template #ticketUrl="{ record }">
                 <div v-if="record.ticketUrl">
@@ -249,7 +249,10 @@ const getPreviewUrl = (url: string) => {
 };
 
 
-const getTheoryScoreReusedText = (auditStatus: number) => {
+const getTheoryScoreReusedText = (auditStatus: number, enrollStatus: number) => {
+    if (auditStatus == 0 && enrollStatus == 2) {
+        return "已结束"
+    }
     switch (auditStatus) {
         case 0:
             return "待考";
@@ -259,7 +262,10 @@ const getTheoryScoreReusedText = (auditStatus: number) => {
             return "未知";
     }
 };
-const getTheoryScoreReusedColor = (auditStatus: number) => {
+const getTheoryScoreReusedColor = (auditStatus: number, enrollStatus: number) => {
+    if (auditStatus == 0 && enrollStatus == 2) {
+        return "orange"
+    }
     switch (auditStatus) {
         case 0:
             return "blue";
