@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="检验人员项目管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="检测项目管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #isOperation="{ record }">
@@ -8,14 +8,14 @@
           getExamTypeText(record.isOperation)
         }}</a-tag>
       </template>
-            <template #isTheory="{ record }">
+      <template #isTheory="{ record }">
         <a-tag :color="getExamTypeColor(record.isTheory)" bordered>{{
           getExamTypeText(record.isTheory)
         }}</a-tag>
       </template>
-    <template #projectLevel="{ record }">
-      <span>{{ getProjectLevelName(record.projectLevel) }}</span>
-    </template>
+      <template #projectLevel="{ record }">
+        <span>{{ getProjectLevelName(record.projectLevel) }}</span>
+      </template>
       <template #toolbar-right>
         <a-button v-permission="['inspector:project:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
@@ -74,8 +74,8 @@
         <a-space :size="2">
           <div v-if="record.projectStatus === 1">
             <a-link v-permission="['inspector:project:examine']" title="审核" @click="onExamineA(record)">审核</a-link>
-            <a-link v-permission="['inspector:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
-            <a-link v-permission="['inspector:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+            <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
 
           </div>
           <!-- 状态2：仅显示详情 + 删除 -->
@@ -84,7 +84,7 @@
             <a-link v-permission="['exam:project:update']" title="修改" @click="onUpdate(record)">修改</a-link>
           </div>
           <div v-else>
-            <a-link v-permission="['inspector:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+            <a-link v-permission="['exam:project:detail']" title="详情" @click="onDetail(record)">详情</a-link>
             <!-- <a-link v-permission="['inspector:project:update']" title="修改" @click="onUpdate(record)">修改</a-link> -->
             <!--            <a-link-->
             <!--                v-permission="['inspector:project:delete']"-->
@@ -131,6 +131,7 @@ defineOptions({ name: "Project" });
 const queryForm = reactive<ProjectQuery>({
   projectType: 1,
   sort: ["id,desc"],
+  categoryType: 3,
 });
 
 const {
@@ -163,9 +164,9 @@ const columns = ref<TableInstanceColumns[]>([
   { title: "项目名称", dataIndex: "projectName", slotName: "projectName", align: "center" },
   { title: "项目代码", dataIndex: "projectCode", slotName: "projectCode", align: "center" },
   { title: "所属种类", dataIndex: "categoryName", slotName: "categoryName", align: "center" },
-      { 
-    title: "考试等级", 
-    dataIndex: "projectLevel", 
+  {
+    title: "考试等级",
+    dataIndex: "projectLevel",
     slotName: "projectLevel",
     width: 120,
     align: "center"
@@ -191,9 +192,9 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
     show: has.hasPermOr([
-      "inspector:project:detail",
-      "inspector:project:update",
-      "inspector:project:delete",
+      "exam:project:detail",
+      "exam:project:update",
+      "exam:project:delete",
     ]),
   },
 ]);
@@ -204,6 +205,7 @@ const reset = () => {
   queryForm.projectCode = undefined;
   queryForm.createUser = undefined;
   queryForm.projectStatus = undefined;
+  queryForm.categoryType = 3
   search();
 };
 

@@ -1,20 +1,27 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="无损检测、检验人员考试通知管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="无损检测考试通知管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
       @select-all="selectAll">
       <template #toolbar-left>
+        <a-select v-model="queryForm.categoryId" placeholder="所属类别" allow-clear class="search-input ml-2"
+          @change="search" style="margin-left: 8px;" :options="categorySelect">
+
+        </a-select>
         <a-input-search v-model="queryForm.title" placeholder="请输入通知内容" allow-clear @search="search" />
         <a-select v-model="queryForm.status" placeholder="通知状态" allow-clear class="search-input ml-2" @change="search"
           style="margin-left: 8px;">
           <a-option value="0">待审</a-option>
-          <a-option value="1">已发布</a-option>
+          <a-option value="1">报名中</a-option>
           <a-option value="2">已驳回</a-option>
+          <a-option value="3">补报中</a-option>
+          <a-option value="4">报名已结束</a-option>
+          <a-option value="5">考试中</a-option>
+          <a-option value="6">已结束</a-option>
         </a-select>
         <a-select v-model="queryForm.examLevel" placeholder="考试等级" allow-clear class="search-input ml-2"
           @change="search" style="margin-left: 8px;">
-          <a-option value="0">无</a-option>
           <a-option value="1">Ⅰ级</a-option>
           <a-option value="2">Ⅱ级</a-option>
         </a-select>
@@ -29,7 +36,7 @@
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
-        <a-button v-permission="['exam:examNotice:audit']" type="primary"  @click="onBatchAudit"
+        <a-button v-permission="['exam:examNotice:audit']" type="primary" @click="onBatchAudit"
           :disabled="selectedKeys.length === 0">
           <template #icon><icon-check /></template>
           <template #default>批量审核</template>
@@ -48,11 +55,11 @@
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['exam:examNotice:update']" title="修改" @click="onUpdate(record)"
-            v-if="record.status != 1">修改</a-link>
+            v-if="record.status == 0 || record == 2">修改</a-link>
           <a-link v-permission="['exam:examNotice:audit']" title="审核" @click="onAudit(record)"
             v-if="record.status == 0">审核</a-link>
           <a-link v-permission="['exam:examNotice:delete']" status="danger" :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)" v-if="record.status != 1">
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)" v-if="record.status == 0 || record == 2">
             删除
           </a-link>
         </a-space>
@@ -86,6 +93,8 @@ import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
+import { selectOptions } from "@/apis/exam/category";
+
 
 defineOptions({ name: 'ExamNotice' })
 
@@ -95,6 +104,8 @@ const queryForm = reactive<ExamNoticeQuery>({
   applyDeadline: undefined,
   examLevel: undefined,
   status: undefined,
+  categoryId: undefined,
+  categoryType: 3
 })
 
 const {
@@ -132,7 +143,7 @@ const columns = ref<TableInstanceColumns[]>([
     title: '操作',
     dataIndex: 'action',
     slotName: 'action',
-    width: 160  ,
+    width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
     show: has.hasPermOr(['exam:examNotice:detail', 'exam:examNotice:update', 'exam:examNotice:delete', 'exam:examNotice:audit'])
@@ -145,6 +156,8 @@ const reset = () => {
   queryForm.applyDeadline = undefined
   queryForm.examLevel = undefined
   queryForm.status = undefined
+  queryForm.categoryId = undefined
+  queryForm.categoryType = 3
   search()
 }
 
@@ -184,30 +197,38 @@ const getExamLevelText = (status: number) => {
 
 const getStatusColor = (status: number) => {
   switch (status) {
-    case 0:
-      return "blue"; // 待审
-    case 1:
-      return "green"; // 通过
-    case 2:
-      return "red"; // 驳回
-    default:
-      return "default";
+    case 0: return 'blue'      // 待审核
+    case 1: return 'green'      // 报名中
+    case 2: return 'red'        // 审核未通过
+    case 3: return 'blue'     // 补报中
+    case 4: return 'gray'       // 报名结束
+    case 5: return 'orange'      // 已开考
+    case 6: return 'default'    // 已结束
+    default: return 'default'
   }
 };
 
 const getStatusText = (status: number) => {
   switch (status) {
-    case 0:
-      return "待审";
-    case 1:
-      return "已发布";
-    case 2:
-      return "已驳回";
-    default:
-      return "未知状态";
+    case 0: return '待审'
+    case 1: return '报名中'
+    case 2: return '已驳回'
+    case 3: return '补报中'
+    case 4: return '报名已结束'
+    case 5: return '考试中'
+    case 6: return '已结束'
+    default: return '未知状态'
   }
 };
+const categorySelect = ref([])
+const initProjectSelect = async () => {
+  const res = await selectOptions([3]);
+  categorySelect.value = res.data || [];
+}
 
+onMounted(async () => {
+  initProjectSelect()
+})
 // 导出
 const onExport = () => {
   useDownload(() => exportExamNotice(queryForm))

@@ -262,7 +262,7 @@ const save = async () => {
 const onAdd = async () => {
   reset();
   dataId.value = "";
-  const res = await selectOptions([3, 4]);
+  const res = await selectOptions([3]);
   categorySelect.value = res.data || [];
   visible.value = true;
 };
@@ -271,7 +271,7 @@ const onAdd = async () => {
 const onUpdate = async (id: string) => {
   reset();
   dataId.value = id;
-  const res = await selectOptions([3, 4]);
+  const res = await selectOptions([3]);
   categorySelect.value = res.data || [];
 
   const { data } = await getProject(id);
@@ -297,7 +297,6 @@ const onAuditConfirm = async () => {
     emit("save-success");
     return true;
   } catch (error) {
-    Message.error("审核失败");
     return false;
   }
 };

@@ -17,7 +17,7 @@
 
     <a-space style="margin-bottom: 16px;">
       <!-- <a-button type="primary" @click="onAddress">绑定地址</a-button> -->
-      <a-button type="primary" @click="onDocument" v-permission="['inspector:project:bindDocument']" v-if="dataDetail?.projectStatus == 2">绑定资料</a-button>
+      <a-button type="primary" @click="onDocument" v-permission="['exam:project:bindDocument']" v-if="dataDetail?.projectStatus == 2">绑定资料</a-button>
     </a-space>
 
     <!--  地址相关  -->
@@ -38,7 +38,7 @@
     <a-table v-if="documentDetail.length > 0" :columns="documentColumns" :data="documentDetail" :pagination="false">
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['inspector:project:unbind']" status="danger" :disabled="record.disabled"
+          <a-link v-permission="['exam:project:unbind']" status="danger" :disabled="record.disabled"
             :title="record.disabled ? '不可删除' : '删除'" @click="onDeleteDocument(record)">
             解绑
           </a-link>
@@ -116,7 +116,7 @@ const documentColumns = ref<TableInstanceColumns[]>([
     width: 100,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['inspector:project:delete'])
+    show: has.hasPermOr(['exam:project:delete'])
   }
 ])
 

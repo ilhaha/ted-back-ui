@@ -6,7 +6,6 @@
         <a-radio-group v-model="form.examLevel">
           <a-radio :value="1">Ⅰ级</a-radio>
           <a-radio :value="2">Ⅱ级</a-radio>
-          <a-radio :value="0">无</a-radio>
         </a-radio-group>
       </template>
       <template #examAttemptType>
@@ -69,7 +68,7 @@ const { width } = useWindowSize()
 const dataId = ref('')
 const visible = ref(false)
 const isUpdate = computed(() => !!dataId.value)
-const title = computed(() => (isUpdate.value ? '修改无损检测、检验人员考试通知' : '新增无损检测、检验人员考试通知'))
+const title = computed(() => (isUpdate.value ? '修改无损检测考试通知' : '新增无损检测考试通知'))
 const formRef = ref<InstanceType<typeof GiForm>>()
 const categorySelect = ref<LabelValueState[]>([]);
 interface ProjectItem {
@@ -256,7 +255,7 @@ const save = async () => {
 }
 
 const initProjectSelect = async () => {
-  const res = await selectOptions([3, 4]);
+  const res = await selectOptions([3]);
   categorySelect.value = res.data || [];
 }
 // 新增

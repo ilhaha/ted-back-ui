@@ -44,10 +44,23 @@ export interface ExamNoticeQuery {
 }
 export interface ExamNoticePageQuery extends ExamNoticeQuery, PageQuery {}
 
+/** @desc 获取通知总览列表 */
+export function overviewPage(query: ExamNoticePageQuery) {
+  return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/overview/page`, query)
+}
+
+
+
 /** @desc 查询无损检测、检验人员考试报名审核通知列表 */
 export function applyAuditPage(query: ExamNoticePageQuery) {
   return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/apply/audit/page`, query)
 }
+
+/** @desc 查询在线补报通知列表 */
+export function supplementaryReportPage(query: ExamNoticePageQuery) {
+  return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/supplementaryReport/page`, query)
+}
+
 
 /** @desc 查询无损检测、检验人员考试通知列表 */
 export function listExamNotice(query: ExamNoticePageQuery) {
@@ -82,4 +95,9 @@ export function exportExamNotice(query: ExamNoticeQuery) {
 /** @desc 审核考试通知（单个或批量） */
 export function auditExamNotice(data: { ids: string[]; status: number }) {
   return http.put(`${BASE_URL}/audit`, data)
+}
+
+/** @desc 开启/关闭补报 */
+export function openOrCloseSupplementaryReport(noticeId: string, status: number) {
+  return http.post(`${BASE_URL}/openOrClose/${noticeId}/${status}`)
 }
