@@ -42,13 +42,14 @@
             <template #action="{ record }">
                 <a-space>
                     <a-link v-permission="['notice:overview:statistics']" title="统计"
-                        @click="onUpdate(record)">统计</a-link>
+                        @click="onStatistics(record)">统计</a-link>
                     <a-link v-permission="['notice:overview:registrationStatus']" title="报名情况"
-                        @click="onUpdate(record)">报名情况</a-link>
+                        @click="onRegistrationStatus(record)">报名情况</a-link>
                 </a-space>
             </template>
         </GiTable>
-
+        <OverviewStatisticsModal ref="OverviewStatisticsModalRef" />
+        <OverviewRegistrationModal ref="OverviewRegistrationModalRef" />
     </div>
 </template>
 
@@ -62,9 +63,24 @@ import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
 import { selectOptions } from "@/apis/exam/category";
+import OverviewStatisticsModal from './OverviewStatisticsModal.vue'
+import OverviewRegistrationModal from './OverviewRegistrationModal.vue'
 
 
 defineOptions({ name: 'ExamNotice' })
+
+const OverviewStatisticsModalRef = ref<InstanceType<typeof OverviewStatisticsModal>>()
+const OverviewRegistrationModalRef = ref<InstanceType<typeof OverviewRegistrationModal>>()
+
+// 统计
+const onStatistics = (record: ExamNoticeResp) => {
+  OverviewStatisticsModalRef.value?.onOpen(record.id)
+}
+
+// 报名情况
+const onRegistrationStatus = (record: ExamNoticeResp) => {
+  OverviewRegistrationModalRef.value?.onOpen(record.id)
+}
 
 
 const queryForm = reactive<ExamNoticeQuery>({

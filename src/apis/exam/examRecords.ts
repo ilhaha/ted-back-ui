@@ -65,12 +65,12 @@ export function getClassExamTableList(planId: string) {
 
 /** @desc 下载资格证 */
 export function downloadQualificationCertificate(data: any) {
-  return http.post(`${BASE_URL}/download`, data, { responseType: 'blob', timeout: 30000 })
+  return http.post(`${BASE_URL}/download`, data, { responseType: 'blob', timeout: 300000 })
 }
 
 /** @desc 批量下载资格证 */
 export function downloadQualificationCertificateByCategory(data: any) {
-  return http.post(`${BASE_URL}/download/cert/info`, data, { responseType: 'blob', timeout: 30000 })
+  return http.post(`${BASE_URL}/download/cert/info`, data, { responseType: 'blob', timeout: 300000 })
 }
 
 

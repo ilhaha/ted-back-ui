@@ -101,3 +101,71 @@ export function auditExamNotice(data: { ids: string[]; status: number }) {
 export function openOrCloseSupplementaryReport(noticeId: string, status: number) {
   return http.post(`${BASE_URL}/openOrClose/${noticeId}/${status}`)
 }
+
+// 通知统计项响应
+export interface NoticeStatisticsItemResp {
+  tableHeader: string           // 表头
+  registrationCount: string    // 报名人数
+  paymentCount: string         // 交费人数
+  passCount: string            // 及格人数
+  totalItemCount: string       // 人项总数
+  firstExamCount: string       // 初试人数
+  makeupExamCount: string      // 补考人数
+  scienceBachelorFirstExamCount: string  // 理工科本科及以上初试人数
+  practicalMakeupCount: string // 补考各项目人数 - 实操
+  openBookMakeupCount: string  // 补考各项目人数 - 开卷
+  closedBookMakeupCount: string // 补考各项目人数 - 闭卷
+  reviewFilmMakeupCount: string // 补考各项目人数 - 评片
+}
+
+// 通知统计响应
+export interface NoticeStatisticsResp {
+  title: string                // 标题
+  applyDeadline: string        // 报名截止时间
+  examLevel: number            // 考试等级 0-无 1一级 2 二级
+  status: number               // 状态
+  projectCodes: string         // 报考项目代码
+  itemList: NoticeStatisticsItemResp[] // 统计项列表
+}
+
+/** @desc 通知总览-通知统计 */
+export function getNoticeStatistics(noticeId: string) {
+  return http.get<NoticeStatisticsResp>(`${BASE_URL}/statistics/${noticeId}`)
+}
+
+// 报名情况项响应
+export interface NoticeRegistrationItemResp {
+  tableHeader: string           // 表头
+  registrationCount: string    // 报名人数
+  paymentCount: string          // 交费人数
+  auditPassCount: string       // 审核通过人数
+  auditRejectCount: string     // 审核驳回人数
+  pendingAuditCount: string    // 待审核人数
+}
+
+// 报名情况响应
+export interface NoticeRegistrationResp {
+  title: string                // 标题
+  applyDeadline: string        // 报名截止时间
+  examLevel: number            // 考试等级
+  status: number               // 状态
+  projectCodes: string         // 报考项目代码
+  itemList: NoticeRegistrationItemResp[] // 报名情况项列表
+}
+
+/** @desc 通知总览-报名情况 */
+export function getNoticeRegistration(noticeId: string) {
+  return http.get<NoticeRegistrationResp>(`${BASE_URL}/registration/${noticeId}`)
+}
+
+// 通知项目汇总响应
+export interface NoticeProjectApplyResp {
+  projectId: number
+  projectCode: string
+  totalItemCount: number
+}
+
+/** @desc 通知总览-项目汇总 */
+export function getNoticeProjectApplyOverview(noticeId: string) {
+  return http.get<NoticeProjectApplyResp[]>(`${BASE_URL}/project/overview`, { noticeId })
+}
