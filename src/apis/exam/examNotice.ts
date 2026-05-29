@@ -44,11 +44,16 @@ export interface ExamNoticeQuery {
 }
 export interface ExamNoticePageQuery extends ExamNoticeQuery, PageQuery {}
 
+/** @desc 获取准考证管理通知列表 */
+export function admissionTicketPage(query: ExamNoticePageQuery) {
+  return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/admissionTicket/page`, query)
+}
+
+
 /** @desc 获取通知总览列表 */
 export function overviewPage(query: ExamNoticePageQuery) {
   return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/overview/page`, query)
 }
-
 
 
 /** @desc 查询无损检测、检验人员考试报名审核通知列表 */
@@ -168,4 +173,32 @@ export interface NoticeProjectApplyResp {
 /** @desc 通知总览-项目汇总 */
 export function getNoticeProjectApplyOverview(noticeId: string) {
   return http.get<NoticeProjectApplyResp[]>(`${BASE_URL}/project/overview`, { noticeId })
+}
+
+// 报考项目响应
+export interface ProjectVo {
+  projectId: number
+  projectCode: string
+}
+
+// 准考证信息响应
+export interface AdmissionTicketInfoResp {
+  title: string
+  admissionTicketStatus: number
+  examProjectList: ProjectVo[]
+}
+
+/** @desc 准考证管理-获取准考证信息 */
+export function getAdmissionTicketInfo(noticeId: string) {
+  return http.get<AdmissionTicketInfoResp>(`${BASE_URL}/admissionTicket/info/${noticeId}`)
+}
+
+/** @desc 开启/关闭准考证下载 */
+export function toggleAdmissionTicketStatus(noticeId: string, status: number) {
+  return http.post(`${BASE_URL}/admissionTicket/toggle/${noticeId}/${status}`)
+}
+
+/** @desc 导出准考证 */
+export function exportAdmissionTicket(noticeId: string, projectIds: (string | number)[]) {
+  return http.download(`${BASE_URL}/admissionTicket/export/${noticeId}`, { projectIds })
 }

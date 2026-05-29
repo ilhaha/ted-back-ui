@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model:visible="visible" title="报名情况" :esc-to-close="false" width="60%" draggable :footer="null"
+  <a-modal v-model:visible="visible" title="报名情况"  width="60%" draggable :footer="null"
     modal-class="no-padding-modal" :body-style="{ padding: '0' }">
     <a-spin :loading="loading">
       <!-- 项目汇总卡片 -->

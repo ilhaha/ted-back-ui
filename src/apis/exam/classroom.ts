@@ -36,6 +36,12 @@ export interface ClassroomQuery {
 }
 export interface ClassroomPageQuery extends ClassroomQuery, PageQuery { }
 
+/** @desc 获取理论 - 考场级联选择器 */
+export function selectExamTypeRoomRespList(personType: number) {
+  return http.get<any[]>(`${BASE_URL}/select/examType/${personType}`)
+}
+
+
 /** @desc 查询考场列表 */
 export function listClassroom(query: ClassroomPageQuery) {
   return http.get<PageRes<ClassroomResp[]>>(`${BASE_URL}`, query)
