@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model:visible="visible" title="准考证详情" :width="width >= 900 ? 900 : '100%'" :footer="null"
+  <a-modal v-model:visible="visible" title="准考证设置详情" :width="width >= 900 ? 900 : '100%'" :footer="null"
     :mask-closable="false">
     <a-spin :loading="loading">
       <div class="table-wrapper">
@@ -18,23 +18,27 @@
                 </a-tag>
               </th>
               <th colspan="4">
-                <a-button type="primary" size="small"
+                <a-button size="small" type="outline" v-hasPermission="['notice:admissionTicket:toggleStatus']"
+                  :status="detailData.admissionTicketStatus === 1 ? 'danger' : 'primary'"
                   @click="onToggleStatus(detailData.admissionTicketStatus === 1 ? 0 : 1)">
                   {{ detailData.admissionTicketStatus === 1 ? '关闭下载' : '开启下载' }}
                 </a-button>
               </th>
-
             </tr>
             <tr>
-              <th colspan="12">
-                已下载人员表：
-                <a-checkbox-group v-model:modelValue="selectedProjects">
-                  <a-checkbox v-for="item in detailData.examProjectList" :key="item.value" :value="item.value">
-                    {{ item.label }}
-                  </a-checkbox>
+              <th colspan="4" style="text-align: center;">导出已下载人员表</th>
+              <th colspan="6" style="text-align: center;">
+                <a-checkbox-group v-model="selectedExportProjects" >
+                  <template v-for="project in detailData.examProjectList" :key="project.projectId">
+                    <a-checkbox :value="project.value" style="margin-right: 12px;">
+                      {{ project.label }}
+                    </a-checkbox>
+                  </template>
                 </a-checkbox-group>
-                <a-button type="primary" size="small" :disabled="selectedProjects.length === 0" @click="onExport">
-                  <template #icon><icon-download /></template>
+              </th>
+              <th colspan="2" style="text-align: center;">
+                <a-button type="primary" size="small" @click="onBatchExport"
+                  :disabled="selectedExportProjects.length === 0">
                   导出
                 </a-button>
               </th>
@@ -54,11 +58,13 @@
                   </a-tag>
                 </td>
                 <td colspan="3">
-                  已下载【0】人
+                  已下载【{{ project.downloadedCount || 0 }}】人
                 </td>
                 <td colspan="3">
-                  <a-button type="primary" size="small"
-                    @click="onToggleStatus(project.admissionTicketStatus === 1 ? 0 : 1)">
+                  <a-button type="outline" size="small"
+                    :status="project.admissionTicketStatus === 1 ? 'danger' : 'primary'"
+                    v-hasPermission="['notice:admissionTicket:toggleStatus']"
+                    @click="onToggleProjectStatus(project.projectId, project.admissionTicketStatus === 1 ? 0 : 1)">
                     {{ project.admissionTicketStatus === 1 ? '关闭下载' : '开启下载' }}
                   </a-button>
                 </td>
@@ -69,13 +75,18 @@
                 <td colspan="2">{{ getPracticalTypeText(item.practicalType) }}</td>
 
                 <td colspan="5">
-                  <a-cascader placeholder="考场" allow-clear class="search-input ml-2" :options="examRoomSelect" />
+                  <a-cascader :model-value="getExamRoomValue(project.projectId, item.scheduleId)"
+                    :placeholder="getExamRoomPlaceholder(item)" allow-clear :options="examRoomSelect"
+                    :disabled="project.admissionTicketStatus === 1"
+                    @update:model-value="(value: any) => onExamRoomChange(project.projectId, item.scheduleId, value)" />
                 </td>
 
                 <td colspan="5">
-                  <a-input placeholder="考试时间" />
+                  <a-date-picker :model-value="getExamTimeValue(project.projectId, item.scheduleId)"
+                    :placeholder="getExamTimePlaceholder(item)" :disabled="project.admissionTicketStatus === 1"
+                    value-format="YYYY-MM-DD HH:mm" show-time format="YYYY-MM-DD HH:mm" style="width: 100%;"
+                    @update:model-value="(value: any) => onExamTimeChange(project.projectId, item.scheduleId, value)" />
                 </td>
-
               </tr>
             </template>
           </tbody>
@@ -89,9 +100,9 @@
 
 <script setup lang="ts">
 import { useWindowSize } from '@vueuse/core'
-import { ref } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { type AdmissionTicketInfoResp, getAdmissionTicketInfo, toggleAdmissionTicketStatus, exportAdmissionTicket } from '@/apis/exam/examNotice'
+import { type AdmissionTicketInfoResp, getAdmissionTicketInfo, toggleAdmissionTicketStatus, exportAdmissionTicketRecord, toggleProjectAdmissionTicketStatus } from '@/apis/exam/examNotice'
 import { selectExamTypeRoomRespList } from '@/apis/exam/classroom'
 
 defineOptions({ name: 'AdmissionTicketDetailModal' })
@@ -100,9 +111,28 @@ const visible = ref(false)
 const loading = ref(false)
 const noticeId = ref('')
 const detailData = ref<AdmissionTicketInfoResp>({} as AdmissionTicketInfoResp)
-const selectedProjects = ref<(string | number)[]>([])
 const { width } = useWindowSize()
 const examRoomSelect = ref<any[]>([])
+
+// 导出项目选择
+const selectedExportProjects = ref<number[]>([])
+
+// 项目数据存储 { [projectId]: { [scheduleId]: { examRoomId, examTime } } }
+interface ExamItemData {
+  examRoomId: number | null
+  examTime: string
+}
+const projectData = reactive<Record<number, Record<number, ExamItemData>>>({})
+
+// 监听弹窗关闭，清空数据
+watch(visible, (val) => {
+  if (!val) {
+    Object.keys(projectData).forEach(key => delete projectData[Number(key)])
+    noticeId.value = ''
+    detailData.value = {} as AdmissionTicketInfoResp
+    selectedExportProjects.value = []
+  }
+})
 
 /** 考试类型映射 */
 const practicalTypeMap: Record<number, string> = {
@@ -118,6 +148,44 @@ const getPracticalTypeText = (type: number) => {
   return practicalTypeMap[type] || '未知'
 }
 
+/** 获取考场占位符 */
+const getExamRoomPlaceholder = (item: any) => {
+  return item.examRoomId ? '' : '选择考场'
+}
+
+/** 获取考试时间占位符 */
+const getExamTimePlaceholder = (item: any) => {
+  return item.examTime || '输入考试时间'
+}
+
+/** 获取考场值 */
+const getExamRoomValue = (projectId: number, scheduleId: number) => {
+  return projectData[projectId]?.[scheduleId]?.examRoomId
+}
+
+/** 获取考试时间值 */
+const getExamTimeValue = (projectId: number, scheduleId: number) => {
+  return projectData[projectId]?.[scheduleId]?.examTime
+}
+
+/** 初始化项目数据 */
+const initProjectData = () => {
+  // 清除旧数据
+  const keys = Object.keys(projectData)
+  keys.forEach(key => delete projectData[Number(key)])
+
+  // 设置新数据
+  for (const project of detailData.value.projectExamInfoRespList || []) {
+    projectData[project.projectId] = {}
+    for (const item of project.projectExamInfoItemRespList || []) {
+      projectData[project.projectId][item.scheduleId] = {
+        examRoomId: item.examRoomId ?? null,
+        examTime: item.examTime || ''
+      }
+    }
+  }
+}
+
 /** 获取详情数据 */
 const fetchDetail = async () => {
   if (!noticeId.value) return
@@ -125,6 +193,7 @@ const fetchDetail = async () => {
   try {
     const res = await getAdmissionTicketInfo(noticeId.value)
     detailData.value = res.data || {} as AdmissionTicketInfoResp
+    initProjectData()
   } finally {
     loading.value = false
   }
@@ -145,16 +214,111 @@ const onToggleStatus = async (status: number) => {
   }
 }
 
-/** 导出准考证 */
-const onExport = async () => {
-  if (selectedProjects.value.length === 0) {
-    Message.warning('请选择要导出的项目')
+/** 切换通知项目下载状态 */
+const onToggleProjectStatus = async (projectId: number, status: number) => {
+  if (detailData.value.admissionTicketStatus !== 1) {
+    Message.warning('请先开启通知准考证下载')
     return
   }
   try {
-    await exportAdmissionTicket(noticeId.value, selectedProjects.value)
-    Message.success('导出成功')
+    // 开启下载时，收集该项目下所有考试安排的数据
+    const project = detailData.value.projectExamInfoRespList?.find(p => p.projectId === projectId)
+    const scheduleList: { scheduleId: number; examRoomId: number | null; examTime: string }[] = []
+
+    if (status === 1 && project) {
+      // 验证所有考试安排都有考场和考试时间
+      for (const item of project.projectExamInfoItemRespList || []) {
+        const data = projectData[projectId]?.[item.scheduleId]
+        const examRoomId = data?.examRoomId ?? null
+        const examTime = data?.examTime ?? ''
+
+        if (!examRoomId) {
+          Message.warning(`请为【${project.projectCode}】的【${getPracticalTypeText(item.practicalType)}】选择考场`)
+          return
+        }
+        if (!examTime) {
+          Message.warning(`请为【${project.projectCode}】的【${getPracticalTypeText(item.practicalType)}】输入考试时间`)
+          return
+        }
+
+        scheduleList.push({
+          scheduleId: item.scheduleId,
+          practicalType: item.practicalType,
+          examRoomId,
+          examTime
+        })
+      }
+    }
+    await toggleProjectAdmissionTicketStatus(noticeId.value, projectId, status, scheduleList)
+    Message.success(status === 1 ? '已开启下载' : '已关闭下载')
+    fetchDetail()
   } catch (error) {
+  }
+}
+
+/** 考场变化 */
+const onExamRoomChange = (projectId: number, scheduleId: number, value: any) => {
+  if (!projectData[projectId]) {
+    projectData[projectId] = {}
+  }
+  if (!projectData[projectId][scheduleId]) {
+    projectData[projectId][scheduleId] = { examRoomId: null, examTime: '' }
+  }
+  // 级联选择器返回数组，取最后一个值（最底层）
+  if (value && Array.isArray(value)) {
+    projectData[projectId][scheduleId].examRoomId = value[value.length - 1] ?? null
+  } else {
+    projectData[projectId][scheduleId].examRoomId = value ?? null
+  }
+}
+
+/** 考试时间变化 */
+const onExamTimeChange = (projectId: number, scheduleId: number, value: any) => {
+  if (!projectData[projectId]) {
+    projectData[projectId] = {}
+  }
+  if (!projectData[projectId][scheduleId]) {
+    projectData[projectId][scheduleId] = { examRoomId: null, examTime: '' }
+  }
+  projectData[projectId][scheduleId].examTime = value?.target?.value || value || ''
+}
+
+
+/** 批量导出选中的项目准考证 */
+const onBatchExport = async () => {
+  if (selectedExportProjects.value.length === 0) {
+    Message.warning('请选择要导出的项目')
+    return
+  }
+
+  loading.value = true
+  try {
+    const res = await exportAdmissionTicketRecord({
+      noticeId: noticeId.value,
+      projectIds: selectedExportProjects.value
+    })
+
+
+    // =========================
+    // 核心：触发浏览器下载
+    // =========================
+    const blob = new Blob([res.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+
+    const url = window.URL.createObjectURL(blob)
+
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `准考证导出.xlsx`
+
+    document.body.appendChild(link)
+    link.click()
+
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -162,7 +326,6 @@ const onExport = async () => {
 const onOpen = (id: string) => {
   noticeId.value = id
   visible.value = true
-  selectedProjects.value = []
   fetchDetail()
   getExamRoomSelect()
 }
@@ -194,21 +357,6 @@ defineExpose({ onOpen })
   background: var(--bg);
 }
 
-.info-th {
-  padding: 14px 16px;
-  line-height: 1.8;
-}
-
-.info-th span {
-  margin-right: 24px;
-  /* ✔ 关键：间距 */
-  display: inline-block;
-}
-
-.info-th .gap {
-  margin-right: 24px;
-}
-
 /* ========== 表格基础 ========== */
 .report-table {
   width: 100%;
@@ -219,12 +367,9 @@ defineExpose({ onOpen })
   table-layout: fixed;
 }
 
-
-
 .report-table th,
 .report-table td {
   border: 1px solid #e8edf4;
-  /* ✅ 恢复完整边框 */
   padding: 10px 12px;
   white-space: nowrap;
   color: #1d2129;
@@ -239,94 +384,9 @@ defineExpose({ onOpen })
   z-index: 5;
 }
 
-/* 子表头 */
-.sub-header {
-  background: #eef2f7;
-  color: #4e5969;
-  font-weight: 500;
-}
-
-/* ========== 斑马纹（更轻） ========== */
-.report-table tbody tr:nth-child(even) {
-  background: var(--bg-zebra);
-}
-
-/* hover（避免太重） */
-.report-table tbody tr:hover {
-  background: var(--bg-hover);
-}
-
-/* ========== 左侧固定列 ========== */
-.fixed-left {
-  position: sticky;
-  left: 0;
-  z-index: 3;
-  background: var(--bg);
-  font-weight: 600;
-  min-width: 120px;
-}
-
-/* 表头 + 左侧交叉层级 */
-thead .fixed-left {
-  z-index: 6;
-  background: var(--bg-header);
-}
-
-/* ========== 数值样式 ========== */
-.data-value {
-  font-weight: 600;
-}
-
-.primary {
-  color: var(--primary);
-}
-
-.success {
-  color: var(--success);
-}
-
-.warning {
-  color: var(--warning);
-}
-
-.secondary {
-  color: var(--sub-text);
-}
-
-/* ========== 合计行（重点优化） ========== */
-.total-row {
-  position: sticky;
-  bottom: 0;
-  z-index: 4;
-}
-
-.total-row td {
-  background: #e6f4ff;
-  font-weight: 700;
-}
-
-/* 合计行左侧固定列 */
-.total-row .fixed-left {
-  background: #e6f4ff;
-}
-
-/* hover 合计行 */
-.total-row:hover td {
-  background: #d6ecff;
-}
-
-/* ========== 滚动条（可选优化） ========== */
-.table-wrapper::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb {
-  background: #d0d7de;
-  border-radius: 4px;
-}
-
-.table-wrapper::-webkit-scrollbar-track {
-  background: #f6f8fa;
+/* ========== 项目操作行 ========== */
+.project-action-row td {
+  background: #fff !important;
+  padding: 8px 12px;
 }
 </style>

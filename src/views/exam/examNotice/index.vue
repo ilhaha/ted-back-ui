@@ -54,8 +54,8 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['exam:examNotice:update']" title="修改" @click="onUpdate(record)"
-            v-if="record.status == 0 || record == 2">修改</a-link>
+          <!-- <a-link v-permission="['exam:examNotice:update']" title="修改" @click="onUpdate(record)"
+            v-if="record.status == 0 || record == 2">修改</a-link> -->
           <a-link v-permission="['exam:examNotice:audit']" title="审核" @click="onAudit(record)"
             v-if="record.status == 0">审核</a-link>
           <a-link v-permission="['exam:examNotice:delete']" status="danger" :disabled="record.disabled"

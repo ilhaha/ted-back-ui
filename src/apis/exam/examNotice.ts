@@ -42,7 +42,7 @@ export interface ExamNoticeQuery {
   status: string | undefined
   sort: Array<string>
 }
-export interface ExamNoticePageQuery extends ExamNoticeQuery, PageQuery {}
+export interface ExamNoticePageQuery extends ExamNoticeQuery, PageQuery { }
 
 /** @desc 获取准考证管理通知列表 */
 export function admissionTicketPage(query: ExamNoticePageQuery) {
@@ -198,7 +198,18 @@ export function toggleAdmissionTicketStatus(noticeId: string, status: number) {
   return http.post(`${BASE_URL}/admissionTicket/toggle/${noticeId}/${status}`)
 }
 
-/** @desc 导出准考证 */
-export function exportAdmissionTicket(noticeId: string, projectIds: (string | number)[]) {
-  return http.download(`${BASE_URL}/admissionTicket/export/${noticeId}`, { projectIds })
+/** @desc 开启/关闭准考证下载 */
+export function toggleProjectAdmissionTicketStatus(noticeId: string, projectId: number, status: number, scheduleList?: { scheduleId: number; examRoomId: number | null; examTime: string }[]) {
+  return http.post(`${BASE_URL}/admissionTicket/toggle/project`, { noticeId, projectId, status, scheduleList })
+}
+
+
+/** @desc 导出已下载准考证人员列表 */
+export function exportAdmissionTicketRecord(query: {
+  noticeId: string
+  projectIds: (string | number)[]
+}) {
+  return http.download(`${BASE_URL}/admissionTicket/record/export`, query, {
+    responseType: 'blob'
+  })
 }

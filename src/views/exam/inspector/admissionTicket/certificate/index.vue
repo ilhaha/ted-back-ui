@@ -33,6 +33,11 @@
           {{ getExamLevelText(record.examLevel) }}
         </a-tag>
       </template>
+      <template #admissionTicketStatus="{ record }">
+        <a-tag :color="getAdmissionTicketStatusColor(record.admissionTicketStatus)" bordered>
+          {{ getAdmissionTicketStatusText(record.admissionTicketStatus) }}
+        </a-tag>
+      </template>
       <template #action="{ record }">
         <a-space>
           <a-link v-permission="['notice:admissionTicket:detail']" title="详情" @click="onDetail(record)">详情</a-link>
@@ -102,6 +107,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '考试等级', dataIndex: 'examLevel', slotName: 'examLevel' },
   { title: '说明', dataIndex: 'remark', slotName: 'remark' },
   { title: '状态', dataIndex: 'status', slotName: 'status' },
+  { title: '准考证下载状态', dataIndex: 'admissionTicketStatus', slotName: 'admissionTicketStatus' },
   { title: '创建人', dataIndex: 'createUserString', slotName: 'createUser' },
   {
     title: '操作',
@@ -158,10 +164,26 @@ const getStatusColor = (status: number) => {
     case 1: return 'green'      // 报名中
     case 2: return 'red'        // 审核未通过
     case 3: return 'blue'     // 补报中
-    case 4: return 'gray'       // 报名结束
+    case 4: return 'red'       // 报名结束
     case 5: return 'orange'      // 已开考
     case 6: return 'default'    // 已结束
     default: return 'default'
+  }
+};
+
+const getAdmissionTicketStatusColor = (status: number) => {
+  switch (status) {
+    case 0: return 'red'
+    case 1: return 'green'
+    default: return 'default'
+  }
+};
+
+const getAdmissionTicketStatusText = (status: number) => {
+  switch (status) {
+    case 0: return '未开启'
+    case 1: return '已开启'
+    default: return '未知状态'
   }
 };
 
