@@ -1,8 +1,9 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="报名审核 - 取证管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="准考证管理 - 取证" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
-      :disabled-column-keys="['name']" @refresh="search">
+      :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
+      @select-all="selectAll">
       <template #toolbar-left>
         <a-input-search v-model="queryForm.title" placeholder="请输入通知内容" allow-clear @search="search" />
         <a-select v-model="queryForm.status" placeholder="通知状态" allow-clear class="search-input ml-2" @change="search"
@@ -13,7 +14,6 @@
         </a-select>
         <a-select v-model="queryForm.examLevel" placeholder="考试等级" allow-clear class="search-input ml-2"
           @change="search" style="margin-left: 8px;">
-          <a-option value="0">无</a-option>
           <a-option value="1">Ⅰ级</a-option>
           <a-option value="2">Ⅱ级</a-option>
         </a-select>
@@ -33,27 +33,32 @@
           {{ getExamLevelText(record.examLevel) }}
         </a-tag>
       </template>
+      <template #admissionTicketStatus="{ record }">
+        <a-tag :color="getAdmissionTicketStatusColor(record.admissionTicketStatus)" bordered>
+          {{ getAdmissionTicketStatusText(record.admissionTicketStatus) }}
+        </a-tag>
+      </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['noticeApply:audit:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+          <a-link v-permission="['notice:admissionTicket:detail']" title="详情" @click="onDetail(record)">详情</a-link>
         </a-space>
-
       </template>
     </GiTable>
-    <NoticeApplyDetail ref="NoticeApplyDetailRef" />
-
   </div>
 </template>
 
 <script setup lang="ts">
-import { type ExamNoticeResp, type ExamNoticeQuery, deleteExamNotice, exportExamNotice, applyAuditPage } from '@/apis/exam/examNotice'
+import { Message } from '@arco-design/web-vue'
+import { type ExamNoticeResp, type ExamNoticeQuery, deleteExamNotice, exportExamNotice, admissionTicketPage, auditExamNotice } from '@/apis/exam/examNotice'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
+import { useDict } from '@/hooks/app'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
-import NoticeApplyDetail from '../NoticeApplyDetail.vue'
 
 defineOptions({ name: 'ExamNotice' })
+
+
 
 
 const queryForm = reactive<ExamNoticeQuery>({
@@ -61,7 +66,8 @@ const queryForm = reactive<ExamNoticeQuery>({
   applyDeadline: undefined,
   examLevel: undefined,
   status: undefined,
-  examType: 2
+  categoryId: 40,
+  categoryType: 3,
 })
 
 const {
@@ -69,8 +75,21 @@ const {
   loading,
   pagination,
   search,
-  handleDelete
-} = useTable((page) => applyAuditPage({ ...queryForm, ...page }), { immediate: true })
+  handleDelete,
+  selectedKeys,
+  select,
+  selectAll
+} = useTable((page) => admissionTicketPage({ ...queryForm, ...page }), { immediate: true })
+
+const rowSelection = reactive({
+  type: 'checkbox',
+  showCheckedAll: true,
+  onlyCurrent: false,
+  selectedRowKeys: selectedKeys,
+  onChange: (keys: string[]) => {
+    selectedKeys.value = keys
+  }
+})
 
 const columns = ref<TableInstanceColumns[]>([
   // { title: '主键ID', dataIndex: 'id', slotName: 'id' },
@@ -81,6 +100,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '考试等级', dataIndex: 'examLevel', slotName: 'examLevel' },
   { title: '说明', dataIndex: 'remark', slotName: 'remark' },
   { title: '状态', dataIndex: 'status', slotName: 'status' },
+  { title: '准考证下载状态', dataIndex: 'admissionTicketStatus', slotName: 'admissionTicketStatus' },
   { title: '创建人', dataIndex: 'createUserString', slotName: 'createUser' },
   {
     title: '操作',
@@ -89,16 +109,9 @@ const columns = ref<TableInstanceColumns[]>([
     width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['noticeApply:audit:detail'])
+    show: has.hasPermOr(['notice:admissionTicket:detail'])
   }
 ]);
-
-
-const NoticeApplyDetailRef = ref<InstanceType<typeof NoticeApplyDetail>>()
-// 详情
-const onDetail = (record: ExamNoticeResp) => {
-  NoticeApplyDetailRef.value?.onOpen(record.id, record.title)
-}
 
 // 重置
 const reset = () => {
@@ -106,6 +119,8 @@ const reset = () => {
   queryForm.applyDeadline = undefined
   queryForm.examLevel = undefined
   queryForm.status = undefined
+  queryForm.categoryId = 40
+  queryForm.categoryType = 3
   search()
 }
 
@@ -138,32 +153,45 @@ const getExamLevelText = (status: number) => {
 
 const getStatusColor = (status: number) => {
   switch (status) {
-    case 1:
-      return "green"; 
-    case 3:
-      return "blue"; 
-    case 4:
-      return "red";
-  
-    default:
-      return "default";
+    case 0: return 'blue'      // 待审核
+    case 1: return 'green'      // 报名中
+    case 2: return 'red'        // 审核未通过
+    case 3: return 'blue'     // 补报中
+    case 4: return 'red'       // 报名结束
+    case 5: return 'orange'      // 已开考
+    case 6: return 'default'    // 已结束
+    default: return 'default'
+  }
+};
+
+const getAdmissionTicketStatusColor = (status: number) => {
+  switch (status) {
+    case 0: return 'red'
+    case 1: return 'green'
+    default: return 'default'
+  }
+};
+
+const getAdmissionTicketStatusText = (status: number) => {
+  switch (status) {
+    case 0: return '未开启'
+    case 1: return '已开启'
+    default: return '未知状态'
   }
 };
 
 const getStatusText = (status: number) => {
   switch (status) {
-    case 1:
-      return "报名中";
-    case 3:
-      return "补报中";
-    case 4:
-      return "报名已结束";
-    default:
-      return "未知状态";
+    case 0: return '待审'
+    case 1: return '报名中'
+    case 2: return '已驳回'
+    case 3: return '补报中'
+    case 4: return '报名已结束'
+    case 5: return '考试中'
+    case 6: return '已结束'
+    default: return '未知状态'
   }
 };
-
-
 </script>
 
 <style scoped lang="scss"></style>

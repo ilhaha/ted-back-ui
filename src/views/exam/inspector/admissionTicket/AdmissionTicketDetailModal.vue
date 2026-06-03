@@ -37,7 +37,7 @@
                 </a-checkbox-group>
               </th>
               <th colspan="2" style="text-align: center;">
-                <a-button type="primary" size="small" @click="onBatchExport"
+                <a-button type="primary" size="small" @click="onBatchExport" v-hasPermission="['notice:admissionTicket:exportRecord']"
                   :disabled="selectedExportProjects.length === 0">
                   导出
                 </a-button>
