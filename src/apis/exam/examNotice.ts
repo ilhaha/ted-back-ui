@@ -44,6 +44,11 @@ export interface ExamNoticeQuery {
 }
 export interface ExamNoticePageQuery extends ExamNoticeQuery, PageQuery { }
 
+/** @desc 获取其它培训通知列表 */
+export function otherTrainingPage(query: ExamNoticePageQuery) {
+  return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/otherTraining/page`, query)
+}
+
 /** @desc 获取准考证管理通知列表 */
 export function admissionTicketPage(query: ExamNoticePageQuery) {
   return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/admissionTicket/page`, query)

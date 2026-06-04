@@ -10,8 +10,8 @@
       </template>
       <template #examAttemptType>
         <a-radio-group v-model="form.examAttemptType">
-          <a-radio :value="0">初考、补考</a-radio>
-          <a-radio :value="1">初考</a-radio>
+          <a-radio :value="0">初试、补考</a-radio>
+          <a-radio :value="1">初试</a-radio>
           <a-radio :value="2">补考</a-radio>
           <a-radio :value="3">无</a-radio>
         </a-radio-group>

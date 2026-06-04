@@ -115,7 +115,7 @@
           <a-link
             @click="onViewFirstScore(record.candidatesId, record.projectId)"
           >
-            初考成绩
+            初试成绩
           </a-link>
         </template>
         <template v-else>
@@ -143,7 +143,7 @@
     <ApplyMaterialModal ref="ApplyMaterialModalRef" />
     <a-modal
       v-model:visible="firstScoreVisible"
-      title="初考成绩"
+      title="初试成绩"
       :footer="null"
       width="600px"
       @cancel="firstScoreVisible = false"
@@ -330,8 +330,8 @@ const getProjectLevelName = (type: number | undefined) => {
 
 // 定义项目考试等级映射关系
 const examTypeMap = {
-  1: "初考", // 1 对应初考
-  2: "初考", // 2 对应初考
+  1: "初试", // 1 对应初试
+  2: "补考", // 2 对应补考
 };
 
 // 根据数字获取种类类型中文名称

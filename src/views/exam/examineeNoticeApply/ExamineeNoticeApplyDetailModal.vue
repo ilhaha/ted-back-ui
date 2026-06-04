@@ -101,7 +101,7 @@
                   </a-col>
                   <a-col :span="8">
                     <div class="form-item" style="border-right: 0;">
-                      <span class="form-value "> {{ item.examAttemptType === 1 ? '初考' : item.examAttemptType === 2 ?
+                      <span class="form-value "> {{ item.examAttemptType === 1 ? '初试' : item.examAttemptType === 2 ?
                         '补考'
                         : '-' }}</span>
                     </div>

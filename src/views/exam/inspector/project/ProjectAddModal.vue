@@ -192,12 +192,15 @@ const columns: ColumnItem[] = reactive([
     },
   },
   {
-    label: "收费标准（元）",
-    prop: "examFee",
-    field: "examFee",
+    label: "培训费用",
+    prop: "trainingFee",
+    field: "trainingFee",
     type: "input-number",
-    required: true,
+    props: {
+      min: 0,
+    },
     span: 24,
+    rules: [{ required: true, message: '请输入培训费用' }],
   },
 ]);
 

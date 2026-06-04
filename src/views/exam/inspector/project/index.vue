@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="检测项目管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="检验、检测项目管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #isOperation="{ record }">
@@ -176,7 +176,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: "项目状态", dataIndex: "projectStatus", slotName: "projectStatus", align: "center" },
   { title: "理论考试", dataIndex: "isTheory", slotName: "isTheory", align: "center" },
   { title: "实操考试", dataIndex: "isOperation", slotName: "isOperation", align: "center" },
-  { title: "项目收费标准（元）", dataIndex: "examFee", slotName: "examFee", align: "center" },
+  { title: "培训费用（元）", dataIndex: "trainingFee", slotName: "trainingFee", align: "center" },
   {
     title: "创建人",
     dataIndex: "createUserString",

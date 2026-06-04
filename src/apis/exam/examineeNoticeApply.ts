@@ -79,3 +79,31 @@ export function exportExamineeNoticeApply(query: ExamineeNoticeApplyQuery) {
 export function auditExamineeNoticeApply(data: any) {
   return http.post(`${BASE_URL}/audit`, data)
 }
+
+
+
+// 报考项目 VO
+export interface ApplyProjectVO {
+  applyRecordId: number
+  projectId: string
+  projectCode: string
+  examAttemptType: number
+  practicalType: number
+  paymentOrderNo: string
+  selected?: boolean
+}
+
+// 审核通过人员 VO
+export interface NoticeAuditPassedVO {
+  applyId: number
+  sort: number
+  realName: string
+  idCardNumber: string
+  paymentOrderNo: string
+  projectList: ApplyProjectVO[]
+}
+
+/** @desc 获取通知资料审核通过人员列表 */
+export function noticeAuditPassedPage(query: ExamineeNoticeApplyQuery) {
+  return http.get<PageRes<NoticeAuditPassedVO[]>>(`${BASE_URL}/audit/passed`, query)
+}

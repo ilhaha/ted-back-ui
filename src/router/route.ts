@@ -12,12 +12,6 @@ export const systemRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
   {
-    path: '/testysy',
-    name: 'Testysy',
-    component: () => import('@/views/testysy.vue'),
-    meta: { hidden: true },
-  },
-  {
     path: '/',
     name: 'Dashboard',
     component: Layout,
