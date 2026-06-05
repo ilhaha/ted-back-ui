@@ -65,6 +65,7 @@ const [form, resetForm] = useResetReactive({
   projectLevel: 0,
   isTheory: 1,
   examFee: 0,
+  trainingFee: 0,
 });
 
 
@@ -190,6 +191,17 @@ const columns: ColumnItem[] = reactive([
       ],
       placeholder: "请选择项目状态",
     },
+  },
+    {
+    label: "考试费用",
+    prop: "examFee",
+    field: "examFee",
+    type: "input-number",
+    props: {
+      min: 0,
+    },
+    span: 24,
+    rules: [{ required: true, message: '请输入考试费用' }],
   },
   {
     label: "培训费用",

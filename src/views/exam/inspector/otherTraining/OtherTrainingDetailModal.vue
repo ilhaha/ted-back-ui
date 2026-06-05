@@ -24,34 +24,23 @@
         >
           <template #toolbar-left>
             <a-input-search
-              v-model="queryForm.title"
-              placeholder="请输入通知内容"
+              v-model="queryForm.realName"
+              placeholder="请输入姓名"
               allow-clear
               @search="search"
             />
-            <a-select
-              v-model="queryForm.status"
-              placeholder="通知状态"
+            <a-input-search
+              v-model="queryForm.username"
+              placeholder="请输入身份证号"
               allow-clear
-              class="search-input ml-2"
-              @change="search"
-              style="margin-left: 8px"
-            >
-              <a-option value="1">报名中</a-option>
-              <a-option value="3">补报中</a-option>
-              <a-option value="4">报名已结束</a-option>
-            </a-select>
-            <a-select
-              v-model="queryForm.examLevel"
-              placeholder="考试等级"
+              @search="search"
+            />
+            <a-input-search
+              v-model="queryForm.companyName"
+              placeholder="请输入单位名称"
               allow-clear
-              class="search-input ml-2"
-              @change="search"
-              style="margin-left: 8px"
-            >
-              <a-option value="1">Ⅰ级</a-option>
-              <a-option value="2">Ⅱ级</a-option>
-            </a-select>
+              @search="search"
+            />
 
             <a-button @click="reset">
               <template #icon><icon-refresh /></template>
@@ -105,7 +94,9 @@
             v-if="allConfirmedProjects.length > 0"
             type="text"
             size="small"
-            @click="allConfirmedProjects = []"
+            :loading="downloadLoading"
+            @click="onDownload()"
+            v-hasPermission="['notice:otherTraining:download']"
           >
             下载
           </a-button>
@@ -119,13 +110,14 @@
             >
               <div class="person-info">
                 <div class="person-left">
-                  <span class="name" style="font-size:14px">{{ person.realName }}</span>
-                  <span class="person-fee" >培训费: {{ person.trainingFee.toFixed(2) }} 元</span>
+                  <span class="name" style="font-size: 14px">{{
+                    person.realName
+                  }}</span>
+                  <span class="person-fee"
+                    >培训费: {{ person.trainingFee.toFixed(2) }} 元</span
+                  >
                 </div>
-                <a-link
-                  class="delete-link"
-                  @click="removePerson(person)"
-                >
+                <a-link class="delete-link" @click="removePerson(person)">
                   删除
                 </a-link>
               </div>
@@ -135,7 +127,7 @@
                   :key="project.applyRecordId"
                   class="project-tag"
                 >
-                  <a-tag color="arcoblue" >
+                  <a-tag color="arcoblue">
                     {{ project.projectCode }}
                     {{ getExamAttemptTypeText(project.examAttemptType) }}
                     {{ project.practicalType }}
@@ -155,6 +147,7 @@
 import { Message, Modal } from "@arco-design/web-vue";
 import {
   noticeAuditPassedPage,
+  downloadTrainingFeeNotice,
   type NoticeAuditPassedVO,
   type ExamineeNoticeApplyQuery,
 } from "@/apis/exam/examineeNoticeApply";
@@ -170,10 +163,10 @@ const title = ref("");
 defineOptions({ name: "ExamNotice" });
 
 const queryForm = reactive<ExamineeNoticeApplyQuery>({
-  examineeId: undefined,
   noticeId: undefined,
-  status: undefined,
-  sort: [],
+  realName: undefined,
+  username: undefined,
+  companyName: undefined,
 });
 
 const {
@@ -185,6 +178,7 @@ const {
   selectedKeys,
   select,
   selectAll,
+  refresh,
 } = useTable((page) => noticeAuditPassedPage({ ...queryForm, ...page }), {
   immediate: false,
 });
@@ -205,6 +199,39 @@ const expandable = reactive({
   defaultExpandAllRows: true,
 });
 
+// 下载交费通知单
+const downloadLoading = ref(false);
+const onDownload = async () => {
+  downloadLoading.value = true;
+  try {
+    const reqList = groupedTrainedList.value.map((person: any) => ({
+      name: person.realName,
+      trainingFee: person.trainingFee,
+      companyName: person.companyName,
+      feeNoticeList: person.projects.map((p: any) => ({
+        applyRecordId: p.applyRecordId,
+        examAttemptType: getExamAttemptTypeText(p.examAttemptType),
+        practicalType: p.practicalType,
+        projectCode: p.projectCode,
+      })),
+    }));
+
+    const res = await downloadTrainingFeeNotice(queryForm.noticeId, reqList);
+    const blob = new Blob([res], { type: "application/pdf" });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "培训交费通知单.pdf";
+    a.click();
+    window.URL.revokeObjectURL(url);
+    allConfirmedProjects.value = [];
+    refresh();
+  } finally {
+    downloadLoading.value = false;
+  }
+};
+
 // 所有确认的项目数组
 const allConfirmedProjects = ref<any[]>([]);
 
@@ -219,6 +246,7 @@ const groupedTrainedList = computed(() => {
       map.set(key, {
         idCardNumber: project.idCardNumber,
         realName: project.realName,
+        companyName: project.companyName,
         projects: [project],
       });
     }
@@ -330,7 +358,8 @@ const totalTrainingFee = computed(() => {
   });
 
   return Array.from(grouped.values()).reduce(
-    (total, personProjects) => total + calculatePersonTrainingFee(personProjects),
+    (total, personProjects) =>
+      total + calculatePersonTrainingFee(personProjects),
     0
   );
 });
@@ -375,6 +404,9 @@ const columns = ref<TableInstanceColumns[]>([
 
 // 重置
 const reset = () => {
+  queryForm.realName = undefined;
+  queryForm.username = undefined;
+  queryForm.companyName = undefined;
   search();
 };
 
@@ -389,6 +421,7 @@ const onTraining = (record: NoticeAuditPassedVO) => {
     .filter((project: any) => project.selected)
     .map((project: any) => ({
       ...project,
+      companyName: record.companyName,
       realName: record.realName,
       idCardNumber: record.idCardNumber,
     }));
@@ -402,17 +435,17 @@ const onTraining = (record: NoticeAuditPassedVO) => {
 
 // 删除单个人员的所有项目
 const removePerson = (person: any) => {
-    allConfirmedProjects.value = allConfirmedProjects.value.filter(
-        (p) => p.idCardNumber !== person.idCardNumber
-      );
+  allConfirmedProjects.value = allConfirmedProjects.value.filter(
+    (p) => p.idCardNumber !== person.idCardNumber
+  );
 };
 
 // 打开弹窗
 const onOpen = (id: string, noticeTitle: string) => {
   allConfirmedProjects.value = [];
   queryForm.noticeId = id;
+  reset();
   title.value = noticeTitle + " - 详情";
-  search();
   visible.value = true;
 };
 

@@ -75,6 +75,11 @@ export function exportExamineeNoticeApply(query: ExamineeNoticeApplyQuery) {
   return http.download(`${BASE_URL}/export`, query)
 }
 
+/** @desc 下载培训交费单 */
+export function downloadTrainingFeeNotice(noticeId:any,reqList: any[]) {
+  return http.post(`${BASE_URL}/feeNotice/download/${noticeId}`, reqList, { responseType: 'blob' })
+}
+
 /** @desc 审核 */
 export function auditExamineeNoticeApply(data: any) {
   return http.post(`${BASE_URL}/audit`, data)
