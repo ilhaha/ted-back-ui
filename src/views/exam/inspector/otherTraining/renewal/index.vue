@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="准考证管理 - 取证" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="换证培训管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search" :row-selection="rowSelection" @select="select"
       @select-all="selectAll">
@@ -40,16 +40,17 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link v-permission="['notice:admissionTicket:detail']" title="详情" @click="onDetail(record)">详情</a-link>
+          <a-link v-permission="['notice:otherTraining:detail']" title="详情" @click="onDetail(record)">详情</a-link>
         </a-space>
       </template>
     </GiTable>
+    <OtherTrainingDetailModal ref="OtherTrainingDetailModalRef" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { Message } from '@arco-design/web-vue'
-import { type ExamNoticeResp, type ExamNoticeQuery, deleteExamNotice, exportExamNotice, admissionTicketPage, auditExamNotice } from '@/apis/exam/examNotice'
+import OtherTrainingDetailModal from '../OtherTrainingDetailModal.vue'
+import { type ExamNoticeResp, type ExamNoticeQuery, deleteExamNotice, exportExamNotice, otherTrainingPage, auditExamNotice } from '@/apis/exam/examNotice'
 import type { TableInstanceColumns } from '@/components/GiTable/type'
 import { useDownload, useTable } from '@/hooks'
 import { useDict } from '@/hooks/app'
@@ -58,11 +59,14 @@ import has from '@/utils/has'
 
 defineOptions({ name: 'ExamNotice' })
 
+const OtherTrainingDetailModalRef = ref<InstanceType<typeof OtherTrainingDetailModal>>()
 
-
+// 详情
+const onDetail = (record: ExamNoticeResp) => {
+  OtherTrainingDetailModalRef.value?.onOpen(record.id, record.title)
+}
 
 const queryForm = reactive<ExamNoticeQuery>({
-  title: undefined,
   applyDeadline: undefined,
   examLevel: undefined,
   status: undefined,
@@ -72,15 +76,14 @@ const queryForm = reactive<ExamNoticeQuery>({
 
 const {
   tableData: dataList,
-  loading,
-  pagination,
   search,
   handleDelete,
   selectedKeys,
   select,
   selectAll
-} = useTable((page) => admissionTicketPage({ ...queryForm, ...page }), { immediate: true })
-
+} = useTable((page) => otherTrainingPage({ ...queryForm, ...page }), {
+  immediate: true,
+});
 const rowSelection = reactive({
   type: 'checkbox',
   showCheckedAll: true,
@@ -100,7 +103,6 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '考试等级', dataIndex: 'examLevel', slotName: 'examLevel' },
   { title: '说明', dataIndex: 'remark', slotName: 'remark' },
   { title: '状态', dataIndex: 'status', slotName: 'status' },
-  { title: '准考证下载状态', dataIndex: 'admissionTicketStatus', slotName: 'admissionTicketStatus' },
   { title: '创建人', dataIndex: 'createUserString', slotName: 'createUser' },
   {
     title: '操作',
@@ -109,7 +111,7 @@ const columns = ref<TableInstanceColumns[]>([
     width: 160,
     align: 'center',
     fixed: !isMobile() ? 'right' : undefined,
-    show: has.hasPermOr(['notice:admissionTicket:detail'])
+    show: has.hasPermOr(['notice:otherTraining:detail'])
   }
 ]);
 
@@ -119,7 +121,7 @@ const reset = () => {
   queryForm.applyDeadline = undefined
   queryForm.examLevel = undefined
   queryForm.status = undefined
-  queryForm.categoryId = 40
+  queryForm.categoryId = 39
   queryForm.categoryType = 3
   search()
 }
@@ -192,6 +194,7 @@ const getStatusText = (status: number) => {
     default: return '未知状态'
   }
 };
+
 </script>
 
 <style scoped lang="scss"></style>

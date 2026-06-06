@@ -1,7 +1,7 @@
 <template>
   <a-modal
     v-model:visible="visible"
-    :title="title + ' - 详情'"
+    :title="title"
     :width="width >= 900 ? 900 : '90%'"
     :footer="null"
     :mask-closable="false"
@@ -24,37 +24,14 @@
         >
           <template #toolbar-left>
             <a-input-search
-              v-model="queryForm.realName"
-              placeholder="请输入姓名"
+              v-model="queryForm.paymentOrderNo"
+              placeholder="培训单号"
               allow-clear
               @search="search"
             />
-            <a-input-search
-              v-model="queryForm.username"
-              placeholder="请输入身份证号"
-              allow-clear
-              @search="search"
-            />
-            <a-input-search
-              v-model="queryForm.companyName"
-              placeholder="请输入单位名称"
-              allow-clear
-              @search="search"
-            />
-
             <a-button @click="reset">
               <template #icon><icon-refresh /></template>
               <template #default>重置</template>
-            </a-button>
-          </template>
-
-          <template #toolbar-right>
-            <a-button
-              type="primary"
-              @click="onBillsDetail()"
-              v-hasPermission="['exam:trainingFeeNoticeDetail:list']"
-            >
-              单据记录
             </a-button>
           </template>
           <template #projectList="{ record }">
@@ -79,10 +56,10 @@
           <template #action="{ record }">
             <a-space>
               <a-link
-                v-permission="['notice:otherTraining:detail']"
-                title="培训"
-                @click="onTraining(record)"
-                >培训</a-link
+                v-permission="['exam:trainingFeeNoticeDetail:detail']"
+                title="详情"
+                @click="onBillsDetail(record)"
+                >详情</a-link
               >
             </a-space>
           </template>
@@ -92,7 +69,11 @@
       <div class="trained-list-wrapper">
         <div class="trained-header">
           <div class="trained-header-left">
-            <span>培训交费列表 ({{ groupedTrainedList.length }})</span>
+            <span
+              >{{ paymentOrderNo }}单据列表 ({{
+                groupedTrainedList.length
+              }})</span
+            >
             <span class="total-fee"
               >人项数: {{ totalSelectedProjects }} 项</span
             >
@@ -100,22 +81,12 @@
               >总培训费: {{ totalTrainingFee.toFixed(2) }} 元</span
             >
           </div>
-          <a-button
-            v-if="allConfirmedProjects.length > 0"
-            type="text"
-            size="small"
-            :loading="downloadLoading"
-            @click="onDownload()"
-            v-hasPermission="['notice:otherTraining:download']"
-          >
-            下载
-          </a-button>
         </div>
         <div class="trained-list">
           <template v-if="groupedTrainedList.length > 0">
             <div
               v-for="person in groupedTrainedList"
-              :key="person.idCardNumber"
+              :key="person.applyId"
               class="trained-item"
             >
               <div class="person-info">
@@ -127,9 +98,6 @@
                     >培训费: {{ person.trainingFee.toFixed(2) }} 元</span
                   >
                 </div>
-                <a-link class="delete-link" @click="removePerson(person)">
-                  删除
-                </a-link>
               </div>
               <div class="projects">
                 <div
@@ -146,40 +114,36 @@
               </div>
             </div>
           </template>
-          <a-empty v-else description="暂无培训人员" />
+          <a-empty v-else description="暂无培训信息" />
         </div>
       </div>
     </div>
   </a-modal>
-  <BillsDetailModel ref="billsDetailModel" />
 </template>
 
 <script setup lang="ts">
 import { Message, Modal } from "@arco-design/web-vue";
 import {
-  noticeAuditPassedPage,
-  downloadTrainingFeeNotice,
-  type NoticeAuditPassedVO,
-  type ExamineeNoticeApplyQuery,
-} from "@/apis/exam/examineeNoticeApply";
-import BillsDetailModel from "./BillsDetailModel.vue";
+  type TrainingFeeNoticeQuery,
+  type TrainingFeeNoticeDetailResp,
+  listTrainingFeeNotice,
+  getTrainingFeeNotice,
+} from "@/apis/exam/trainingFeeNotice";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
 import { useDict } from "@/hooks/app";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
 
-
 const visible = ref(false);
 const title = ref("");
-
+const paymentOrderNo = ref("");
 defineOptions({ name: "ExamNotice" });
 
-const queryForm = reactive<ExamineeNoticeApplyQuery>({
+const queryForm = reactive<TrainingFeeNoticeQuery>({
   noticeId: undefined,
-  realName: undefined,
-  username: undefined,
-  companyName: undefined,
+  paymentOrderNo: undefined,
+  sort: ["id,desc"],
 });
 
 const {
@@ -192,7 +156,7 @@ const {
   select,
   selectAll,
   refresh,
-} = useTable((page) => noticeAuditPassedPage({ ...queryForm, ...page }), {
+} = useTable((page) => listTrainingFeeNotice({ ...queryForm, ...page }), {
   immediate: false,
 });
 
@@ -212,57 +176,19 @@ const expandable = reactive({
   defaultExpandAllRows: true,
 });
 
-const billsDetailModel = ref<InstanceType<typeof BillsDetailModelillsDetailModel>>();
-const onBillsDetail = () => {
-  billsDetailModel.value?.onOpen(queryForm.noticeId, title.value);
-};
-
-
-// 下载交费通知单
-const downloadLoading = ref(false);
-const onDownload = async () => {
-  downloadLoading.value = true;
-  try {
-    const reqList = groupedTrainedList.value.map((person: any) => ({
-      name: person.realName,
-      trainingFee: person.trainingFee,
-      companyName: person.companyName,
-      feeNoticeList: person.projects.map((p: any) => ({
-        applyRecordId: p.applyRecordId,
-        examAttemptType: getExamAttemptTypeText(p.examAttemptType),
-        practicalType: p.practicalType,
-        projectCode: p.projectCode,
-      })),
-    }));
-
-    const res = await downloadTrainingFeeNotice(queryForm.noticeId, reqList);
-    const blob = new Blob([res], { type: "application/pdf" });
-
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "培训交费通知单.pdf";
-    a.click();
-    window.URL.revokeObjectURL(url);
-    allConfirmedProjects.value = [];
-    refresh();
-  } finally {
-    downloadLoading.value = false;
-  }
-};
-
 // 所有确认的项目数组
 const allConfirmedProjects = ref<any[]>([]);
 
 // 按人员分组的数据
 const groupedTrainedList = computed(() => {
-  const map = new Map<string, any>();
+  const map = new Map<number, any>();
   allConfirmedProjects.value.forEach((project) => {
-    const key = project.idCardNumber;
+    const key = project.applyId;
     if (map.has(key)) {
       map.get(key).projects.push(project);
     } else {
       map.set(key, {
+        applyId: project.applyId,
         idCardNumber: project.idCardNumber,
         realName: project.realName,
         companyName: project.companyName,
@@ -270,7 +196,6 @@ const groupedTrainedList = computed(() => {
       });
     }
   });
-  // 计算每个人的培训费
   return Array.from(map.values()).map((person: any) => ({
     ...person,
     trainingFee: calculatePersonTrainingFee(person.projects),
@@ -359,73 +284,45 @@ const getProjectFee = (p: any) => {
   return fee;
 };
 
-// 计算总培训费（按人员分组计算优惠）
-const totalTrainingFee = computed(() => {
-  const projects = allConfirmedProjects.value;
-  if (!projects.length) {
-    return 0;
-  }
-
-  // 按人员分组
-  const grouped = new Map<string, any[]>();
-  projects.forEach((p) => {
-    const key = p.idCardNumber;
-    if (!grouped.has(key)) {
-      grouped.set(key, []);
-    }
-    grouped.get(key)!.push(p);
-  });
-
-  return Array.from(grouped.values()).reduce(
-    (total, personProjects) =>
-      total + calculatePersonTrainingFee(personProjects),
-    0
-  );
-});
+// 计算总培训费
+const totalTrainingFee = computed(() =>
+  groupedTrainedList.value.reduce((sum, p) => sum + p.trainingFee, 0)
+);
 
 const columns = ref<TableInstanceColumns[]>([
-  // { title: '主键ID', dataIndex: 'id', slotName: 'id' },
-  { title: "序号", dataIndex: "sort", slotName: "sort", width: 80 },
   {
-    title: "姓名",
-    dataIndex: "realName",
-    slotName: "realName",
-    width: 120,
+    title: "培训单号",
+    dataIndex: "paymentOrderNo",
+    slotName: "paymentOrderNo",
   },
   {
-    title: "身份证号",
-    dataIndex: "idCardNumber",
-    slotName: "idCardNumber",
-    width: 170,
+    title: "培训总金额",
+    dataIndex: "totalAmount",
+    slotName: "totalAmount",
   },
   {
-    title: "单位名称",
-    dataIndex: "companyName",
-    slotName: "companyName",
-    width: 150,
+    title: "培训人项总数",
+    dataIndex: "totalPersonItemCount",
+    slotName: "totalPersonItemCount",
   },
   {
-    title: "报考项目",
-    dataIndex: "projectList",
-    slotName: "projectList",
-    width: 300,
+    title: "创建日期",
+    dataIndex: "createTime",
+    slotName: "createTime",
   },
   {
     title: "操作",
     dataIndex: "action",
     slotName: "action",
-    width: 80,
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
-    show: has.hasPermOr(["notice:otherTraining:detail"]),
+    show: has.hasPermOr(["exam:trainingFeeNoticeDetail:detail"]),
   },
 ]);
 
 // 重置
 const reset = () => {
-  queryForm.realName = undefined;
-  queryForm.username = undefined;
-  queryForm.companyName = undefined;
+  queryForm.paymentOrderNo = undefined;
   search();
 };
 
@@ -433,35 +330,29 @@ const getExamAttemptTypeText = (type: number) => {
   return type === 1 ? "初试" : type === 2 ? "补考" : "未知";
 };
 
-// 点击培训
-const onTraining = (record: NoticeAuditPassedVO) => {
-  // 收集当前行选中的项目
-  const selectedProjects = record.projectList
-    .filter((project: any) => project.selected)
-    .map((project: any) => ({
-      ...project,
-      applyId: record.applyId,
-      companyName: record.companyName,
-      realName: record.realName,
-      idCardNumber: record.idCardNumber,
-    }));
-  if (selectedProjects.length === 0) {
-    Message.warning("请先勾选要培训的项目");
-    return;
-  }
-  // 先删除该人的所有项目
-  allConfirmedProjects.value = allConfirmedProjects.value.filter(
-    (p) => p.applyId !== record.applyId
+// 点击详情
+const onBillsDetail = async (record: TrainingFeeNoticeDetailResp) => {
+  paymentOrderNo.value = record.paymentOrderNo + " - ";
+  const res = await getTrainingFeeNotice(record.id);
+  const detail = res.data;
+  allConfirmedProjects.value = [];
+  // 展开每个人的 projectList，每个人一个卡片
+  const selectedProjects = (detail.noticeAuditPassedVOList || []).flatMap(
+    (person: any) =>
+      (person.projectList || []).map((p: any) => ({
+        ...p,
+        applyId: person.applyId,
+        realName: person.realName,
+        idCardNumber: person.idCardNumber,
+        companyName: person.companyName,
+      }))
   );
-  // 添加新的选中项目
+  // 移除已在列表中的人员（按 applyId 去重），再合并新的
+  const existIds = new Set(selectedProjects.map((sp: any) => sp.applyId));
+  allConfirmedProjects.value = allConfirmedProjects.value.filter(
+    (p: any) => !existIds.has(p.applyId)
+  );
   allConfirmedProjects.value.push(...selectedProjects);
-};
-
-// 删除单个人员的所有项目
-const removePerson = (person: any) => {
-  allConfirmedProjects.value = allConfirmedProjects.value.filter(
-    (p) => p.idCardNumber !== person.idCardNumber
-  );
 };
 
 // 打开弹窗
@@ -469,7 +360,7 @@ const onOpen = (id: string, noticeTitle: string) => {
   allConfirmedProjects.value = [];
   queryForm.noticeId = id;
   reset();
-  title.value = noticeTitle;
+  title.value = noticeTitle + " - 单据记录";
   visible.value = true;
 };
 
