@@ -92,7 +92,7 @@ const {
 const columns = ref<TableInstanceColumns[]>([
   { title: '考评人员', dataIndex: 'nickname', slotName: 'nickname' },
   { title: '监考种类', dataIndex: 'categoryName', slotName: 'categoryName' },
-  { title: '监考班级', dataIndex: 'invigilateInfo', slotName: 'invigilateInfo' },
+  { title: '监考信息', dataIndex: 'invigilateInfo', slotName: 'invigilateInfo' },
   { title: '监考班级', dataIndex: 'invigilateClassName', slotName: 'invigilateClassName' },
   { title: '监考日期', dataIndex: 'invigilateDate', slotName: 'invigilateDate' },
   { title: '监考时长（天）', dataIndex: 'invigilateDurationDays', slotName: 'invigilateDurationDays' },

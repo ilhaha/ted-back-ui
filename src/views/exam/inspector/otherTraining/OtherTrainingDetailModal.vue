@@ -56,6 +56,13 @@
             >
               单据记录
             </a-button>
+            <a-button
+              type="primary"
+              @click="onBookIssuanceDetail()"
+              v-hasPermission="['bookIssuance:trainingFeeNoticeDetail:list']"
+            >
+              发书记录
+            </a-button>
           </template>
           <template #projectList="{ record }">
             <div class="project-list">
@@ -152,6 +159,7 @@
     </div>
   </a-modal>
   <BillsDetailModel ref="billsDetailModel" />
+  <BookIssuanceDetailModel ref="bookIssuanceDetailModel" />
 </template>
 
 <script setup lang="ts">
@@ -163,12 +171,12 @@ import {
   type ExamineeNoticeApplyQuery,
 } from "@/apis/exam/examineeNoticeApply";
 import BillsDetailModel from "./BillsDetailModel.vue";
+import BookIssuanceDetailModel from "./BookIssuanceDetailModel.vue";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
 import { useDict } from "@/hooks/app";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
-
 
 const visible = ref(false);
 const title = ref("");
@@ -212,11 +220,16 @@ const expandable = reactive({
   defaultExpandAllRows: true,
 });
 
-const billsDetailModel = ref<InstanceType<typeof BillsDetailModelillsDetailModel>>();
+const billsDetailModel =
+  ref<InstanceType<typeof BillsDetailModelillsDetailModel>>();
 const onBillsDetail = () => {
   billsDetailModel.value?.onOpen(queryForm.noticeId, title.value);
 };
 
+const bookIssuanceDetailModel = ref<InstanceType<typeof BookIssuanceDetailModel>>();
+const onBookIssuanceDetail = () => {
+  bookIssuanceDetailModel.value?.onOpen(queryForm.noticeId, title.value);
+};
 
 // 下载交费通知单
 const downloadLoading = ref(false);

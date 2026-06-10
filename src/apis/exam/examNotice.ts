@@ -54,6 +54,11 @@ export function admissionTicketPage(query: ExamNoticePageQuery) {
   return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/admissionTicket/page`, query)
 }
 
+/** @desc 获取网络课堂通知列表 */
+export function onlineCourseNoticeAdminPage(query: ExamNoticePageQuery) {
+  return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/onlineCourse/admin/page`, query)
+}
+
 
 /** @desc 获取通知总览列表 */
 export function overviewPage(query: ExamNoticePageQuery) {

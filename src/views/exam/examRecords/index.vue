@@ -6,7 +6,7 @@
       <template #toolbar-left>
         <a-space>
           <a-cascader v-model="queryForm.planId" :options="projectPlanList" placeholder="选择考试计划" allow-clear
-            @change="search" class="search-input ml-2" />
+            @change="search" class="search-input ml-2" :allow-search="true" />
           <a-input-search @search="search" v-model="queryForm.className" placeholder="搜索班级编号" allow-clear
             class="search-input ml-2" />
           <a-button @click="reset">

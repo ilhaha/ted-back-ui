@@ -213,26 +213,7 @@ const reset = () => {
 }
 
 
-const getPreviewUrl = (url: string) => {
-  if (!url) {
-    Message.warning('暂无文件可预览');
-    return;
-  }
-
-  // 提取文件扩展名
-  const ext = url.split('.').pop()?.toLowerCase();
-
-  if (ext === 'pdf') {
-    //  PDF 直接在浏览器中预览
-    window.open(url, '_blank');
-  } else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext)) {
-    //  Office 文件使用微软在线预览
-    const previewUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
-    window.open(previewUrl, '_blank');
-  } else {
-    Message.warning('暂不支持此文件类型预览');
-  }
-};
+c
 
 const getConfirmMessage = (status: number) => {
   switch (status) {
