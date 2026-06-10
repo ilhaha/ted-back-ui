@@ -34,11 +34,18 @@
                 评片</a-tag>
               <a-tag v-else-if="project.practicalType === 4" color="green">实操免考</a-tag>
             </span> -->
-            <a-date-picker :model-value="project.examTime"
-              @update:model-value="(val) => handleExamTimeChange(project, val)" value-format="YYYY-MM-DD HH:mm:ss"
-              show-now-button format="YYYY-MM-DD HH:mm:ss" placeholder="请选择考试时间"
-              :disabled="!project.selected || form.categoryId == '41' || form.categoryId == '44'" style="width: 200px;"
-              :style="{ opacity: project.selected ? 1 : 0.5 }" />
+            <a-date-picker
+              :model-value="project.examTime"
+              @update:model-value="(val) => handleExamTimeChange(project, val)"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              show-now-button
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="请选择考试时间"
+              :disabled="!project.selected || form.categoryId == '41' || form.categoryId == '44'"
+              :disabled-date="(current: Date) => getDisabledExamTime(current)"
+              style="width: 200px;"
+              :style="{ opacity: project.selected ? 1 : 0.5 }"
+            />
           </div>
           <a-empty v-if="needSelectTip" description="请先选择种类和考试等级" />
           <a-empty v-else-if="noProjectTip" description="该种类与考试等级下没有考试项目" />
@@ -90,7 +97,8 @@ const isEditing = ref(false)
 const [form, resetForm] = useResetReactive({
   examLevel: 1,
   examAttemptType: 0,
-  categoryId: undefined as string | undefined
+  categoryId: undefined as string | undefined,
+  applyDeadline: undefined as string | undefined,
 })
 // 监听 categoryId 和 examLevel 变化，重新获取项目列表
 watch(
@@ -151,7 +159,24 @@ const columns: ColumnItem[] = reactive([
     field: 'applyDeadline',
     type: 'date-picker',
     span: 24,
-    rules: [{ required: true, message: '请输入报名截止时间' }]
+    props: {
+      disabledDate: (current: Date) => {
+        return current && current < dayjs().startOf('day').toDate()
+      },
+    },
+    rules: [
+      { required: true, message: '请输入报名截止时间' },
+      {
+        validator: (value: any, callback) => {
+          if (value && dayjs(value).isBefore(dayjs().startOf('day'))) {
+            callback('报名截止时间不能早于当前时间')
+          } else {
+            callback()
+          }
+        },
+        trigger: 'change'
+      }
+    ]
   },
   {
     label: "所属种类",
@@ -197,6 +222,13 @@ const columns: ColumnItem[] = reactive([
             selectedProjects.some(p => !p.examTime)
           ) {
             callback('请为每个已选项目选择考试时间')
+          } else if (
+            form.applyDeadline &&
+            form.categoryId != '41' &&
+            form.categoryId != '44' &&
+            selectedProjects.some(p => p.examTime && dayjs(p.examTime).isBefore(dayjs(form.applyDeadline)))
+          ) {
+            callback('考试时间不能早于报名截止时间')
           } else {
             callback()
           }
@@ -294,6 +326,14 @@ const handleExamTimeChange = (project: ProjectItem, dateTimeStr: string) => {
   } else {
     project.examTime = ''
   }
+}
+
+// 禁用考试时间 - 不能早于报名截止时间
+const getDisabledExamTime = (current: Date) => {
+  if (!form.applyDeadline) {
+    return false
+  }
+  return current && current < dayjs(form.applyDeadline).startOf('day').toDate()
 }
 
 defineExpose({ onAdd, onUpdate })

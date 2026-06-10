@@ -1,6 +1,6 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="报名审核 - 取证管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="报名审核 - 考试换证管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
