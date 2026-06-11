@@ -1,7 +1,7 @@
 <template>
   <div class="gi_table_page">
     <GiTable
-      title="检验、检测项目管理"
+      title="检验项目管理"
       row-key="id"
       :data="dataList"
       :columns="columns"
@@ -24,6 +24,11 @@
       </template>
       <template #projectLevel="{ record }">
         <span>{{ getProjectLevelName(record.projectLevel) }}</span>
+      </template>
+      <template #isTypeTest="{ record }">
+        <a-tag :color="getIsTypeTestColor(record.isTypeTest)" bordered>{{
+          getIsTypeTestText(record.isTypeTest)
+        }}</a-tag>
       </template>
       <template #toolbar-right>
         <a-button
@@ -190,7 +195,7 @@ defineOptions({ name: "Project" });
 const queryForm = reactive<ProjectQuery>({
   projectType: 1,
   sort: ["id,desc"],
-  categoryType: 3,
+  categoryType: 4,
 });
 
 const {
@@ -238,12 +243,18 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
   },
   {
-    title: "考试等级",
-    dataIndex: "projectLevel",
-    slotName: "projectLevel",
-    width: 120,
+    title: "是否是型式试验项目",
+    dataIndex: "isTypeTest",
+    slotName: "isTypeTest",
     align: "center",
   },
+  // {
+  //   title: "考试等级",
+  //   dataIndex: "projectLevel",
+  //   slotName: "projectLevel",
+  //   width: 120,
+  //   align: "center",
+  // },
   {
     title: "考试时长（分钟）",
     dataIndex: "examDuration",
@@ -478,6 +489,25 @@ const getStatusText = (status: number) => {
   }
 };
 
+const getIsTypeTestColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 否
+    case 1:
+      return "orange"; // 是
+    default:
+      return "default";
+  }
+};
+
+const getIsTypeTestText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "否";
+    case 1:
+      return "是";
+  }
+};
 const getExamTypeColor = (status: number) => {
   switch (status) {
     case 0:

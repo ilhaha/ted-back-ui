@@ -180,7 +180,7 @@ const handleUpload = (options: RequestOption) => {
 // 考试类型选项（与数据库枚举值一致：0-未指定，1-作业人员考试，2-无损检验人员考试，3-有损检验人员考试）
 const examTypeOptions = [
   { label: '作业人员', value: 1 },
-  { label: '检验人员', value: 2 },
+  { label: '检验、检测人员', value: 2 },
   // 后续新增类型直接在这里添加，无需修改表结构
 ];
 const columns: ColumnItem[] = reactive([

@@ -5,7 +5,7 @@
       <template #personnelType>
         <a-radio-group v-model="form.personnelType">
           <a-radio :value="0">作业人员</a-radio>
-          <a-radio :value="1">检验人员</a-radio>
+          <a-radio :value="1">检验、检测人员</a-radio>
         </a-radio-group>
       </template>
       <template #needUploadPerson>

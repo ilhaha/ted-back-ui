@@ -9,7 +9,26 @@
     @before-ok="save"
     @close="reset"
   >
-    <GiForm ref="formRef" v-model="form" :columns="currentColumns" />
+    <GiForm ref="formRef" v-model="form" :columns="currentColumns">
+      <!-- 考试等级 - 小圆点单选按钮 -->
+      <template #projectLevel>
+        <a-radio-group
+          v-model="form.projectLevel"
+          :disabled="isWeldingReadonly"
+        >
+          <a-radio :value="0">无</a-radio>
+          <a-radio :value="1">Ⅰ级</a-radio>
+          <a-radio :value="2">Ⅱ级</a-radio>
+        </a-radio-group>
+      </template>
+
+      <template #isTypeTest>
+        <a-radio-group v-model="form.isTypeTest">
+          <a-radio :value="0">否</a-radio>
+          <a-radio :value="1">是</a-radio>
+        </a-radio-group>
+      </template>
+    </GiForm>
     <template #footer>
       <a-button v-if="isAudit" type="primary" @click="onAuditConfirm"
         >确认审核</a-button
@@ -55,46 +74,25 @@ const [form, resetForm] = useResetReactive({
   projectName: "",
   projectCode: "",
   examDuration: "",
+  examEndAge: 60,
   imageUrl: "",
   auditStatus: "2",
   projectStatus: "",
-  categoryId: undefined,
-  projectType: 0,
-  isOperation: 0,
+  isTypeTest: 0,
+  categoryId: undefined as number | undefined,
+  projectType: 1,
+  isOperation: 1,
+  projectLevel: 0,
+  isTheory: 1,
+  examFee: 0,
+  trainingFee: 0,
 });
 
-// 上传图片
-const handleUpload = (options: RequestOption) => {
-  const controller = new AbortController();
-  (async function requestWrap() {
-    const { onProgress, onError, onSuccess, fileItem, name = "file" } = options;
-    onProgress(20);
-    const formData = new FormData();
-    formData.append(name as string, fileItem.file as Blob);
-    formData.append("type", "pic");
-    try {
-      const res = await upload(formData, {
-        signal: controller.signal,
-      });
-      Message.success("上传成功");
-      form.imageUrl = res.data.url;
-      onSuccess(res.data.thUrl);
-    } catch (error) {
-      onError(error);
-    }
-  })();
-  return {
-    abort() {
-      controller.abort();
-    },
-  };
-};
-
 const categorySelect = ref<LabelValueState[]>([]);
-//计算属性，判断所属考核项目种类是否禁用
-// const categoryDisabled = computed(() => {
-//   return isUpdate.value && form.projectStatus === "2";
-// });
+
+const categoryDisabled = computed(() => {
+  return isUpdate.value;
+});
 
 const columns: ColumnItem[] = reactive([
   {
@@ -114,15 +112,7 @@ const columns: ColumnItem[] = reactive([
     span: 24,
   },
   {
-    label: "考试时长（分钟）",
-    prop: "examDuration",
-    field: "examDuration",
-    type: "input-number",
-    required: true,
-    span: 24,
-  },
-  {
-    label: "所属考核项目种类",
+    label: "所属种类",
     prop: "categoryId",
     field: "categoryId",
     type: "select",
@@ -131,7 +121,55 @@ const columns: ColumnItem[] = reactive([
     props: {
       allowSearch: true,
       options: categorySelect,
-      // disabled: categoryDisabled,
+      disabled: categoryDisabled,
+    },
+  },
+  {
+    label: "考试时长（分钟）",
+    prop: "examDuration",
+    field: "examDuration",
+    type: "input-number",
+    required: true,
+    span: 24,
+  },
+  {
+    label: "考试年龄上限（岁）",
+    prop: "examEndAge",
+    field: "examEndAge",
+    type: "input-number",
+    required: true,
+    span: 24,
+    props: {
+      min: 60,
+      max: 80,
+    },
+  },
+  {
+    label: "是否是型式试验项目",
+    field: "isTypeTest",
+    type: "slot",
+    span: 24,
+    rules: [{ required: true, message: "请选择是否是型式试验项目" }],
+  },
+  // {
+  //   label: '考试等级',
+  //   field: 'projectLevel',
+  //   type: 'slot',
+  //   span: 24,
+  //   rules: [{ required: true, message: '请选择考试等级' }],
+  // },
+  {
+    label: "理论考试",
+    field: "isTheory",
+    type: "select",
+    span: 24,
+    required: true,
+    props: {
+      options: [
+        { label: "有", value: 1 },
+        { label: "无", value: 0 },
+      ],
+      placeholder: "请选择是否有理论考试",
     },
   },
   {
@@ -142,8 +180,8 @@ const columns: ColumnItem[] = reactive([
     required: true,
     props: {
       options: [
-        { label: "无", value: 0 },
         { label: "有", value: 1 },
+        { label: "无", value: 0 },
       ],
       placeholder: "请选择是否有实操考试",
     },
@@ -180,12 +218,26 @@ const columns: ColumnItem[] = reactive([
     },
   },
   {
-    label: "收费标准（元）",
+    label: "考试费用",
     prop: "examFee",
     field: "examFee",
     type: "input-number",
-    required: true,
+    props: {
+      min: 0,
+    },
     span: 24,
+    rules: [{ required: true, message: "请输入考试费用" }],
+  },
+  {
+    label: "培训费用",
+    prop: "trainingFee",
+    field: "trainingFee",
+    type: "input-number",
+    props: {
+      min: 0,
+    },
+    span: 24,
+    rules: [{ required: true, message: "请输入培训费用" }],
   },
 ]);
 
@@ -210,6 +262,7 @@ const auditColumns: ColumnItem[] = reactive([
 const currentColumns = computed(() => {
   return isAudit.value ? auditColumns : columns;
 });
+
 // 重置
 const reset = () => {
   formRef.value?.formRef?.resetFields();
@@ -217,6 +270,11 @@ const reset = () => {
   isAudit.value = false;
 };
 
+// 核心判断：修改场景 + 考试等级为 1 或 2 → 只读
+// 修改场景 + 考试等级为 1 / 2 → 只读
+const isWeldingReadonly = computed(() => {
+  return isUpdate.value && [0, 1, 2].includes(Number(form.projectLevel));
+});
 // 保存
 const save = async () => {
   try {
@@ -243,7 +301,7 @@ const save = async () => {
 const onAdd = async () => {
   reset();
   dataId.value = "";
-  const res = await selectOptions(1);
+  const res = await selectOptions([4]);
   categorySelect.value = res.data || [];
   visible.value = true;
 };
@@ -252,8 +310,9 @@ const onAdd = async () => {
 const onUpdate = async (id: string) => {
   reset();
   dataId.value = id;
-  const res = await selectOptions([1,2]);
+  const res = await selectOptions([4]);
   categorySelect.value = res.data || [];
+
   const { data } = await getProject(id);
   data.projectStatus = String(data.projectStatus);
   data.categoryId = Number(data.categoryId);
@@ -277,7 +336,6 @@ const onAuditConfirm = async () => {
     emit("save-success");
     return true;
   } catch (error) {
-    Message.error("审核失败");
     return false;
   }
 };
@@ -286,10 +344,11 @@ const onAuditConfirm = async () => {
 const onExamineA = async (id: string) => {
   reset();
   dataId.value = id;
-  const res = await selectOptions(1);
+  const res = await selectOptions([3, 4]);
   categorySelect.value = res.data || [];
 
   const { data } = await getProject(id);
+  data.categoryId = Number(data.categoryId);
   Object.assign(form, data);
   isAudit.value = true;
   visible.value = true;

@@ -34,6 +34,12 @@ export interface ExamNoticeDetailResp {
   isDeleted: string
   createUserString: string
   updateUserString: string
+  isTypeTest: number
+  projectList: Array<{
+    projectId: string
+    projectCode: string
+    examTime: string
+  }>
 }
 export interface ExamNoticeQuery {
   title: string | undefined

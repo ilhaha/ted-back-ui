@@ -261,7 +261,7 @@ const getExamTypeText = (status: number) => {
     case 1:
       return "作业人员";
     case 2:
-      return "检验人员";
+      return "检验、检测人员";
     default:
       return "未知状态";
   }

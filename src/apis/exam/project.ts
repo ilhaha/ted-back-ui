@@ -90,6 +90,11 @@ export function getInspectionProjectList(categoryId: string, examLevel: number) 
   return http.get(`${BASE_URL}/inspection/list/${categoryId}/${examLevel}`)
 }
 
+/** @desc 获取检验人员考试通知项目选择器 */
+export function getProjectInspectionSelect(categoryId: string, isTypeTest: number) {
+  return http.get(`${BASE_URL}/inspection/select/${categoryId}/${isTypeTest}`)
+}
+
 
 /** @desc 查询项目列表 */
 export function getProjectsWithClassrooms() {

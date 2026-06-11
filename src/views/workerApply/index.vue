@@ -369,7 +369,7 @@ const getStatusText = (status: number) => {
     case 0:
       return "待审核";
     case 1:
-      return "待报考 / 考试";
+      return "待报考";
     case 2:
       return "驳回";
     case 3:
@@ -382,6 +382,8 @@ const getStatusText = (status: number) => {
       return "待完善";
     case 7:
       return "已考试";
+    case 8:
+      return "已报名";
     default:
       return "";
   }
@@ -392,7 +394,7 @@ const getStatusColor = (status: number) => {
     case 0:
       return "blue";
     case 1:
-      return "green";
+      return "blue";
     case 2:
       return "orange";
     case 3:
@@ -405,6 +407,8 @@ const getStatusColor = (status: number) => {
       return "orangered";
     case 7:
       return "gray";
+    case 8:
+      return "green";
     default:
       return "gray";
   }
