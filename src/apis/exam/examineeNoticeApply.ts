@@ -44,6 +44,11 @@ export interface ExamineeNoticeApplyPageQuery extends PageQuery {
   sort?: Array<string>
 }
 
+/** @desc 获取通知对应项目的交费人员统计 */
+export function getProjectPaidCount(noticeId: string) {
+  return http.get<any[]>(`${BASE_URL}/project/paid/${noticeId}`)
+}
+
 /** @desc 获取考生申请培训详情 */
 export function getCandidateApplyTrainingDetail(applyId: string) {
   return http.get<any>(`${BASE_URL}/review/training/detail/${applyId}`)

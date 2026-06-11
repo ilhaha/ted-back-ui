@@ -62,7 +62,7 @@
     </GiTable>
     <a-modal v-model:visible="showWokerListVisible" title="班级人员" :mask-closable="false" :esc-to-close="false"
       width="95%" draggable :footer="null" modal-class="no-padding-modal" @close="search">
-      <WokerList ref="WokerListRef" @showModel="handShowModel" />
+      <WokerList ref="WokerListRef" />
     </a-modal>
 
 
@@ -148,15 +148,6 @@ const openWorkerList = (classId: string, projectId: string) => {
   WokerListRef.value?.onOpen(classId, projectId)
   showWokerListVisible.value = true
 }
-
-const handShowModel = (res: any) => {
-  showWokerListVisible.value = res.show
-  if (showWokerListVisible.value) {
-    openWorkerList(res.classId)
-  }
-}
-
-
 
 const categoryOptions = ref<ProjectCategoryVO[]>([])
 

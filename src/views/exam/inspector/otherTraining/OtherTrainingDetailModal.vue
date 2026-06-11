@@ -6,9 +6,22 @@
     :footer="null"
     :mask-closable="false"
   >
-    <div class="detail-container">
+  
+    <div class="detail-container" style="margin-bottom: 50px">
       <!-- 左侧表格 -->
       <div class="table-wrapper">
+        <a-alert style="margin-bottom: 10px" v-if="projectPaidCountList.length > 0">
+            <span>项目已交费人数：</span>
+            <a-tag
+              v-for="item in projectPaidCountList"
+              :key="item.projectId"
+              style="margin-left: 8px"
+              color="red"
+              size="small"
+            >
+              {{ item.projectCode }}：{{ item.paidCount || 0 }}
+            </a-tag>
+        </a-alert>
         <GiTable
           title=""
           row-key="id"
@@ -172,6 +185,7 @@ import {
 } from "@/apis/exam/examineeNoticeApply";
 import BillsDetailModel from "./BillsDetailModel.vue";
 import BookIssuanceDetailModel from "./BookIssuanceDetailModel.vue";
+import { getProjectPaidCount } from "@/apis/exam/examineeNoticeApply";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
 import { useDict } from "@/hooks/app";
@@ -180,7 +194,7 @@ import has from "@/utils/has";
 
 const visible = ref(false);
 const title = ref("");
-
+const projectPaidCountList = ref<any[]>([]);
 defineOptions({ name: "ExamNotice" });
 
 const queryForm = reactive<ExamineeNoticeApplyQuery>({
@@ -483,6 +497,9 @@ const onOpen = (id: string, noticeTitle: string) => {
   queryForm.noticeId = id;
   reset();
   title.value = noticeTitle;
+  getProjectPaidCount(id).then((res) => {
+    projectPaidCountList.value = res.data;
+  });
   visible.value = true;
 };
 
