@@ -25,7 +25,7 @@ import { Message } from "@arco-design/web-vue";
 import { useWindowSize } from "@vueuse/core";
 import {
   getExamNotice,
-  addExamNotice,
+  addInspectionExamNotice,
   updateExamNotice,
 } from "@/apis/exam/examNotice";
 import type { ColumnItem, GiForm } from "@/components/GiForm";
@@ -220,7 +220,7 @@ const save = async () => {
       await updateExamNotice(submitData, dataId.value);
       Message.success("修改成功");
     } else {
-      await addExamNotice(submitData);
+      await addInspectionExamNotice(submitData);
       Message.success("新增成功");
     }
     emit("save-success");

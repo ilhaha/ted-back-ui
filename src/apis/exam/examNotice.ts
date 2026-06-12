@@ -93,9 +93,14 @@ export function getExamNotice(id: string) {
   return http.get<ExamNoticeDetailResp>(`${BASE_URL}/${id}`)
 }
 
-/** @desc 新增无损检测、检验人员考试通知 */
+/** @desc 新增无损检测考试通知 */
 export function addExamNotice(data: any) {
   return http.post(`${BASE_URL}`, data)
+}
+
+/** @desc 新增检验人员考试通知 */
+export function addInspectionExamNotice(data: any) {
+  return http.post(`${BASE_URL}/inspection/add`, data)
 }
 
 /** @desc 修改无损检测、检验人员考试通知 */
