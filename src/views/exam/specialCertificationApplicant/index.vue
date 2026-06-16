@@ -275,8 +275,9 @@ const {
 );
 
 const isImage = (url: string) => {
-  return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
-};
+  return /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico|tif|tiff|jfif|avif|heic|heif)(\?.*)?$/i.test(url)
+}
+
 
 const getStatusColor = (status: number) => {
   switch (status) {

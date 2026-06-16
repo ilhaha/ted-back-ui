@@ -371,8 +371,9 @@ const openReview = (record: WorkerApplyResp) => {
 }
 
 const isImage = (url: string) => {
-    return /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
+  return /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico|tif|tiff|jfif|avif|heic|heif)(\?.*)?$/i.test(url)
 }
+
 
 const onOpen = async (classId: string, projectId: string) => {
     queryForm.classId = classId

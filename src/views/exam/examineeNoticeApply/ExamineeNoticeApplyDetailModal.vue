@@ -99,7 +99,7 @@
                       <span class="form-value ">{{ item.projectCode || '-' }}</span>
                     </div>
                   </a-col>
-                  <a-col :span="8">
+                  <a-col :span="categoryType == 3 ? 8 : 4">
                     <div class="form-item" style="border-right: 0;">
                       <span class="form-value "> {{ item.examAttemptType === 1 ? '初试' : item.examAttemptType === 2 ?
                         '补考'
@@ -107,8 +107,13 @@
                     </div>
                   </a-col>
                   <a-col :span="8">
-                    <div class="form-item">
+                    <div class="form-item" :style="{ borderRight: categoryType == 4 ? '0' : '1px solid var(--color-border)' }">
                       <span class="form-value">{{ getPracticalTypes(item.practicalType) }}</span>
+                    </div>
+                  </a-col>
+                  <a-col :span="4" v-if="categoryType == 4">
+                    <div class="form-item">
+                      <span class="form-value">{{ item.applyNo || '-' }}</span>
                     </div>
                   </a-col>
                 </a-row>
@@ -132,7 +137,7 @@
                         : '-' }}</span>
                     </div>
                   </a-col>
-                  <a-col :span="4"> 
+                  <a-col :span="4">
                     <div class="form-item" style="border-right: 0;background-color: #f5f5f5;">
                       <span class=" form-value">取证日期</span>
                     </div>
@@ -238,7 +243,7 @@ const applyProjectList = computed(() => dataDetail.value?.applyProjectList || []
 const licenseHolderList = computed(() => dataDetail.value?.licenseHolderList || [])
 const alreadyUploadDocList = computed(() => dataDetail.value?.alreadyUploadDocList || [])
 const examineeNoticeApplyInfo = computed(() => dataDetail.value?.examineeNoticeApplyResp || {})
-
+const categoryType = computed(() => dataDetail.value?.categoryType || 0)
 const getFileList = (docPath?: string) => {
   if (!docPath) return []
 
@@ -249,7 +254,7 @@ const getFileList = (docPath?: string) => {
 }
 
 const isImage = (url: string) => {
-  return /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
+  return /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico|tif|tiff|jfif|avif|heic|heif)(\?.*)?$/i.test(url)
 }
 
 const isPdf = (url: string) => {

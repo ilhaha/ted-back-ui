@@ -1,48 +1,19 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
-    title="申请列表"
-    :width="1100"
-    :footer="null"
-    :mask-closable="false"
-    @cancel="handleClose"
-  >
+  <a-modal v-model:visible="visible" title="申请列表" :width="1100" :footer="null" :mask-closable="false"
+    @cancel="handleClose">
     <a-spin :loading="loading">
-      <GiTable
-        title=""
-        row-key="id"
-        :data="dataList"
-        :columns="columns"
-        :scroll="{ x: '100%', y: 400, minWidth: 900 }"
-        :pagination="pagination"
-        :disabled-tools="['size']"
-      >
+      <GiTable title="" row-key="id" :data="dataList" :columns="columns" :scroll="{ x: '100%', y: 400, minWidth: 900 }"
+        :pagination="pagination" :disabled-tools="['size']">
         <template #toolbar-left>
-          <a-select
-            v-model="queryForm.trainingApplyStatus"
-            placeholder="申请状态"
-            allow-clear
-            class="search-input ml-2"
-            @change="search"
-            style="margin-left: 8px"
-          >
+          <a-select v-model="queryForm.trainingApplyStatus" placeholder="申请状态" allow-clear class="search-input ml-2"
+            @change="search" style="margin-left: 8px">
             <a-option value="1">待审核</a-option>
             <a-option value="2">驳回</a-option>
             <a-option value="3">通过</a-option>
           </a-select>
-          <a-input-search
-            v-model="queryForm.nickname"
-            placeholder="请输入姓名"
-            allow-clear
-            @search="search"
-          />
-          <a-input-search
-            v-model="queryForm.username"
-            placeholder="请输入身份证"
-            allow-clear
-            @search="search"
-            style="margin-left: 8px"
-          />
+          <a-input-search v-model="queryForm.nickname" placeholder="请输入姓名" allow-clear @search="search" />
+          <a-input-search v-model="queryForm.username" placeholder="请输入身份证" allow-clear @search="search"
+            style="margin-left: 8px" />
           <a-button @click="reset">
             <template #icon><icon-refresh /></template>
             <template #default>重置</template>
@@ -50,26 +21,12 @@
         </template>
         <template #trainingCertificate="{ record }">
           <a-space wrap>
-            <template
-              v-for="(url, idx) in (record.trainingCertificate || '').split(
-                ','
-              )"
-              :key="idx"
-            >
-              <a-image
-                v-if="isImage(url)"
-                :src="url"
-                width="60"
-                height="60"
-                fit="cover"
-                style="cursor: pointer; border-radius: 4px"
-              />
-              <a-link
-                v-else-if="isPdf(url)"
-                title="预览文件"
-                @click="getPreviewUrl(url)"
-                style="margin-right: 8px"
-              >
+            <template v-for="(url, idx) in (record.trainingCertificate || '').split(
+              ','
+            )" :key="idx">
+              <a-image v-if="isImage(url)" :src="url" width="60" height="60" fit="cover"
+                style="cursor: pointer; border-radius: 4px" />
+              <a-link v-else-if="isPdf(url)" title="预览文件" @click="getPreviewUrl(url)" style="margin-right: 8px">
                 PDF预览
               </a-link>
               <span v-else>-</span>
@@ -77,21 +34,13 @@
           </a-space>
         </template>
         <template #trainingApplyStatus="{ record }">
-          <a-tag
-            :color="getTrainingApplyStatusColor(record.trainingApplyStatus)"
-            bordered
-          >
+          <a-tag :color="getTrainingApplyStatusColor(record.trainingApplyStatus)" bordered>
             {{ getTrainingApplyStatusText(record.trainingApplyStatus) }}
           </a-tag>
         </template>
         <template #action="{ record }">
           <a-space>
-            <a-link
-              v-permission="['notice:training:detail']"
-              title="详情"
-              @click="onDetail(record)"
-              >详情</a-link
-            >
+            <a-link v-permission="['notice:training:detail']" title="详情" @click="onDetail(record)">详情</a-link>
           </a-space>
         </template>
       </GiTable>
@@ -220,7 +169,9 @@ const getPracticalTypeText = (type: number | string) => {
   return map[String(type)] || String(type);
 };
 
-const isImage = (url: string) => /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url);
+const isImage = (url: string) =>
+  /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico|tif|tiff|jfif|avif|heic|heif)(\?.*)?$/i.test(url)
+
 const isPdf = (url: string) => /\.pdf$/i.test(url);
 const getPreviewUrl = (url: string) => {
   if (!url) {
