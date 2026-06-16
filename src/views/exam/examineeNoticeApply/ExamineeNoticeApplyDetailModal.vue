@@ -121,18 +121,18 @@
               <td class="form-wrapper" colspan="6" style="padding: 8px 50px;"
                 v-if="licenseHolderList && licenseHolderList.length > 0">
                 <a-row v-for="item in licenseHolderList" :key="item.id" :gutter="[0, 8]" style="text-align: center;">
-                  <a-col :span="4">
+                  <a-col :span="item.projectLevel ? 4 : 8">
                     <div class="form-item " style="border-right: 0;background-color: #f5f5f5;">
                       <span class="form-value ">{{ item.projectCode || '-' }}</span>
                     </div>
                   </a-col>
-                  <a-col :span="4">
+                  <a-col :span="4" v-if="item.projectLevel">
                     <div class="form-item" style="border-right: 0;">
                       <span class="form-value "> {{ item.projectLevel === 1 ? 'Ⅰ级' : item.projectLevel === 2 ? 'Ⅱ级'
                         : '-' }}</span>
                     </div>
                   </a-col>
-                  <a-col :span="4">
+                  <a-col :span="4"> 
                     <div class="form-item" style="border-right: 0;background-color: #f5f5f5;">
                       <span class=" form-value">取证日期</span>
                     </div>

@@ -61,7 +61,8 @@ const queryForm = reactive<ExamNoticeQuery>({
   applyDeadline: undefined,
   examLevel: undefined,
   status: undefined,
-  examType: 2
+  examType: 2,
+  categoryType: 3,
 })
 
 const {

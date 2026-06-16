@@ -1,9 +1,12 @@
 <template>
   <div class="gi_table_page">
-    <GiTable title="报名审核 - 免试换证管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+    <GiTable title="定检监检 - 报名审核管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
       :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
       :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
+        <a-select v-model="queryForm.categoryId" placeholder="所属类别" allow-clear class="search-input ml-2"
+          @change="search" style="margin-left: 8px" :options="categorySelect">
+        </a-select>
         <a-input-search v-model="queryForm.title" placeholder="请输入通知内容" allow-clear @search="search" />
         <a-select v-model="queryForm.status" placeholder="通知状态" allow-clear class="search-input ml-2" @change="search"
           style="margin-left: 8px;">
@@ -11,13 +14,6 @@
           <a-option value="3">补报中</a-option>
           <a-option value="4">报名已结束</a-option>
         </a-select>
-        <a-select v-model="queryForm.examLevel" placeholder="考试等级" allow-clear class="search-input ml-2"
-          @change="search" style="margin-left: 8px;">
-          <a-option value="0">无</a-option>
-          <a-option value="1">Ⅰ级</a-option>
-          <a-option value="2">Ⅱ级</a-option>
-        </a-select>
-
         <a-button @click="reset">
           <template #icon><icon-refresh /></template>
           <template #default>重置</template>
@@ -52,6 +48,7 @@ import { useDownload, useTable } from '@/hooks'
 import { isMobile } from '@/utils'
 import has from '@/utils/has'
 import NoticeApplyDetail from '../NoticeApplyDetail.vue'
+import { selectOptions } from "@/apis/exam/category";
 
 defineOptions({ name: 'ExamNotice' })
 
@@ -61,8 +58,9 @@ const queryForm = reactive<ExamNoticeQuery>({
   applyDeadline: undefined,
   examLevel: undefined,
   status: undefined,
-  examType: 3,
-  categoryType: 3,
+  examType: [1, 2, 3],
+  isTypeTest: 0,
+  categoryType: 4,
 })
 
 const {
@@ -79,7 +77,6 @@ const columns = ref<TableInstanceColumns[]>([
   { title: '报名截止时间', dataIndex: 'applyDeadline', slotName: 'applyDeadline' },
   { title: '所属类别', dataIndex: 'categoryName', slotName: 'categoryName' },
   { title: '考试项目', dataIndex: 'projectCodes', slotName: 'projectCodes' },
-  { title: '考试等级', dataIndex: 'examLevel', slotName: 'examLevel' },
   { title: '说明', dataIndex: 'remark', slotName: 'remark' },
   { title: '状态', dataIndex: 'status', slotName: 'status' },
   { title: '创建人', dataIndex: 'createUserString', slotName: 'createUser' },
@@ -94,6 +91,12 @@ const columns = ref<TableInstanceColumns[]>([
   }
 ]);
 
+const categorySelect = ref([]);
+const initProjectSelect = async () => {
+  const res = await selectOptions([4]);
+  categorySelect.value = res.data || [];
+};
+
 
 const NoticeApplyDetailRef = ref<InstanceType<typeof NoticeApplyDetail>>()
 // 详情
@@ -107,6 +110,7 @@ const reset = () => {
   queryForm.applyDeadline = undefined
   queryForm.examLevel = undefined
   queryForm.status = undefined
+  queryForm.categoryId = undefined
   search()
 }
 
@@ -140,12 +144,12 @@ const getExamLevelText = (status: number) => {
 const getStatusColor = (status: number) => {
   switch (status) {
     case 1:
-      return "green"; 
+      return "green";
     case 3:
-      return "blue"; 
+      return "blue";
     case 4:
       return "red";
-  
+
     default:
       return "default";
   }
@@ -163,7 +167,9 @@ const getStatusText = (status: number) => {
       return "未知状态";
   }
 };
-
+onMounted(async () => {
+  await initProjectSelect();
+});
 
 </script>
 

@@ -32,7 +32,7 @@
       </template>
       <template #toolbar-right>
         <a-button
-          v-permission="['inspector:project:add']"
+          v-permission="['exam:project:add']"
           type="primary"
           @click="onAdd"
         >
@@ -89,7 +89,7 @@
             重置
           </a-button>
           <!-- <div class="operation-btns">
-            <a-button v-permission="['inspector:project:add']" type="primary" @click="onAdd">
+            <a-button v-permission="['exam:project:add']" type="primary" @click="onAdd">
               <template #icon><icon-plus /></template>
               新增
             </a-button>

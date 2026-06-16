@@ -19,12 +19,13 @@
       </template>
       <template #noticeExamProjectList="{ record }">
         <a-tag v-if="!record.noticeExamProjectList || record.noticeExamProjectList.length === 0">-</a-tag>
-        <a-space v-else>
+        <div v-else class="project-tags-wrap">
           <a-tag v-for="item in record.noticeExamProjectList" :key="item.projectId"
+            class="project-tag"
             :color="getProjectColor(item.isApply, item.examAttemptType)">
             {{ item.projectCode }}
           </a-tag>
-        </a-space>
+        </div>
       </template>
       <template #status="{ record }">
         <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
@@ -147,4 +148,13 @@ defineExpose({
 })
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.project-tags-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 4px;
+}
+.project-tag {
+  margin: 0 !important;
+}
+</style>
