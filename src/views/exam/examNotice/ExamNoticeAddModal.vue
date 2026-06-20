@@ -9,11 +9,11 @@
         </a-radio-group>
       </template>
       <template #examAttemptType>
-        <a-radio-group v-model="form.examAttemptType">
+        <a-radio-group v-model="form.examAttemptType" :disabled="isExamExemptionRenewal">
           <a-radio :value="0">初试、补考</a-radio>
           <a-radio :value="1">初试</a-radio>
           <a-radio :value="2">补考</a-radio>
-          <a-radio :value="3">无</a-radio>
+          <a-radio v-if="isExamExemptionRenewal" :value="3">无</a-radio>
         </a-radio-group>
       </template>
       <template #projectList>
@@ -100,11 +100,26 @@ const [form, resetForm] = useResetReactive({
   categoryId: undefined as string | undefined,
   applyDeadline: undefined as string | undefined,
 })
+const isExamExemptionRenewal = computed(() => String(form.categoryId) === '41')
+
+const syncExamAttemptType = (isExemptionRenewal: boolean) => {
+  if (isExemptionRenewal) {
+    form.examAttemptType = 3
+  } else if (!isUpdate.value) {
+    form.examAttemptType = 0
+  }
+}
+
+watch(isExamExemptionRenewal, (isExemptionRenewal) => {
+  syncExamAttemptType(isExemptionRenewal)
+})
+
 // 监听 categoryId 和 examLevel 变化，重新获取项目列表
 watch(
   () => [form.categoryId, form.examLevel],
   async ([newCategoryId, newExamLevel]) => {
 
+    syncExamAttemptType(isExamExemptionRenewal.value)
 
     if (newCategoryId && newExamLevel !== undefined) {
       const { data } = await getInspectionProjectList(
@@ -262,9 +277,14 @@ const save = async () => {
     const isInvalid = await formRef.value?.formRef?.validate()
     if (isInvalid) return false
 
+    if (isExamExemptionRenewal.value) {
+      form.examAttemptType = 3
+    }
+
     // 准备提交数据，只提交选中的项目
     const submitData = {
       ...form,
+      examAttemptType: form.examAttemptType,
       projectList: projectList.value.filter(p => p.selected).map(p => ({
         projectId: p.projectId,
         projectCode: p.projectCode,
@@ -289,6 +309,7 @@ const save = async () => {
 const initProjectSelect = async () => {
   const res = await selectOptions([3]);
   categorySelect.value = res.data || [];
+  syncExamAttemptType(isExamExemptionRenewal.value)
 }
 // 新增
 const onAdd = async () => {

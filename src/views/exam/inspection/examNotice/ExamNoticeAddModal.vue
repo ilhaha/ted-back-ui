@@ -16,6 +16,14 @@
           <a-radio :value="1">是</a-radio>
         </a-radio-group>
       </template>
+      <template #examAttemptType>
+        <a-radio-group v-model="form.examAttemptType" :disabled="isExamExemptionRenewal">
+          <a-radio :value="0">初试、补考</a-radio>
+          <a-radio :value="1">初试</a-radio>
+          <a-radio :value="2">补考</a-radio>
+          <a-radio v-if="isExamExemptionRenewal" :value="3">无</a-radio>
+        </a-radio-group>
+      </template>
     </GiForm>
   </a-modal>
 </template>
@@ -57,10 +65,25 @@ const isEditing = ref(false);
 const [form, resetForm] = useResetReactive({
   isTypeTest: 0,
   examLevel: 0,
+  examAttemptType: 0,
   startTime: undefined as string | undefined,
   categoryId: undefined as string | undefined,
   applyDeadline: undefined as string | undefined,
   projectId: undefined as string | undefined,
+});
+
+const isExamExemptionRenewal = computed(() => String(form.categoryId) === "45");
+
+const syncExamAttemptType = (isExemptionRenewal: boolean) => {
+  if (isExemptionRenewal) {
+    form.examAttemptType = 3;
+  } else if (!isUpdate.value) {
+    form.examAttemptType = 0;
+  }
+};
+
+watch(isExamExemptionRenewal, (isExemptionRenewal) => {
+  syncExamAttemptType(isExemptionRenewal);
 });
 
 const columns: ColumnItem[] = reactive([
@@ -116,6 +139,12 @@ const columns: ColumnItem[] = reactive([
     rules: [{ required: true, message: "请选择考试等级" }],
   },
   {
+    label: "考试类型",
+    field: "examAttemptType",
+    span: 24,
+    rules: [{ required: true, message: "请选择考试类型" }],
+  },
+  {
     label: "考试项目",
     field: "projectId",
     type: "select",
@@ -144,14 +173,17 @@ const columns: ColumnItem[] = reactive([
         return current < dayjs().startOf("day").toDate();
       },
     },
+    show: () => !isExamExemptionRenewal.value,
     rules: [
-      { required: true, message: "请输入考试时间" },
       {
         validator: (value: any, callback) => {
-          if (value && dayjs(value).isBefore(dayjs().startOf("day"))) {
+          if (isExamExemptionRenewal.value) {
+            callback();
+          } else if (!value) {
+            callback("请输入考试时间");
+          } else if (dayjs(value).isBefore(dayjs().startOf("day"))) {
             callback("考试时间不能早于当前时间");
           } else if (
-            value &&
             form.applyDeadline &&
             dayjs(value).isBefore(dayjs(form.applyDeadline))
           ) {
@@ -180,6 +212,10 @@ watch(
   [() => form.categoryId, () => form.isTypeTest],
   async ([newCategoryId, newIsTypeTest]) => {
     form.projectId = undefined;
+    syncExamAttemptType(isExamExemptionRenewal.value);
+    if (isExamExemptionRenewal.value) {
+      form.startTime = undefined;
+    }
     if (newCategoryId && newIsTypeTest !== undefined) {
       const { data } = await getProjectInspectionSelect(
         newCategoryId as string,
@@ -211,9 +247,14 @@ const save = async () => {
     const isInvalid = await formRef.value?.formRef?.validate();
     if (isInvalid) return false;
 
+    if (isExamExemptionRenewal.value) {
+      form.examAttemptType = 3;
+    }
+
     // 准备提交数据
     const submitData: any = {
       ...form,
+      examAttemptType: form.examAttemptType,
     };
 
     if (isUpdate.value) {
@@ -233,6 +274,7 @@ const save = async () => {
 const initProjectSelect = async () => {
   const res = await selectOptions([4]);
   categorySelect.value = res.data || [];
+  syncExamAttemptType(isExamExemptionRenewal.value);
 };
 // 新增
 const onAdd = async () => {
