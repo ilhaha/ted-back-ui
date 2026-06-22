@@ -69,13 +69,6 @@
             >
               单据记录
             </a-button>
-            <a-button
-              type="primary"
-              @click="onBookIssuanceDetail()"
-              v-hasPermission="['bookIssuance:trainingFeeNoticeDetail:list']"
-            >
-              发书记录
-            </a-button>
           </template>
           <template #projectList="{ record }">
             <div class="project-list">
@@ -172,7 +165,6 @@
     </div>
   </a-modal>
   <BillsDetailModel ref="billsDetailModel" />
-  <BookIssuanceDetailModel ref="bookIssuanceDetailModel" />
 </template>
 
 <script setup lang="ts">
@@ -184,7 +176,6 @@ import {
   type ExamineeNoticeApplyQuery,
 } from "@/apis/exam/examineeNoticeApply";
 import BillsDetailModel from "./BillsDetailModel.vue";
-import BookIssuanceDetailModel from "./BookIssuanceDetailModel.vue";
 import { getProjectPaidCount } from "@/apis/exam/examineeNoticeApply";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -195,7 +186,7 @@ import has from "@/utils/has";
 const visible = ref(false);
 const title = ref("");
 const projectPaidCountList = ref<any[]>([]);
-defineOptions({ name: "ExamNotice" });
+defineOptions({ name: "InspectionOtherTrainingDetailModal" });
 
 const queryForm = reactive<ExamineeNoticeApplyQuery>({
   noticeId: undefined,
@@ -234,15 +225,9 @@ const expandable = reactive({
   defaultExpandAllRows: true,
 });
 
-const billsDetailModel =
-  ref<InstanceType<typeof BillsDetailModelillsDetailModel>>();
+const billsDetailModel = ref<InstanceType<typeof BillsDetailModel>>();
 const onBillsDetail = () => {
   billsDetailModel.value?.onOpen(queryForm.noticeId, title.value);
-};
-
-const bookIssuanceDetailModel = ref<InstanceType<typeof BookIssuanceDetailModel>>();
-const onBookIssuanceDetail = () => {
-  bookIssuanceDetailModel.value?.onOpen(queryForm.noticeId, title.value);
 };
 
 // 下载交费通知单
@@ -272,6 +257,7 @@ const onDownload = async () => {
     a.click();
     window.URL.revokeObjectURL(url);
     allConfirmedProjects.value = [];
+    initProjectPaidCount(queryForm.noticeId as string);
     refresh();
   } finally {
     downloadLoading.value = false;
@@ -495,10 +481,9 @@ const removePerson = (person: any) => {
 const onOpen = (id: string, noticeTitle: string) => {
   allConfirmedProjects.value = [];
   queryForm.noticeId = id;
-  initProjectPaidCount(id);
   reset();
   title.value = noticeTitle;
-
+  initProjectPaidCount(id);
   visible.value = true;
 };
 
@@ -507,6 +492,7 @@ const initProjectPaidCount = (noticeId: string) => {
     projectPaidCountList.value = res.data;
   });
 };
+
 defineExpose({ onOpen });
 </script>
 

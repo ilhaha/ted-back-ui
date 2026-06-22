@@ -56,7 +56,7 @@
           <template #action="{ record }">
             <a-space>
               <a-link
-                v-permission="['exam:trainingFeeNoticeDetail:detail']"
+                v-permission="['exam:trainingFeeNotice:detail']"
                 title="详情"
                 @click="onBillsDetail(record)"
                 >详情</a-link
@@ -316,7 +316,7 @@ const columns = ref<TableInstanceColumns[]>([
     slotName: "action",
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
-    show: has.hasPermOr(["exam:trainingFeeNoticeDetail:detail"]),
+    show: has.hasPermOr(["exam:trainingFeeNotice:detail"]),
   },
 ]);
 
