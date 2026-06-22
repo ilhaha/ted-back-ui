@@ -50,14 +50,14 @@
         </a-select>
         <a-select
           v-model="queryForm.isTypeTest"
-          placeholder="是否是型式试验通知"
+          placeholder="通知类型"
           allow-clear
           class="search-input ml-2"
           @change="search"
           style="margin-left: 8px"
         >
-          <a-option value="0">否</a-option>
-          <a-option value="1">是</a-option>
+          <a-option value="0">定检监检</a-option>
+          <a-option value="1">型式试验</a-option>
         </a-select>
 
         <a-button @click="reset">
@@ -205,7 +205,7 @@ const columns = ref<TableInstanceColumns[]>([
   { title: "所属类别", dataIndex: "categoryName", slotName: "categoryName" },
   { title: "考试项目", dataIndex: "projectCodes", slotName: "projectCodes" },
   {
-    title: "是否是型式试验通知",
+    title: "通知类型",
     dataIndex: "isTypeTest",
     slotName: "isTypeTest",
   },
@@ -261,9 +261,9 @@ const getIsTypeTestColor = (isTypeTest: number) => {
 const getIsTypeTestText = (isTypeTest: number) => {
   switch (isTypeTest) {
     case 0:
-      return "否";
+      return "定检监检";
     case 1:
-      return "是";
+      return "型式试验";
     default:
       return "未知";
   }

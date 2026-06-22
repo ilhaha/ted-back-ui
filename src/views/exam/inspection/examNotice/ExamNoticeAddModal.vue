@@ -12,8 +12,8 @@
     <GiForm ref="formRef" v-model="form" :columns="columns">
       <template #isTypeTest>
         <a-radio-group v-model="form.isTypeTest">
-          <a-radio :value="0">否</a-radio>
-          <a-radio :value="1">是</a-radio>
+          <a-radio :value="0">定检监检</a-radio>
+          <a-radio :value="1">型式试验</a-radio>
         </a-radio-group>
       </template>
       <template #examAttemptType>
@@ -133,7 +133,7 @@ const columns: ColumnItem[] = reactive([
     },
   },
   {
-    label: "是否是型式试验通知",
+    label: "通知类型",
     field: "isTypeTest",
     span: 24,
     rules: [{ required: true, message: "请选择考试等级" }],
@@ -207,7 +207,7 @@ const columns: ColumnItem[] = reactive([
   },
 ]);
 
-// 监听所属种类和是否是型式试验通知变化，获取考试项目列表
+// 监听所属种类和通知类型变化，获取考试项目列表
 watch(
   [() => form.categoryId, () => form.isTypeTest],
   async ([newCategoryId, newIsTypeTest]) => {

@@ -503,9 +503,11 @@ const getIsTypeTestColor = (status: number) => {
 const getIsTypeTestText = (status: number) => {
   switch (status) {
     case 0:
-      return "否";
+      return "定检监检";
     case 1:
-      return "是";
+      return "型式试验";
+    default:
+      return "未知";
   }
 };
 const getExamTypeColor = (status: number) => {
