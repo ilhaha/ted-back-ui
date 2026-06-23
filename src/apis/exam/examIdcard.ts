@@ -57,6 +57,8 @@ export interface ExamIdcardDetailResp {
 export interface ExamIdcardQuery {
   realName: string | undefined
   idCardNumber: string | undefined
+  educationVerifyStatus?: number
+  verifyType?: number
   sort: Array<string>
 }
 export interface ExamIdcardPageQuery extends ExamIdcardQuery, PageQuery {}
