@@ -1,42 +1,13 @@
 <template>
   <div class="gi_table_page">
-    <GiTable
-      title="题目管理"
-      row-key="id"
-      :data="dataList"
-      :columns="columns"
-      :loading="loading"
-      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
-      :pagination="pagination"
-      :disabled-tools="['size']"
-      :disabled-column-keys="['name']"
-      @refresh="search"
-    >
+    <GiTable title="无损检测题库管理" row-key="id" :data="dataList" :columns="columns" :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }" :pagination="pagination" :disabled-tools="['size']"
+      :disabled-column-keys="['name']" @refresh="search">
       <template #toolbar-left>
-        <a-input-search
-          v-model="queryForm.question"
-          placeholder="问题"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.categoryName"
-          placeholder="考核项目种类"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.projectName"
-          placeholder="所属项目"
-          allow-clear
-          @search="search"
-        />
-        <a-input-search
-          v-model="queryForm.knowledgeTypeName"
-          placeholder="知识类型"
-          allow-clear
-          @search="search"
-        />
+        <a-input-search v-model="queryForm.question" placeholder="问题" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.categoryName" placeholder="考核项目种类" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.projectName" placeholder="所属项目" allow-clear @search="search" />
+        <a-input-search v-model="queryForm.knowledgeTypeName" placeholder="知识类型" allow-clear @search="search" />
         <!-- <a-button type="primary" class="ml-2" @click="search">
           <template #icon><icon-search /></template>
 搜索
@@ -62,26 +33,15 @@
         }}</a-tag>
       </template>
       <template #toolbar-right>
-        <a-button
-          v-permission="['examconnect:questionBank:add']"
-          type="primary"
-          @click="onAdd"
-        >
+        <a-button v-permission="['examconnect:questionBank:add']" type="primary" @click="onAdd">
           <template #icon><icon-plus /></template>
           <template #default>新增</template>
         </a-button>
-        <a-button
-          @click="onImport"
-          v-permission="['examconnect:questionBank:import']"
-        >
+        <a-button @click="onImport" v-permission="['examconnect:questionBank:import']">
           <template #icon><icon-upload /></template>
           <template #default>导入</template>
         </a-button>
-        <a-button
-          @click="openBatchDelete"
-          v-permission="['examconnect:questionBank:delete']"
-          status="danger"
-        >
+        <a-button @click="openBatchDelete" v-permission="['examconnect:questionBank:delete']" status="danger">
           <template #icon><icon-delete /></template>
           <template #default>批量删除</template>
         </a-button>
@@ -92,64 +52,26 @@
       </template>
       <template #action="{ record }">
         <a-space>
-          <a-link
-            v-permission="['examconnect:questionBank:detail']"
-            title="题目信息"
-            @click="onDetail(record)"
-            >详情</a-link
-          >
-          <a-link
-            v-permission="['examconnect:questionBank:update']"
-            title="修改"
-            @click="onUpdate(record)"
-            >修改</a-link
-          >
-          <a-link
-            v-permission="['examconnect:questionBank:delete']"
-            status="danger"
-            :disabled="record.disabled"
-            :title="record.disabled ? '不可删除' : '删除'"
-            @click="onDelete(record)"
-          >
+          <a-link v-permission="['examconnect:questionBank:detail']" title="题目信息" @click="onDetail(record)">详情</a-link>
+          <a-link v-permission="['examconnect:questionBank:update']" title="修改" @click="onUpdate(record)">修改</a-link>
+          <a-link v-permission="['examconnect:questionBank:delete']" status="danger" :disabled="record.disabled"
+            :title="record.disabled ? '不可删除' : '删除'" @click="onDelete(record)">
             删除
           </a-link>
         </a-space>
       </template>
     </GiTable>
 
-    <QuestionBankAddModal
-      ref="QuestionBankAddModalRef"
-      @save-success="search"
-    />
+    <QuestionBankAddModal ref="QuestionBankAddModalRef" @save-success="search" />
     <QuestionBankDetailDrawer ref="QuestionBankDetailDrawerRef" />
-    <QuestionBankImportModal
-      ref="QuestionBankImportModalRef"
-      @import-success="search"
-    />
+    <QuestionBankImportModal ref="QuestionBankImportModalRef" @import-success="search" />
     <ExportQuestionsExcel ref="ExportQuestionsExcelRef" />
 
-    <a-modal
-      v-model:visible="batchDeleteVisible"
-      title="项目题目批量删除"
-      :mask-closable="false"
-      :esc-to-close="false"
-      :width="width >= 600 ? 600 : '100%'"
-      draggable
-      @before-ok="batchDelete"
-      @close="search"
-    >
-      <GiForm
-        ref="formRef"
-        v-model="batchDeleteForm"
-        :columns="batchDeleteColumns"
-      />
+    <a-modal v-model:visible="batchDeleteVisible" title="项目题目批量删除" :mask-closable="false" :esc-to-close="false"
+      :width="width >= 600 ? 600 : '100%'" draggable @before-ok="batchDelete" @close="search">
+      <GiForm ref="formRef" v-model="batchDeleteForm" :columns="batchDeleteColumns" />
       <template #footer>
-        <a-button
-          type="primary"
-          @click="batchDelete"
-          :loading="batchDeleteLoading"
-          >确认删除</a-button
-        >
+        <a-button type="primary" @click="batchDelete" :loading="batchDeleteLoading">确认删除</a-button>
       </template>
     </a-modal>
   </div>
@@ -162,7 +84,7 @@ import QuestionBankImportModal from "./QuestionBankImportModal.vue";
 import ExportQuestionsExcel from "./ExportQuestionsExcel.vue";
 import { useExamPlanProject, useResetReactive } from "@/hooks";
 import { useWindowSize } from "@vueuse/core";
-import { Message } from "@arco-design/web-vue";
+import { Message } from '@arco-design/web-vue'
 
 import {
   type QuestionBankResp,
@@ -170,7 +92,7 @@ import {
   deleteQuestionBank,
   exportQuestionBank,
   listQuestionBank,
-  batchDeleteQuestionBank,
+  batchDeleteQuestionBank
 } from "@/apis/examconnect/questionBank";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -181,7 +103,8 @@ import { type ColumnItem, GiForm } from "@/components/GiForm";
 
 const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
 
-defineOptions({ name: "QuestionBank" });
+
+defineOptions({ name: "TestingQuestionBank" });
 
 const { width } = useWindowSize();
 
@@ -199,7 +122,7 @@ const queryForm = reactive<QuestionBankQuery>({
   knowledgeTypeName: undefined,
   projectName: undefined,
   question: undefined,
-  examType: 1,
+  examType: 2,
   sort: ["id,desc"],
 });
 
@@ -214,11 +137,7 @@ const {
 });
 const columns = ref<TableInstanceColumns[]>([
   { title: "问题", dataIndex: "question", slotName: "question" },
-  {
-    title: "所属考核项目种类",
-    dataIndex: "categoryName",
-    slotName: "categoryName",
-  },
+  { title: "所属考核项目种类", dataIndex: "categoryName", slotName: "categoryName" },
   { title: "所属考试项目", dataIndex: "projectName", slotName: "projectName" },
   {
     title: "知识类型",
@@ -238,10 +157,11 @@ const columns = ref<TableInstanceColumns[]>([
     show: has.hasPermOr([
       "examconnect:questionBank:update",
       "examconnect:questionBank:delete",
-      "examconnect:questionBank:detail",
+      "examconnect:questionBank:detail"
     ]),
   },
 ]);
+
 
 const batchDeleteColumns: ColumnItem[] = reactive([
   {
@@ -250,7 +170,9 @@ const batchDeleteColumns: ColumnItem[] = reactive([
     type: "cascader",
     required: true,
     span: 24,
-    rules: [{ required: true, message: "请选择考试项目", trigger: "change" }],
+    rules: [
+      { required: true, message: "请选择考试项目", trigger: "change" }
+    ],
     props: computed(() => ({
       options: examProjectOptions.value,
       allowSearch: true,
@@ -261,8 +183,8 @@ const batchDeleteColumns: ColumnItem[] = reactive([
 
 const batchDelete = async () => {
   // 表单实例校验
-  const isInvalid = await formRef.value?.formRef?.validate();
-  if (isInvalid) return false;
+  const isInvalid = await formRef.value?.formRef?.validate()
+  if (isInvalid) return false
   batchDeleteLoading.value = true;
   try {
     await batchDeleteQuestionBank(batchDeleteForm.examProjectId);
@@ -298,16 +220,16 @@ const getQuestionType = (str: string | number) => {
 const openBatchDelete = async () => {
   batchDeleteVisible.value = true;
   batchDeleteForm.examProjectId = [];
-  await getExamProjectOptions(2);
+  await getExamProjectOptions(1);
 };
 
 // 重置
 const reset = () => {
-  queryForm.categoryName = undefined;
-  queryForm.knowledgeTypeName = undefined;
-  queryForm.knowledgeTypeName = undefined;
-  queryForm.question = undefined;
-  search();
+  queryForm.categoryName = undefined
+  queryForm.knowledgeTypeName = undefined
+  queryForm.knowledgeTypeName = undefined
+  queryForm.question = undefined
+  search()
 };
 
 // 删除
@@ -323,10 +245,9 @@ const getStatusColor = (str: string) => {
   return "red";
 };
 
+
 const getExamTypeColor = (status: number) => {
   switch (status) {
-    case 1:
-      return "blue"; // 作业人员
     case 2:
       return "orange"; // 检验人员
     default:
@@ -336,8 +257,6 @@ const getExamTypeColor = (status: number) => {
 
 const getExamTypeText = (status: number) => {
   switch (status) {
-    case 1:
-      return "作业人员";
     case 2:
       return "检验、检测人员";
     default:
@@ -398,6 +317,7 @@ const exportQuestionsExcelRef =
 const onExportExcel = () => {
   exportQuestionsExcelRef.value?.onOpen();
 };
+
 </script>
 
 <style scoped lang="scss"></style>

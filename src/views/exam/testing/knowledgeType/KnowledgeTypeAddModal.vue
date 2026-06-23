@@ -37,7 +37,7 @@ const dataId = ref("");
 const visible = ref(false);
 const isUpdate = computed(() => !!dataId.value);
 const title = computed(() =>
-  isUpdate.value ? "修改项目知识类型" : "新增项目知识类型"
+  isUpdate.value ? "修改无损检测知识类型" : "新增无损检测知识类型"
 );
 const formRef = ref<InstanceType<typeof GiForm>>();
 const projectOptions = ref<LabelValueState[]>([]);
@@ -46,8 +46,9 @@ const { examProjectOptions, getExamProjectOptions } = useExamPlanProject();
 const [form, resetForm] = useResetReactive({
   name: "",
   proportion: 0,
+  points: undefined,
   projectId: undefined,
-  personType: 0,
+  personType: 1,
 });
 
 // 自定义校验函数
@@ -66,6 +67,21 @@ const validateProportion = (
   }
 };
 
+const validatePoints = (
+  value: number | undefined,
+  callback: (error?: string) => void
+) => {
+  if (value === undefined || value === null) {
+    callback();
+    return;
+  }
+  if (value <= 0) {
+    callback("每题分值必须大于 0");
+  } else {
+    callback();
+  }
+};
+
 const columns: ColumnItem[] = reactive([
   {
     label: "知识类型名称",
@@ -75,7 +91,7 @@ const columns: ColumnItem[] = reactive([
     rules: [{ required: true, message: "请输入项目ID" }],
   },
   {
-    label: "分数占比(整数)",
+    label: "出题占比(整数)",
     field: "proportion",
     type: "input-number",
     span: 22,
@@ -87,6 +103,20 @@ const columns: ColumnItem[] = reactive([
       min: 1,
       max: 100,
       precision: 0, // 确保是整数
+    },
+  },
+  {
+    label: "每题分值",
+    field: "points",
+    type: "input-number",
+    span: 22,
+    rules: [
+      { required: true, message: "请输入每题分值" },
+      { validator: validatePoints },
+    ],
+    props: {
+      min: 1,
+      max: 2,
     },
   },
   {
@@ -138,7 +168,7 @@ const onAdd = async () => {
   reset();
   dataId.value = "";
   visible.value = true;
-  getProjectList(0);
+  getProjectList(1);
 };
 
 // 修改
@@ -152,7 +182,7 @@ const onUpdate = async (id: string) => {
     const { data } = await getKnowledgeType(id);
 
     // 2. 加载 分类-项目 树
-    await getExamProjectOptions(0);
+    await getExamProjectOptions(1);
     const parentProjects = examProjectOptions.value;
 
     // 3. 根据 projectId 找到对应的 父分类 + 子项目

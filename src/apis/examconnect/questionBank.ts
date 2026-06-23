@@ -16,6 +16,7 @@ export interface QuestionBankResp {
   createTime: string
   updateTime: string
   isDeleted: string
+  examType: number
   createUserString: string
   updateUserString: string
   disabled: boolean
@@ -33,6 +34,7 @@ export interface QuestionBankDetailResp {
   createTime: string
   updateTime: string
   isDeleted: string
+  examType: number
   createUserString: string
   updateUserString: string
 }
@@ -42,6 +44,7 @@ export interface QuestionBankQuery {
   knowledgeTypeName: string | undefined
   projectName: string | undefined
   question: string | undefined
+  examType?: number
 }
 export interface QuestionBankPageQuery extends QuestionBankQuery, PageQuery { }
 
@@ -53,8 +56,18 @@ export function batchDeleteQuestionBank(data: any[]) {
 
 
 /** @desc 获取级联菜单 */
-export function getOptions() {
-  return http.get(`${OPTIONS}`)
+export function getOptions(categoryTypes?: any[]) {
+  const params = new URLSearchParams()
+
+  if (categoryTypes?.length) {
+    categoryTypes.forEach(item => {
+      params.append('categoryTypes', String(item))
+    })
+  }
+
+  const query = params.toString()
+
+  return http.get(query ? `${OPTIONS}?${query}` : OPTIONS)
 }
 
 /** @desc 查询题库，存储各类题目及其分类信息列表 */
@@ -91,5 +104,4 @@ export function exportQuestionBank(query: QuestionBankQuery) {
 export function exportQuestionsExcel(query: QuestionBankQuery) {
   return http.download(`${BASE_URL}/exportExcel`, query)
 }
-
 

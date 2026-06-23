@@ -6,8 +6,11 @@ export interface KnowledgeTypeResp {
   id: string
   projectId: string
   projectName: string
+  projectCode: string
+  categoryName: string
   name: string
   proportion: string
+  points?: number
   createUser: string
   updateUser: string
   createTime: string
@@ -22,6 +25,7 @@ export interface KnowledgeTypeDetailResp {
   projectId: string
   name: string
   proportion: string
+  points?: number
   createUser: string
   updateUser: string
   createTime: string
@@ -32,6 +36,9 @@ export interface KnowledgeTypeDetailResp {
 }
 export interface KnowledgeTypeQuery {
   projectName?: string
+  projectCode?: string
+  projectId?: string
+  personType?: number
   createUserName?: string
   updateUserName?: string
   sort: Array<string>

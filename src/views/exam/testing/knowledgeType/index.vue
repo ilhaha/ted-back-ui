@@ -1,7 +1,7 @@
 <template>
   <div class="gi_table_page">
     <GiTable
-      title="作业人员知识类型占比管理"
+      title="无损检测知识类型占比管理"
       row-key="id"
       :data="dataList"
       :columns="columns"
@@ -14,8 +14,8 @@
     >
       <template #toolbar-left>
         <a-input-search
-          v-model="queryForm.projectName"
-          placeholder="项目名称"
+          v-model="queryForm.projectCode"
+          placeholder="项目代码"
           allow-clear
           @search="search"
         />
@@ -91,11 +91,11 @@ import { useDict } from "@/hooks/app";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
 
-defineOptions({ name: "KnowledgeType" });
+defineOptions({ name: "TestingKnowledgeType" });
 
 const queryForm = reactive<KnowledgeTypeQuery>({
-  projectName: undefined,
-  personType: 0,
+  projectCode: undefined,
+  personType: 1,
   sort: ["id,desc"],
 });
 
@@ -115,8 +115,9 @@ const columns = ref<TableInstanceColumns[]>([
     dataIndex: "categoryName",
     slotName: "categoryName",
   },
-  { title: "项目名称", dataIndex: "projectName", slotName: "projectName" },
-  { title: "占比（百分比）", dataIndex: "proportion", slotName: "proportion" },
+  { title: "项目代码", dataIndex: "projectCode", slotName: "projectCode" },
+  { title: "出题占比（百分比）", dataIndex: "proportion", slotName: "proportion" },
+  { title: "每题分值", dataIndex: "points", slotName: "points" },
   {
     title: "操作",
     dataIndex: "action",
@@ -134,7 +135,7 @@ const columns = ref<TableInstanceColumns[]>([
 
 // 重置
 const reset = () => {
-  queryForm.projectName = undefined;
+  queryForm.projectCode = undefined;
   queryForm.projectId = undefined;
   search();
 };
