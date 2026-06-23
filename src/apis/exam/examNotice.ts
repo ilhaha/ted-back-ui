@@ -7,6 +7,9 @@ export interface ExamNoticeResp {
   title: string
   applyDeadline: string
   categoryId: string
+  categoryName: string
+  projectCodes: string
+  isTypeTest: number
   examLevel: string
   status: string
   remark: string
@@ -46,6 +49,9 @@ export interface ExamNoticeQuery {
   applyDeadline: string | undefined
   examLevel: string | undefined
   status: string | undefined
+  categoryId?: string | number
+  categoryType?: number
+  isTypeTest?: number
   sort: Array<string>
 }
 export interface ExamNoticePageQuery extends ExamNoticeQuery, PageQuery { }
@@ -69,6 +75,18 @@ export function onlineCourseNoticeAdminPage(query: ExamNoticePageQuery) {
 /** @desc 获取通知总览列表 */
 export function overviewPage(query: ExamNoticePageQuery) {
   return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/overview/page`, query)
+}
+
+/** @desc 获取检验统计表通知列表 */
+export function statisticsTablePage(query: ExamNoticePageQuery) {
+  return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/statistics/table/page`, query)
+}
+
+/** @desc 导出检验统计表已缴费培训人员 */
+export function exportPaidTrainingUsers(noticeIds: (string | number)[]) {
+  return http.download(`${BASE_URL}/statistics/table/training/paid/export`, { noticeIds }, {
+    responseType: 'blob'
+  })
 }
 
 
