@@ -1,21 +1,32 @@
 <template>
-  <a-modal v-model:visible="visible" title="考生报考详情" :width="width >= 900 ? 900 : '100%'" :footer="false"
-    :mask-closable="false" @cancel="handleModalCancel">
+  <a-modal
+    v-model:visible="visible"
+    title="考生报考详情"
+    :width="width >= 900 ? 900 : '100%'"
+    :footer="false"
+    :mask-closable="false"
+    @cancel="handleModalCancel"
+  >
     <div class="section-title">审核信息</div>
-    <table class="info-table" style="margin-bottom: 20px;">
+    <table class="info-table" style="margin-bottom: 20px">
       <tbody>
         <tr>
-          <td class="info-label" style="background-color: #fff1f0;">上次原因</td>
-          <td class="info-value">{{ examineeNoticeApplyInfo.remark || '-' }}
+          <td class="info-label" style="background-color: #fff1f0">上次原因</td>
+          <td class="info-value">
+            {{ examineeNoticeApplyInfo.remark || "-" }}
           </td>
-          <td class="info-label" style="background-color: #fff1f0;">驳回原因</td>
+          <td class="info-label" style="background-color: #fff1f0">驳回原因</td>
           <td class="info-value" style="padding: 5px 5px 0px 5px">
-            <a-textarea v-model="remark" placeholder="请输入驳回原因" allow-clear :auto-size="{
-              minRows: 3
-            }" />
-
+            <a-textarea
+              v-model="remark"
+              placeholder="请输入驳回原因"
+              allow-clear
+              :auto-size="{
+                minRows: 3,
+              }"
+            />
           </td>
-          <td class="info-value" style=" text-align: center;">
+          <td class="info-value" style="text-align: center">
             <!-- <a-button type="outline" @click="handleApprove" :loading="submitLoading"
               v-permission="['exam:examineeNoticeApply:audit']" v-if="examineeNoticeApplyInfo.status == 1">通过</a-button>
             <a-button type="outline" status="danger" @click="handleReject" :loading="submitLoading"
@@ -23,19 +34,34 @@
               v-if="examineeNoticeApplyInfo.status == 1 || examineeNoticeApplyInfo.status == 2">驳回</a-button> -->
 
             <a-space>
-              <a-link title="通过" @click="handleApprove" :loading="submitLoading"
-                v-permission="['exam:examineeNoticeApply:audit']" v-if="examineeNoticeApplyInfo.status == 1">通过</a-link>
+              <a-link
+                title="通过"
+                @click="handleApprove"
+                :loading="submitLoading"
+                v-permission="['exam:examineeNoticeApply:audit']"
+                v-if="examineeNoticeApplyInfo.status == 1 && isConfirm == 0"
+                >通过</a-link
+              >
 
-              <a-link status="danger" :loading="submitLoading" v-permission="['exam:examineeNoticeApply:audit']"
-                v-if="examineeNoticeApplyInfo.status == 1 || examineeNoticeApplyInfo.status == 2"
-                @click="handleReject">驳回</a-link>
+              <a-link
+                status="danger"
+                :loading="submitLoading"
+                v-permission="['exam:examineeNoticeApply:audit']"
+                v-if="
+                  (examineeNoticeApplyInfo.status == 1 ||
+                    examineeNoticeApplyInfo.status == 2) &&
+                  isConfirm == 0
+                "
+                @click="handleReject"
+                >驳回</a-link
+              >
             </a-space>
           </td>
         </tr>
       </tbody>
     </table>
     <div class="section-title">报考信息</div>
-    <a-scrollbar style="height:600px;overflow: auto;">
+    <a-scrollbar style="height: 600px; overflow: auto">
       <a-spin :loading="loading">
         <!-- 报考信息 -->
 
@@ -43,134 +69,228 @@
           <tbody>
             <tr>
               <td class="info-label">考生姓名</td>
-              <td class="info-value" colspan="2">{{ idCardInfo.realName || '-' }}</td>
+              <td class="info-value" colspan="2">
+                {{ idCardInfo.realName || "-" }}
+              </td>
               <td class="info-label">性别</td>
-              <td class="info-value" colspan="2">{{ idCardInfo.gender || '-' }}</td>
+              <td class="info-value" colspan="2">
+                {{ idCardInfo.gender || "-" }}
+              </td>
             </tr>
             <tr>
               <td class="info-label">身份证号</td>
-              <td class="info-value" colspan="5">{{ idCardInfo.idCardNumber || '-' }}</td>
-
+              <td class="info-value" colspan="5">
+                {{ idCardInfo.idCardNumber || "-" }}
+              </td>
             </tr>
             <tr>
               <td class="info-label">学历</td>
-              <td class="info-value" colspan="2">{{ idCardInfo.education || '-' }}</td>
+              <td class="info-value" colspan="2">
+                {{ idCardInfo.education || "-" }}
+              </td>
               <td class="info-label">专业类型</td>
-              <td class="info-value" colspan="2">{{ idCardInfo.majorType || '-' }}</td>
-
+              <td class="info-value" colspan="2">
+                {{ idCardInfo.majorType || "-" }}
+              </td>
             </tr>
             <tr>
               <td class="info-label">专业</td>
-              <td class="info-value" colspan="5">{{ idCardInfo.relatedMajor || '-' }}</td>
+              <td class="info-value" colspan="5">
+                {{ idCardInfo.relatedMajor || "-" }}
+              </td>
             </tr>
             <tr>
               <td class="info-label">技术职称</td>
-              <td class="info-value" colspan="2">{{ idCardInfo.qualification || '-' }}</td>
+              <td class="info-value" colspan="2">
+                {{ idCardInfo.qualification || "-" }}
+              </td>
               <td class="info-label">工作年限</td>
-              <td class="info-value" colspan="2">{{ idCardInfo.workYears || '-' }}</td>
+              <td class="info-value" colspan="2">
+                {{ idCardInfo.workYears || "-" }}
+              </td>
             </tr>
             <tr>
               <td class="info-label">移动电话</td>
-              <td class="info-value" colspan="5">{{ idCardInfo.phone || '-' }}</td>
+              <td class="info-value" colspan="5">
+                {{ idCardInfo.phone || "-" }}
+              </td>
             </tr>
             <tr>
               <td class="info-label">单位名称</td>
-              <td class="info-value" colspan="5">{{ idCardInfo.companyName || '-' }}</td>
+              <td class="info-value" colspan="5">
+                {{ idCardInfo.companyName || "-" }}
+              </td>
             </tr>
             <tr>
               <td class="info-label">通信地址</td>
-              <td class="info-value" colspan="5">{{ idCardInfo.address || '-' }}</td>
+              <td class="info-value" colspan="5">
+                {{ idCardInfo.address || "-" }}
+              </td>
             </tr>
             <tr>
               <td class="info-label">所在地</td>
-              <td class="info-value" colspan="2">{{ idCardInfo.region || '-' }}</td>
+              <td class="info-value" colspan="2">
+                {{ idCardInfo.region || "-" }}
+              </td>
               <td class="info-label">邮政编码</td>
-              <td class="info-value" colspan="2">{{ idCardInfo.postalCode || '-' }}</td>
+              <td class="info-value" colspan="2">
+                {{ idCardInfo.postalCode || "-" }}
+              </td>
             </tr>
             <tr>
-              <td class="info-label" colspan="6" style="text-align: center;">申请种类与项目级别</td>
+              <td class="info-label" colspan="6" style="text-align: center">
+                申请种类与项目级别
+              </td>
             </tr>
             <tr>
-              <td class="form-wrapper" colspan="6" v-if="applyProjectList && applyProjectList.length > 0">
-                <a-row v-for="item in applyProjectList" :key="item.projectCode" :gutter="[0, 8]"
-                  style="text-align: center;">
+              <td
+                class="form-wrapper"
+                colspan="6"
+                v-if="applyProjectList && applyProjectList.length > 0"
+              >
+                <a-row
+                  v-for="item in applyProjectList"
+                  :key="item.projectCode"
+                  :gutter="[0, 8]"
+                  style="text-align: center"
+                >
                   <a-col :span="8">
-                    <div class="form-item " style="border-right: 0;background-color: #f5f5f5;">
-                      <span class="form-value ">{{ item.projectCode || '-' }}</span>
+                    <div
+                      class="form-item"
+                      style="border-right: 0; background-color: #f5f5f5"
+                    >
+                      <span class="form-value">{{
+                        item.projectCode || "-"
+                      }}</span>
                     </div>
                   </a-col>
                   <a-col :span="categoryType == 3 ? 8 : 4">
-                    <div class="form-item" style="border-right: 0;">
-                      <span class="form-value "> {{ item.examAttemptType === 1 ? '初试' : item.examAttemptType === 2 ?
-                        '补考'
-                        : '-' }}</span>
+                    <div class="form-item" style="border-right: 0">
+                      <span class="form-value">
+                        {{
+                          item.examAttemptType === 1
+                            ? "初试"
+                            : item.examAttemptType === 2
+                            ? "补考"
+                            : "-"
+                        }}</span
+                      >
                     </div>
                   </a-col>
                   <a-col :span="8">
-                    <div class="form-item" :style="{ borderRight: categoryType == 4 ? '0' : '1px solid var(--color-border)' }">
-                      <span class="form-value">{{ getPracticalTypes(item.practicalType) }}</span>
+                    <div
+                      class="form-item"
+                      :style="{
+                        borderRight:
+                          categoryType == 4
+                            ? '0'
+                            : '1px solid var(--color-border)',
+                      }"
+                    >
+                      <span class="form-value">{{
+                        getPracticalTypes(item.practicalType)
+                      }}</span>
                     </div>
                   </a-col>
                   <a-col :span="4" v-if="categoryType == 4">
                     <div class="form-item">
-                      <span class="form-value">{{ item.applyNo || '-' }}</span>
+                      <span class="form-value">{{ item.applyNo || "-" }}</span>
                     </div>
                   </a-col>
                 </a-row>
               </td>
             </tr>
             <tr>
-              <td class="info-label" colspan="6" style="text-align: center;">已持证项目</td>
+              <td class="info-label" colspan="6" style="text-align: center">
+                已持证项目
+              </td>
             </tr>
             <tr>
-              <td class="form-wrapper" colspan="6" style="padding: 8px 50px;"
-                v-if="licenseHolderList && licenseHolderList.length > 0">
-                <a-row v-for="item in licenseHolderList" :key="item.id" :gutter="[0, 8]" style="text-align: center;">
+              <td
+                class="form-wrapper"
+                colspan="6"
+                style="padding: 8px 50px"
+                v-if="licenseHolderList && licenseHolderList.length > 0"
+              >
+                <a-row
+                  v-for="item in licenseHolderList"
+                  :key="item.id"
+                  :gutter="[0, 8]"
+                  style="text-align: center"
+                >
                   <a-col :span="item.projectLevel ? 4 : 8">
-                    <div class="form-item " style="border-right: 0;background-color: #f5f5f5;">
-                      <span class="form-value ">{{ item.projectCode || '-' }}</span>
+                    <div
+                      class="form-item"
+                      style="border-right: 0; background-color: #f5f5f5"
+                    >
+                      <span class="form-value">{{
+                        item.projectCode || "-"
+                      }}</span>
                     </div>
                   </a-col>
                   <a-col :span="4" v-if="item.projectLevel">
-                    <div class="form-item" style="border-right: 0;">
-                      <span class="form-value "> {{ item.projectLevel === 1 ? 'Ⅰ级' : item.projectLevel === 2 ? 'Ⅱ级'
-                        : '-' }}</span>
+                    <div class="form-item" style="border-right: 0">
+                      <span class="form-value">
+                        {{
+                          item.projectLevel === 1
+                            ? "Ⅰ级"
+                            : item.projectLevel === 2
+                            ? "Ⅱ级"
+                            : "-"
+                        }}</span
+                      >
                     </div>
                   </a-col>
                   <a-col :span="4">
-                    <div class="form-item" style="border-right: 0;background-color: #f5f5f5;">
-                      <span class=" form-value">取证日期</span>
+                    <div
+                      class="form-item"
+                      style="border-right: 0; background-color: #f5f5f5"
+                    >
+                      <span class="form-value">取证日期</span>
                     </div>
                   </a-col>
                   <a-col :span="4">
-                    <div class="form-item" style="border-right: 0;">
-                      <span class="form-value "> {{ item.validStartDate }}</span>
+                    <div class="form-item" style="border-right: 0">
+                      <span class="form-value"> {{ item.validStartDate }}</span>
                     </div>
                   </a-col>
                   <a-col :span="4">
-                    <div class="form-item" style="border-right: 0;background-color: #f5f5f5;">
-                      <span class=" form-value">有效期</span>
+                    <div
+                      class="form-item"
+                      style="border-right: 0; background-color: #f5f5f5"
+                    >
+                      <span class="form-value">有效期</span>
                     </div>
                   </a-col>
                   <a-col :span="4">
                     <div class="form-item">
-                      <span class="form-value "> {{ item.validEndDate }}</span>
+                      <span class="form-value"> {{ item.validEndDate }}</span>
                     </div>
                   </a-col>
                 </a-row>
               </td>
-              <td v-else style="border: 0; text-align: center;" colspan="6">
-                <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+              <td v-else style="border: 0; text-align: center" colspan="6">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                  "
+                >
                   <a-empty />
                 </div>
               </td>
             </tr>
             <tr>
-              <td class="info-label" colspan="6" style="text-align: center;">上传资料</td>
+              <td class="info-label" colspan="6" style="text-align: center">
+                上传资料
+              </td>
             </tr>
-            <template v-if="alreadyUploadDocList && alreadyUploadDocList.length > 0">
+            <template
+              v-if="alreadyUploadDocList && alreadyUploadDocList.length > 0"
+            >
               <tr v-for="item in alreadyUploadDocList" :key="item.id">
-
                 <!-- 第一列 -->
                 <td class="info-label">
                   {{ item.typeName }}
@@ -179,37 +299,54 @@
                 <!-- 文件展示 -->
                 <td class="info-value" colspan="5">
                   <div class="file-list">
-
-                    <template v-for="(file, index) in getFileList(item.docPath)" :key="index">
-
+                    <template
+                      v-for="(file, index) in getFileList(item.docPath)"
+                      :key="index"
+                    >
                       <!-- 图片 -->
-                      <a-image v-if="isImage(file)" :src="file" width="90" height="90" fit="cover" />
+                      <a-image
+                        v-if="isImage(file)"
+                        :src="file"
+                        width="90"
+                        height="90"
+                        fit="cover"
+                      />
 
                       <!-- PDF -->
-                      <div v-else-if="isPdf(file)" class="pdf-box" style="margin-left: 10px;">
-                        <a-button type="primary" size="small" @click="previewPdf(file)">
+                      <div
+                        v-else-if="isPdf(file)"
+                        class="pdf-box"
+                        style="margin-left: 10px"
+                      >
+                        <a-button
+                          type="primary"
+                          size="small"
+                          @click="previewPdf(file)"
+                        >
                           PDF在线预览
                         </a-button>
                       </div>
 
                       <!-- 其他文件 -->
-                      <div v-else class="file-box">
-                        文件
-                      </div>
-
+                      <div v-else class="file-box">文件</div>
                     </template>
 
                     <!-- 空状态 -->
                     <a-empty v-if="getFileList(item.docPath).length === 0" />
-
                   </div>
                 </td>
-
               </tr>
             </template>
             <template v-else>
-              <td style="border: 0; text-align: center;" colspan="6">
-                <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+              <td style="border: 0; text-align: center" colspan="6">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                  "
+                >
                   <a-empty />
                 </div>
               </td>
@@ -222,144 +359,173 @@
 </template>
 
 <script setup lang="ts">
-import { useWindowSize } from '@vueuse/core'
-import { getCandidateApplyDetail, auditExamineeNoticeApply } from '@/apis/exam/examineeNoticeApply'
-import { Message } from '@arco-design/web-vue'
+import { useWindowSize } from "@vueuse/core";
+import {
+  getCandidateApplyDetail,
+  auditExamineeNoticeApply,
+} from "@/apis/exam/examineeNoticeApply";
+import { Message } from "@arco-design/web-vue";
 
 const emit = defineEmits<{
-  'refresh-list': []
-}>()
+  "refresh-list": [];
+}>();
 
-const { width } = useWindowSize()
-const dataDetail = ref<any>()
-const visible = ref(false)
-const loading = ref(false)
-const submitLoading = ref(false)
-const remark = ref('')
+const { width } = useWindowSize();
+const dataDetail = ref<any>();
+const visible = ref(false);
+const loading = ref(false);
+const submitLoading = ref(false);
+const remark = ref("");
 
-const applyId = ref('')
-const idCardInfo = computed(() => dataDetail.value?.examIdcardResp || {})
-const applyProjectList = computed(() => dataDetail.value?.applyProjectList || [])
-const licenseHolderList = computed(() => dataDetail.value?.licenseHolderList || [])
-const alreadyUploadDocList = computed(() => dataDetail.value?.alreadyUploadDocList || [])
-const examineeNoticeApplyInfo = computed(() => dataDetail.value?.examineeNoticeApplyResp || {})
-const categoryType = computed(() => dataDetail.value?.categoryType || 0)
+const applyId = ref("");
+const idCardInfo = computed(() => dataDetail.value?.examIdcardResp || {});
+const applyProjectList = computed(
+  () => dataDetail.value?.applyProjectList || []
+);
+const licenseHolderList = computed(
+  () => dataDetail.value?.licenseHolderList || []
+);
+const alreadyUploadDocList = computed(
+  () => dataDetail.value?.alreadyUploadDocList || []
+);
+const examineeNoticeApplyInfo = computed(
+  () => dataDetail.value?.examineeNoticeApplyResp || {}
+);
+const categoryType = computed(() => dataDetail.value?.categoryType || 0);
+const isConfirm = computed(() => dataDetail.value?.isConfirm || 0);
 const getFileList = (docPath?: string) => {
-  if (!docPath) return []
+  if (!docPath) return [];
 
   return docPath
-    .split(',')
-    .map(item => item.trim())
-    .filter(Boolean)
-}
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
 
 const isImage = (url: string) => {
-  return /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico|tif|tiff|jfif|avif|heic|heif)(\?.*)?$/i.test(url)
-}
+  return /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico|tif|tiff|jfif|avif|heic|heif)(\?.*)?$/i.test(
+    url
+  );
+};
 
 const isPdf = (url: string) => {
-  return /\.pdf$/i.test(url)
-}
+  return /\.pdf$/i.test(url);
+};
 
 const previewPdf = (url: string) => {
-  window.open(url, '_blank')
-}
+  window.open(url, "_blank");
+};
 
 const getStatusText = (status: string | number | undefined) => {
-  if (status === undefined || status === null) return '-'
-  const num = Number(status)
+  if (status === undefined || status === null) return "-";
+  const num = Number(status);
   switch (num) {
-    case 0: return '待报名'
-    case 1: return '报名待审核'
-    case 2: return '报名审核通过'
-    case 3: return '报名审核未通过'
-    case 4: return '完成部分项目考试'
-    case 5: return '已完成全部考试'
-    default: return String(status)
+    case 0:
+      return "待报名";
+    case 1:
+      return "报名待审核";
+    case 2:
+      return "报名审核通过";
+    case 3:
+      return "报名审核未通过";
+    case 4:
+      return "完成部分项目考试";
+    case 5:
+      return "已完成全部考试";
+    default:
+      return String(status);
   }
-}
+};
 
 // 获取实操类型文本（位运算）
 const getPracticalTypes = (value: number) => {
-  if (!value) return '-'
-  const types = []
-  if (value & 1) types.push('实操')
-  if (value & 2) types.push('拍片')
-  if (value & 4) types.push('评片')
-  if (value & 8) types.push('开卷')
-  if (value & 16) types.push('闭卷')
-  return types.length > 0 ? types.join('、') : '-'
-}
+  if (!value) return "-";
+  const types = [];
+  if (value & 1) types.push("实操");
+  if (value & 2) types.push("拍片");
+  if (value & 4) types.push("评片");
+  if (value & 8) types.push("开卷");
+  if (value & 16) types.push("闭卷");
+  return types.length > 0 ? types.join("、") : "-";
+};
 
 const reset = () => {
-  remark.value = ''
-}
+  remark.value = "";
+};
 
 // 弹窗关闭时重置并通知父组件刷新
 const handleModalCancel = () => {
-  reset()
-  emit('refresh-list')
-}
+  reset();
+  emit("refresh-list");
+};
 
 // 打开弹窗
 const onOpen = async (id: string) => {
   try {
-    loading.value = true
-    applyId.value = id
-    await init(applyId.value)
-    visible.value = true
+    loading.value = true;
+    applyId.value = id;
+    await init(applyId.value);
+    visible.value = true;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const init = async (applyId: string) => {
-  const res = await getCandidateApplyDetail(applyId)
-  dataDetail.value = res.data
-}
+  const res = await getCandidateApplyDetail(applyId);
+  dataDetail.value = res.data;
+};
 
 // 通过审核
 const handleApprove = async () => {
-  if (!examineeNoticeApplyInfo.value?.id) return
+  if (!examineeNoticeApplyInfo.value?.id) return;
   try {
-    submitLoading.value = true
-    await auditExamineeNoticeApply({ id: examineeNoticeApplyInfo.value.id, remark: remark.value, status: 2 })
-    Message.success('审核通过')
-    remark.value = ''
-    init(applyId.value)
+    submitLoading.value = true;
+    await auditExamineeNoticeApply({
+      id: examineeNoticeApplyInfo.value.id,
+      remark: remark.value,
+      status: 2,
+    });
+    Message.success("审核通过");
+    remark.value = "";
+    init(applyId.value);
   } catch (error) {
   } finally {
-    submitLoading.value = false
+    submitLoading.value = false;
   }
-}
+};
 
 // 驳回审核
 const handleReject = async () => {
-  if (!examineeNoticeApplyInfo.value?.id) return
+  if (!examineeNoticeApplyInfo.value?.id) return;
   if (!remark.value.trim()) {
-    Message.error("请输入驳回原因")
-    return
+    Message.error("请输入驳回原因");
+    return;
   }
   try {
-    submitLoading.value = true
-    await auditExamineeNoticeApply({ id: examineeNoticeApplyInfo.value.id, remark: remark.value, status: 3 })
-    Message.success('已驳回')
-    remark.value = ''
-    init(applyId.value)
+    submitLoading.value = true;
+    await auditExamineeNoticeApply({
+      id: examineeNoticeApplyInfo.value.id,
+      remark: remark.value,
+      status: 3,
+    });
+    Message.success("已驳回");
+    remark.value = "";
+    init(applyId.value);
   } catch (error) {
   } finally {
-    submitLoading.value = false
+    submitLoading.value = false;
   }
-}
+};
 
 // 关闭弹窗
 const handleClose = () => {
-  emit('refresh-list')
-}
+  emit("refresh-list");
+};
 
-defineExpose({ onOpen })
+defineExpose({ onOpen });
 </script>
 
 <style scoped lang="scss">
@@ -464,7 +630,7 @@ defineExpose({ onOpen })
     padding: 2px 8px;
     background: rgb(var(--primary-1));
     border-radius: 4px;
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
   }
 }
 </style>
