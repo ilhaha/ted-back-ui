@@ -64,7 +64,7 @@
                   <a-button type="outline" size="small"
                     :status="project.admissionTicketStatus === 1 ? 'danger' : 'primary'"
                     v-hasPermission="['notice:admissionTicket:toggleStatus']"
-                    @click="onToggleProjectStatus(project.projectId, project.admissionTicketStatus === 1 ? 0 : 1)">
+                    @click="onToggleProjectStatus(project.projectId, project.admissionTicketStatus === 1 ? 2 : 1)">
                     {{ project.admissionTicketStatus === 1 ? '关闭下载' : '开启下载' }}
                   </a-button>
                 </td>

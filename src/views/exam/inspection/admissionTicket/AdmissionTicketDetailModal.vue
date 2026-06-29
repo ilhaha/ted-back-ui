@@ -64,7 +64,7 @@
                   <a-button type="outline" size="small"
                     :status="project.admissionTicketStatus === 1 ? 'danger' : 'primary'"
                     v-hasPermission="['notice:admissionTicket:toggleStatus']"
-                    @click="onToggleProjectStatus(project.projectId, project.admissionTicketStatus === 1 ? 0 : 1)">
+                    @click="onToggleProjectStatus(project)">
                     {{ project.admissionTicketStatus === 1 ? '关闭下载' : '开启下载' }}
                   </a-button>
                 </td>
@@ -215,14 +215,15 @@ const onToggleStatus = async (status: number) => {
 }
 
 /** 切换通知项目下载状态 */
-const onToggleProjectStatus = async (projectId: number, status: number) => {
+const onToggleProjectStatus = async (project: any) => {
   if (detailData.value.admissionTicketStatus !== 1) {
     Message.warning('请先开启通知准考证下载')
     return
   }
+  const projectId = project.projectId
+  const status = Number(project.admissionTicketStatus) === 1 ? 2 : 1
   try {
     // 开启下载时，收集该项目下所有考试安排的数据
-    const project = detailData.value.projectExamInfoRespList?.find(p => p.projectId === projectId)
     const scheduleList: { scheduleId: number; examRoomId: number | null; examTime: string }[] = []
 
     if (status === 1 && project) {

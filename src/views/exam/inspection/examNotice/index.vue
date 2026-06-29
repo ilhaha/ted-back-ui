@@ -211,6 +211,7 @@ const columns = ref<TableInstanceColumns[]>([
   },
   { title: "说明", dataIndex: "remark", slotName: "remark" },
   { title: "状态", dataIndex: "status", slotName: "status" },
+  { title: "报名信息确认状态", dataIndex: "isConfirm", slotName: "isConfirm" },
   { title: "创建人", dataIndex: "createUserString", slotName: "createUser" },
   {
     title: "操作",
@@ -245,6 +246,29 @@ const onDelete = (record: ExamNoticeResp) => {
     content: `是否确定删除该条数据？`,
     showModal: true,
   });
+};
+
+const getIsConfirmColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 未确定
+    case 1:
+      return "green"; // 未确定
+
+    default:
+      return "default";
+  }
+};
+
+const getIsConfirmText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "未确认";
+    case 1:
+      return "已确认";
+    default:
+      return "未知状态";
+  }
 };
 
 const getIsTypeTestColor = (isTypeTest: number) => {

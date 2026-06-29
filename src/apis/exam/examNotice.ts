@@ -10,6 +10,7 @@ export interface ExamNoticeResp {
   categoryName: string
   projectCodes: string
   isTypeTest: number
+  isConfirm: number
   examLevel: string
   status: string
   remark: string
@@ -38,6 +39,7 @@ export interface ExamNoticeDetailResp {
   createUserString: string
   updateUserString: string
   isTypeTest: number
+  isConfirm: number
   projectList: Array<{
     projectId: string
     projectCode: string
@@ -141,6 +143,11 @@ export function auditExamNotice(data: { ids: string[]; status: number }) {
   return http.put(`${BASE_URL}/audit`, data)
 }
 
+/** @desc 确认考试通知 */
+export function confirmExamNotice(id: string) {
+  return http.post(`${BASE_URL}/confirm/${id}`)
+}
+
 /** @desc 开启/关闭补报 */
 export function openOrCloseSupplementaryReport(noticeId: string, status: number) {
   return http.post(`${BASE_URL}/openOrClose/${noticeId}/${status}`)
@@ -239,7 +246,7 @@ export function toggleAdmissionTicketStatus(noticeId: string, status: number) {
 
 /** @desc 开启/关闭准考证下载 */
 export function toggleProjectAdmissionTicketStatus(noticeId: string, projectId: number, status: number, scheduleList?: { scheduleId: number; examRoomId: number | null; examTime: string }[]) {
-  return http.post(`${BASE_URL}/admissionTicket/toggle/project`, { noticeId, projectId, status, scheduleList })
+  return http.post(`${BASE_URL}/admissionTicket/toggle/project`, { noticeId, projectId, status: status === 0 ? 2 : status, scheduleList })
 }
 
 
