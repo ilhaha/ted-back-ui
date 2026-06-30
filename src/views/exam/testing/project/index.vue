@@ -263,7 +263,7 @@ const columns = ref<TableInstanceColumns[]>([
     align: "center",
   },
   {
-    title: "理论考试",
+    title: "机考闭卷考试",
     dataIndex: "isTheory",
     slotName: "isTheory",
     align: "center",

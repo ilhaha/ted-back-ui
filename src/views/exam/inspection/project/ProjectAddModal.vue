@@ -159,7 +159,7 @@ const columns: ColumnItem[] = reactive([
   //   rules: [{ required: true, message: '请选择考试等级' }],
   // },
   {
-    label: "理论考试",
+    label: "机考闭卷考试",
     field: "isTheory",
     type: "select",
     span: 24,
@@ -169,7 +169,7 @@ const columns: ColumnItem[] = reactive([
         { label: "有", value: 1 },
         { label: "无", value: 0 },
       ],
-      placeholder: "请选择是否有理论考试",
+      placeholder: "请选择是否有机考闭卷考试",
     },
   },
   {
