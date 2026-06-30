@@ -259,3 +259,25 @@ export function exportAdmissionTicketRecord(query: {
     responseType: 'blob'
   })
 }
+
+export interface RegistrationFormProjectOption {
+  label: string
+  value: string | number
+}
+
+/** @desc 查询考试报名表可导出项目 */
+export function listRegistrationFormProjectOptions(noticeId: string | number) {
+  return http.get<RegistrationFormProjectOption[]>(`${BASE_URL}/registration/form/project/options`, { noticeId })
+}
+
+/** @desc 导出考试报名表 */
+export function exportRegistrationForm(data: {
+  noticeId: string | number
+  projectIds: (string | number)[]
+}) {
+  return http.download(`${BASE_URL}/registration/form/export`, undefined, {
+    method: 'post',
+    data,
+    responseType: 'blob'
+  })
+}

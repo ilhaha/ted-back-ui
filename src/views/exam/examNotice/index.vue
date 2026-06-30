@@ -116,6 +116,22 @@
             >确认考试通知</a-link
           >
           <a-link
+            title="导出试题"
+            @click="onExportReviewQuestionBank(record)"
+            :loading="exportReviewQuestionBankLoadingId === record.id"
+            v-if="canExportReviewQuestionBank(record)"
+            v-permission="['examconnect:reviewQuestionBank:export']"
+            >导出试题</a-link
+          >
+          <a-link
+            title="导出考试报名表"
+            @click="onOpenRegistrationFormExport(record)"
+            :loading="registrationFormLoadingId === record.id"
+            v-permission="['exam:examNotice:exportRegistrationForm']"
+            v-if="record.isConfirm == 1"
+            >导出考试报名表</a-link
+          >
+          <a-link
             v-permission="['exam:examNotice:delete']"
             status="danger"
             :disabled="record.disabled"
@@ -146,6 +162,28 @@
       </a-form>
     </a-modal>
 
+    <a-modal
+      v-model:visible="registrationFormVisible"
+      title="导出考试报名表"
+      :mask-closable="false"
+      :ok-loading="registrationFormExporting"
+      @before-ok="handleRegistrationFormExport"
+      @cancel="onCancelRegistrationFormExport"
+    >
+      <a-form :model="registrationForm" auto-label-width>
+        <a-form-item label="考试项目" required>
+          <a-select
+            v-model="registrationForm.projectIds"
+            :options="registrationFormProjectOptions"
+            :loading="registrationFormProjectLoading"
+            placeholder="请选择考试项目"
+            multiple
+            allow-clear
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
     <ExamNoticeAddModal ref="ExamNoticeAddModalRef" @save-success="search" />
     <ExamNoticeDetailDrawer ref="ExamNoticeDetailDrawerRef" />
   </div>
@@ -163,6 +201,9 @@ import {
   listExamNotice,
   auditExamNotice,
   confirmExamNotice,
+  listRegistrationFormProjectOptions,
+  exportRegistrationForm,
+  type RegistrationFormProjectOption,
 } from "@/apis/exam/examNotice";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -170,6 +211,7 @@ import { useDict } from "@/hooks/app";
 import { isMobile } from "@/utils";
 import has from "@/utils/has";
 import { selectOptions } from "@/apis/exam/category";
+import { exportReviewQuestionBank } from "@/apis/examconnect/reviewQuestionBank";
 
 defineOptions({ name: "ExamNotice" });
 
@@ -413,7 +455,39 @@ const canConfirmExamNotice = (record: ExamNoticeResp) => {
   return Number(record.status) === 4 && Number(record.isConfirm) === 0;
 };
 
+const canExportReviewQuestionBank = (record: ExamNoticeResp) => {
+  return (
+    Number(record.categoryId) === 39 &&
+    Number(record.examLevel) === 1 &&
+    Number(record.isConfirm) === 1 &&
+    Number(record.status) === 4
+  );
+};
+
+const getReviewQuestionBankFileName = (record: ExamNoticeResp) => {
+  const levelName =
+    Number(record.examLevel) === 1
+      ? "一级"
+      : Number(record.examLevel) === 2
+      ? "二级"
+      : "";
+  return `检测考试${levelName}题库.zip`;
+};
+
 const confirmExamNoticeLoadingId = ref<string>();
+const exportReviewQuestionBankLoadingId = ref<string>();
+const registrationFormLoadingId = ref<string>();
+const registrationFormVisible = ref(false);
+const registrationFormProjectLoading = ref(false);
+const registrationFormExporting = ref(false);
+const registrationFormProjectOptions = ref<RegistrationFormProjectOption[]>([]);
+const registrationForm = reactive<{
+  noticeId?: string;
+  projectIds: (string | number)[];
+}>({
+  noticeId: undefined,
+  projectIds: [],
+});
 
 const onConfirmExamNotice = (record: ExamNoticeResp) => {
   if (confirmExamNoticeLoadingId.value) {
@@ -435,6 +509,82 @@ const onConfirmExamNotice = (record: ExamNoticeResp) => {
       }
     },
   });
+};
+
+const onExportReviewQuestionBank = async (record: ExamNoticeResp) => {
+  if (exportReviewQuestionBankLoadingId.value) {
+    return;
+  }
+  exportReviewQuestionBankLoadingId.value = record.id;
+  try {
+    await useDownload(
+      () => exportReviewQuestionBank({ noticeId: record.id }),
+      false,
+      getReviewQuestionBankFileName(record)
+    );
+  } finally {
+    exportReviewQuestionBankLoadingId.value = undefined;
+  }
+};
+
+const onOpenRegistrationFormExport = async (record: ExamNoticeResp) => {
+  registrationForm.noticeId = record.id;
+  registrationForm.projectIds = [];
+  registrationFormProjectOptions.value = [];
+  registrationFormVisible.value = true;
+  registrationFormLoadingId.value = record.id;
+  registrationFormProjectLoading.value = true;
+  try {
+    const res = await listRegistrationFormProjectOptions(record.id);
+    registrationFormProjectOptions.value = res.data || [];
+  } finally {
+    registrationFormProjectLoading.value = false;
+    registrationFormLoadingId.value = undefined;
+  }
+};
+
+const onCancelRegistrationFormExport = () => {
+  registrationFormVisible.value = false;
+  registrationForm.noticeId = undefined;
+  registrationForm.projectIds = [];
+  registrationFormProjectOptions.value = [];
+};
+
+const getRegistrationFormFileName = (record?: ExamNoticeResp) => {
+  const levelName = Number(record?.examLevel) === 1 ? "一级" : Number(record?.examLevel) === 2 ? "二级" : "";
+  return `检测考试${levelName}报名表.xls`;
+};
+
+const handleRegistrationFormExport = async (done: (val: boolean) => void) => {
+  if (!registrationForm.noticeId) {
+    Message.warning("请选择考试通知");
+    done(false);
+    return;
+  }
+  if (registrationForm.projectIds.length === 0) {
+    Message.warning("请选择考试项目");
+    done(false);
+    return;
+  }
+  const record = dataList.value.find((item: ExamNoticeResp) => item.id === registrationForm.noticeId);
+  registrationFormExporting.value = true;
+  try {
+    await useDownload(
+      () => exportRegistrationForm({
+        noticeId: registrationForm.noticeId!,
+        projectIds: registrationForm.projectIds,
+      }),
+      false,
+      getRegistrationFormFileName(record),
+      ".xls",
+    );
+    onCancelRegistrationFormExport();
+    done(true);
+  } catch (error) {
+    done(false);
+  } finally {
+    registrationFormExporting.value = false;
+  }
 };
 
 const ExamNoticeDetailDrawerRef =

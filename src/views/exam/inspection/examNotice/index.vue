@@ -106,6 +106,14 @@
             >审核</a-link
           >
           <a-link
+            title="导出考试报名表"
+            @click="onOpenRegistrationFormExport(record)"
+            :loading="registrationFormLoadingId === record.id"
+            v-permission="['exam:examNotice:exportRegistrationForm']"
+            v-if="record.isConfirm == 1"
+            >导出考试报名表</a-link
+          >
+          <a-link
             v-permission="['exam:examNotice:delete']"
             status="danger"
             :disabled="record.disabled"
@@ -136,6 +144,28 @@
       </a-form>
     </a-modal>
 
+    <a-modal
+      v-model:visible="registrationFormVisible"
+      title="导出考试报名表"
+      :mask-closable="false"
+      :ok-loading="registrationFormExporting"
+      @before-ok="handleRegistrationFormExport"
+      @cancel="onCancelRegistrationFormExport"
+    >
+      <a-form :model="registrationForm" auto-label-width>
+        <a-form-item label="考试项目" required>
+          <a-select
+            v-model="registrationForm.projectIds"
+            :options="registrationFormProjectOptions"
+            :loading="registrationFormProjectLoading"
+            placeholder="请选择考试项目"
+            multiple
+            allow-clear
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
     <ExamNoticeAddModal ref="ExamNoticeAddModalRef" @save-success="search" />
     <ExamNoticeDetailDrawer ref="ExamNoticeDetailDrawerRef" />
   </div>
@@ -152,6 +182,9 @@ import {
   exportExamNotice,
   listExamNotice,
   auditExamNotice,
+  listRegistrationFormProjectOptions,
+  exportRegistrationForm,
+  type RegistrationFormProjectOption,
 } from "@/apis/exam/examNotice";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -225,6 +258,7 @@ const columns = ref<TableInstanceColumns[]>([
       "exam:examNotice:update",
       "exam:examNotice:delete",
       "exam:examNotice:audit",
+      "exam:examNotice:exportRegistrationForm",
     ]),
   },
 ]);
@@ -396,6 +430,77 @@ const handleAudit = async (done: (val: boolean) => void) => {
   auditVisible.value = false;
   done(true);
   search();
+};
+
+const registrationFormLoadingId = ref<string>();
+const registrationFormVisible = ref(false);
+const registrationFormProjectLoading = ref(false);
+const registrationFormExporting = ref(false);
+const registrationFormProjectOptions = ref<RegistrationFormProjectOption[]>([]);
+const registrationForm = reactive<{
+  noticeId?: string;
+  projectIds: (string | number)[];
+}>({
+  noticeId: undefined,
+  projectIds: [],
+});
+
+const onOpenRegistrationFormExport = async (record: ExamNoticeResp) => {
+  registrationForm.noticeId = record.id;
+  registrationForm.projectIds = [];
+  registrationFormProjectOptions.value = [];
+  registrationFormVisible.value = true;
+  registrationFormLoadingId.value = record.id;
+  registrationFormProjectLoading.value = true;
+  try {
+    const res = await listRegistrationFormProjectOptions(record.id);
+    registrationFormProjectOptions.value = res.data || [];
+  } finally {
+    registrationFormProjectLoading.value = false;
+    registrationFormLoadingId.value = undefined;
+  }
+};
+
+const onCancelRegistrationFormExport = () => {
+  registrationFormVisible.value = false;
+  registrationForm.noticeId = undefined;
+  registrationForm.projectIds = [];
+  registrationFormProjectOptions.value = [];
+};
+
+const getRegistrationFormFileName = () => {
+  return "检验考试报名表.xls";
+};
+
+const handleRegistrationFormExport = async (done: (val: boolean) => void) => {
+  if (!registrationForm.noticeId) {
+    Message.warning("请选择考试通知");
+    done(false);
+    return;
+  }
+  if (registrationForm.projectIds.length === 0) {
+    Message.warning("请选择考试项目");
+    done(false);
+    return;
+  }
+  registrationFormExporting.value = true;
+  try {
+    await useDownload(
+      () => exportRegistrationForm({
+        noticeId: registrationForm.noticeId!,
+        projectIds: registrationForm.projectIds,
+      }),
+      false,
+      getRegistrationFormFileName(),
+      ".xls",
+    );
+    onCancelRegistrationFormExport();
+    done(true);
+  } catch (error) {
+    done(false);
+  } finally {
+    registrationFormExporting.value = false;
+  }
 };
 
 const ExamNoticeDetailDrawerRef =

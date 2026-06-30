@@ -10,11 +10,21 @@ import { Message, Notification } from '@arco-design/web-vue'
 interface NavigatorWithMsSaveOrOpenBlob extends Navigator {
   msSaveOrOpenBlob: (blob: Blob, fileName: string) => void
 }
+
+const getDownloadFileName = (contentDisposition: string) => {
+  const utf8FileName = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1]
+  if (utf8FileName) {
+    return decodeURIComponent(utf8FileName)
+  }
+  const fileName = contentDisposition.match(/filename="?([^";]+)"?/i)?.[1]
+  return fileName ? decodeURIComponent(fileName) : ''
+}
+
 export const useDownload = async (api: () => Promise<any>, isNotify = false, tempName = '', fileType = '.xlsx') => {
   try {
     const res = await api()
     if (res.headers['content-disposition']) {
-      tempName = decodeURI(res.headers['content-disposition'].split(';')[1].split('=')[1])
+      tempName = getDownloadFileName(res.headers['content-disposition']) || tempName
     } else {
       tempName = tempName || new Date().getTime() + fileType
     }
