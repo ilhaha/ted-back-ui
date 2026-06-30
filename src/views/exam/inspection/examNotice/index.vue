@@ -49,6 +49,17 @@
           <a-option value="6">已结束</a-option>
         </a-select>
         <a-select
+          v-model="queryForm.isConfirm"
+          placeholder="报名信息确认状态"
+          allow-clear
+          class="search-input ml-2"
+          @change="search"
+          style="margin-left: 8px"
+        >
+          <a-option value="0">未确认</a-option>
+          <a-option value="1">已确认</a-option>
+        </a-select>
+        <a-select
           v-model="queryForm.isTypeTest"
           placeholder="通知类型"
           allow-clear
@@ -89,6 +100,19 @@
           {{ getStatusText(record.status) }}
         </a-tag>
       </template>
+      <template #gradeReleaseStatus="{ record }">
+        <a-tag
+          :color="getGradeReleaseStatusColor(record.gradeReleaseStatus)"
+          bordered
+        >
+          {{ getGradeReleaseStatusText(record.gradeReleaseStatus) }}
+        </a-tag>
+      </template>
+      <template #isConfirm="{ record }">
+        <a-tag :color="getIsConfirmColor(record.isConfirm)" bordered>
+          {{ getIsConfirmText(record.isConfirm) }}
+        </a-tag>
+      </template>
       <template #isTypeTest="{ record }">
         <a-tag :color="getIsTypeTestColor(record.isTypeTest)" bordered>
           {{ getIsTypeTestText(record.isTypeTest) }}
@@ -110,7 +134,11 @@
             @click="onOpenRegistrationFormExport(record)"
             :loading="registrationFormLoadingId === record.id"
             v-permission="['exam:examNotice:exportRegistrationForm']"
-            v-if="record.isConfirm == 1"
+            v-if="
+              record.isConfirm == 1 &&
+              record.gradeReleaseStatus == 0 &&
+              (record.examType == 1 || record.examType == 2)
+            "
             >导出考试报名表</a-link
           >
           <a-link
@@ -202,6 +230,7 @@ const queryForm = reactive<ExamNoticeQuery>({
   status: undefined,
   categoryId: undefined,
   categoryType: 4,
+  isConfirm: undefined,
 });
 
 const {
@@ -245,6 +274,11 @@ const columns = ref<TableInstanceColumns[]>([
   { title: "说明", dataIndex: "remark", slotName: "remark" },
   { title: "状态", dataIndex: "status", slotName: "status" },
   { title: "报名信息确认状态", dataIndex: "isConfirm", slotName: "isConfirm" },
+  {
+    title: "成绩发布状态",
+    dataIndex: "gradeReleaseStatus",
+    slotName: "gradeReleaseStatus",
+  },
   { title: "创建人", dataIndex: "createUserString", slotName: "createUser" },
   {
     title: "操作",
@@ -271,6 +305,7 @@ const reset = () => {
   queryForm.status = undefined;
   queryForm.categoryId = undefined;
   queryForm.categoryType = 4;
+  queryForm.isConfirm = undefined
   search();
 };
 
@@ -280,6 +315,29 @@ const onDelete = (record: ExamNoticeResp) => {
     content: `是否确定删除该条数据？`,
     showModal: true,
   });
+};
+
+const getGradeReleaseStatusColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 未发布
+    case 1:
+      return "green"; // 已发布
+
+    default:
+      return "default";
+  }
+};
+
+const getGradeReleaseStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "未发布";
+    case 1:
+      return "已发布";
+    default:
+      return "未知状态";
+  }
 };
 
 const getIsConfirmColor = (status: number) => {
@@ -486,13 +544,14 @@ const handleRegistrationFormExport = async (done: (val: boolean) => void) => {
   registrationFormExporting.value = true;
   try {
     await useDownload(
-      () => exportRegistrationForm({
-        noticeId: registrationForm.noticeId!,
-        projectIds: registrationForm.projectIds,
-      }),
+      () =>
+        exportRegistrationForm({
+          noticeId: registrationForm.noticeId!,
+          projectIds: registrationForm.projectIds,
+        }),
       false,
       getRegistrationFormFileName(),
-      ".xls",
+      ".xls"
     );
     onCancelRegistrationFormExport();
     done(true);

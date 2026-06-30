@@ -46,6 +46,17 @@
           <a-option value="6">已结束</a-option>
         </a-select>
         <a-select
+          v-model="queryForm.isConfirm"
+          placeholder="报名信息确认状态"
+          allow-clear
+          class="search-input ml-2"
+          @change="search"
+          style="margin-left: 8px"
+        >
+          <a-option value="0">未确认</a-option>
+          <a-option value="1">已确认</a-option>
+        </a-select>
+        <a-select
           v-model="queryForm.examLevel"
           placeholder="考试等级"
           allow-clear
@@ -96,6 +107,14 @@
           {{ getIsConfirmText(record.isConfirm) }}
         </a-tag>
       </template>
+      <template #gradeReleaseStatus="{ record }">
+        <a-tag
+          :color="getGradeReleaseStatusColor(record.gradeReleaseStatus)"
+          bordered
+        >
+          {{ getGradeReleaseStatusText(record.gradeReleaseStatus) }}
+        </a-tag>
+      </template>
       <template #action="{ record }">
         <a-space>
           <!-- <a-link v-permission="['exam:examNotice:update']" title="修改" @click="onUpdate(record)"
@@ -128,7 +147,11 @@
             @click="onOpenRegistrationFormExport(record)"
             :loading="registrationFormLoadingId === record.id"
             v-permission="['exam:examNotice:exportRegistrationForm']"
-            v-if="record.isConfirm == 1"
+            v-if="
+              record.isConfirm == 1 &&
+              record.gradeReleaseStatus == 0 &&
+              (record.examType == 1 || record.examType == 2)
+            "
             >导出考试报名表</a-link
           >
           <a-link
@@ -222,6 +245,7 @@ const queryForm = reactive<ExamNoticeQuery>({
   status: undefined,
   categoryId: undefined,
   categoryType: 3,
+  isConfirm: undefined,
 });
 
 const {
@@ -261,6 +285,11 @@ const columns = ref<TableInstanceColumns[]>([
   { title: "说明", dataIndex: "remark", slotName: "remark" },
   { title: "状态", dataIndex: "status", slotName: "status" },
   { title: "报名信息确认状态", dataIndex: "isConfirm", slotName: "isConfirm" },
+  {
+    title: "成绩发布状态",
+    dataIndex: "gradeReleaseStatus",
+    slotName: "gradeReleaseStatus",
+  },
   { title: "创建人", dataIndex: "createUserString", slotName: "createUser" },
   {
     title: "操作",
@@ -286,6 +315,7 @@ const reset = () => {
   queryForm.status = undefined;
   queryForm.categoryId = undefined;
   queryForm.categoryType = 3;
+  queryForm.isConfirm = undefined;
   search();
 };
 
@@ -387,6 +417,30 @@ const getStatusText = (status: number) => {
       return "未知状态";
   }
 };
+
+const getGradeReleaseStatusColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 未发布
+    case 1:
+      return "green"; // 已发布
+
+    default:
+      return "default";
+  }
+};
+
+const getGradeReleaseStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "未发布";
+    case 1:
+      return "已发布";
+    default:
+      return "未知状态";
+  }
+};
+
 const categorySelect = ref([]);
 const initProjectSelect = async () => {
   const res = await selectOptions([3]);
@@ -457,7 +511,7 @@ const canConfirmExamNotice = (record: ExamNoticeResp) => {
 
 const canExportReviewQuestionBank = (record: ExamNoticeResp) => {
   return (
-    Number(record.categoryId) === 39 &&
+    Number(record.examType) === 1 &&
     Number(record.examLevel) === 1 &&
     Number(record.isConfirm) === 1 &&
     Number(record.status) === 4
@@ -551,7 +605,12 @@ const onCancelRegistrationFormExport = () => {
 };
 
 const getRegistrationFormFileName = (record?: ExamNoticeResp) => {
-  const levelName = Number(record?.examLevel) === 1 ? "一级" : Number(record?.examLevel) === 2 ? "二级" : "";
+  const levelName =
+    Number(record?.examLevel) === 1
+      ? "一级"
+      : Number(record?.examLevel) === 2
+      ? "二级"
+      : "";
   return `检测考试${levelName}报名表.xls`;
 };
 
@@ -566,17 +625,20 @@ const handleRegistrationFormExport = async (done: (val: boolean) => void) => {
     done(false);
     return;
   }
-  const record = dataList.value.find((item: ExamNoticeResp) => item.id === registrationForm.noticeId);
+  const record = dataList.value.find(
+    (item: ExamNoticeResp) => item.id === registrationForm.noticeId
+  );
   registrationFormExporting.value = true;
   try {
     await useDownload(
-      () => exportRegistrationForm({
-        noticeId: registrationForm.noticeId!,
-        projectIds: registrationForm.projectIds,
-      }),
+      () =>
+        exportRegistrationForm({
+          noticeId: registrationForm.noticeId!,
+          projectIds: registrationForm.projectIds,
+        }),
       false,
       getRegistrationFormFileName(record),
-      ".xls",
+      ".xls"
     );
     onCancelRegistrationFormExport();
     done(true);

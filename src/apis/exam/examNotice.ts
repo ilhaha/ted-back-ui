@@ -22,6 +22,7 @@ export interface ExamNoticeResp {
   createUserString: string
   updateUserString: string
   disabled: boolean
+  examType: number
 }
 export interface ExamNoticeDetailResp {
   id: string
