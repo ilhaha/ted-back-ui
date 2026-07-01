@@ -139,7 +139,12 @@ export function parseGradeImport(noticeId: string, data: FormData) {
 
 /** @desc 确认导入成绩 */
 export function confirmGradeImport(noticeId: string, validList: GradeImportScoreItemResp[]) {
-  return http.post<GradeImportParseResp>(`${BASE_URL}/grade/import/confirm/${noticeId}`, { validList })
+  return http.post<boolean>(`${BASE_URL}/grade/import/confirm/${noticeId}`, { validList })
+}
+
+/** @desc 发布成绩 */
+export function publishGrade(noticeId: string) {
+  return http.post<boolean>(`${BASE_URL}/grade/publish/${noticeId}`)
 }
 
 /** @desc 获取网络课堂通知列表 */

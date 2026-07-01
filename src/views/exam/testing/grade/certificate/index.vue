@@ -85,6 +85,13 @@
             @click="onDetail(record)"
             >详情</a-link
           >
+          <a-link
+            v-if="record.gradeReleaseStatus === 0"
+            v-permission="['notice:grade:publish']"
+            title="发布成绩"
+            @click="onPublishGrade(record)"
+            >发布成绩</a-link
+          >
         </a-space>
       </template>
     </GiTable>
@@ -94,7 +101,7 @@
 
 <script setup lang="ts">
 import GradeDetailModal from "../GradeDetailModal.vue";
-import { Message } from "@arco-design/web-vue";
+import { Message, Modal } from "@arco-design/web-vue";
 import {
   type ExamNoticeResp,
   type ExamNoticeQuery,
@@ -102,6 +109,7 @@ import {
   exportExamNotice,
   gradePage,
   auditExamNotice,
+  publishGrade,
 } from "@/apis/exam/examNotice";
 import type { TableInstanceColumns } from "@/components/GiTable/type";
 import { useDownload, useTable } from "@/hooks";
@@ -116,6 +124,18 @@ const GradeDetailModalRef = ref<InstanceType<typeof GradeDetailModal>>();
 // 详情
 const onDetail = (record: ExamNoticeResp) => {
   GradeDetailModalRef.value?.onOpen(record);
+};
+
+const onPublishGrade = (record: ExamNoticeResp) => {
+  Modal.confirm({
+    title: "发布成绩",
+    content: `确认发布的成绩吗？发布后不允许再导入成绩。`,
+    async onOk() {
+      await publishGrade(record.id);
+      Message.success("发布成功");
+      search();
+    },
+  });
 };
 
 const queryForm = reactive<ExamNoticeQuery>({
@@ -173,10 +193,10 @@ const columns = ref<TableInstanceColumns[]>([
     title: "操作",
     dataIndex: "action",
     slotName: "action",
-    width: 160,
+    width: 200,
     align: "center",
     fixed: !isMobile() ? "right" : undefined,
-    show: has.hasPermOr(["notice:grade:detail"]),
+    show: has.hasPermOr(["notice:grade:detail", "notice:grade:publish"]),
   },
 ]);
 

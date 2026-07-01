@@ -67,7 +67,7 @@
           v-permission="['notice:grade:import']"
         >
           <template #upload-button>
-            <a-button type="primary" :loading="importLoading" :disabled="isGradePublished">
+            <a-button :loading="importLoading" :disabled="isGradePublished">
               <template #icon><icon-upload /></template>
               导入成绩
             </a-button>
@@ -517,16 +517,11 @@ const confirmImport = async () => {
   if (!currentRecord.value || !importResult.value?.validList?.length) return;
   confirmLoading.value = true;
   try {
-    const { data } = await confirmGradeImport(
+    await confirmGradeImport(
       currentRecord.value.id,
       importResult.value.validList
     );
-    importResult.value = data;
-    Message.success(
-      `导入成功 ${data.validList?.length || 0} 条，失败 ${
-        data.failList?.length || 0
-      } 条`
-    );
+    Message.success("已导入")
     await loadDetail(currentRecord.value);
     importVisible.value = false;
   } finally {
