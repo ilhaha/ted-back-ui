@@ -69,6 +69,49 @@ export function admissionTicketPage(query: ExamNoticePageQuery) {
   return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/admissionTicket/page`, query)
 }
 
+/** @desc 获取成绩管理通知列表 */
+export function gradePage(query: ExamNoticePageQuery) {
+  return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/grade/page`, query)
+}
+
+export interface GradeProjectAssessmentResp {
+  projectId: string | number
+  projectCode: string
+  assessmentList: Array<{
+    assessmentKey: string
+    assessmentName: string
+  }>
+}
+
+/** @desc 获取成绩详情表头 */
+export function getGradeDetailHeader(noticeId: string) {
+  return http.get<GradeProjectAssessmentResp[]>(`${BASE_URL}/grade/header/${noticeId}`)
+}
+
+export interface GradeDetailDataResp {
+  candidateId: string | number
+  sort: string | number
+  idCard: string
+  name: string
+  scores: Record<string, Record<string, any>>
+}
+
+/** @desc 获取成绩详情数据 */
+export function getGradeDetailData(noticeId: string, query: { page: number; size: number; name?: string; idCard?: string }) {
+  return http.get<PageRes<GradeDetailDataResp[]>>(`${BASE_URL}/grade/detail/${noticeId}`, query)
+}
+
+export interface GradeProjectPassCountResp {
+  projectId: string | number
+  projectCode: string
+  passCount: number
+}
+
+/** @desc 获取成绩每个项目及格人数 */
+export function getGradeProjectPassCount(noticeId: string) {
+  return http.get<GradeProjectPassCountResp[]>(`${BASE_URL}/grade/passCount/${noticeId}`)
+}
+
 /** @desc 获取网络课堂通知列表 */
 export function onlineCourseNoticeAdminPage(query: ExamNoticePageQuery) {
   return http.get<PageRes<ExamNoticeResp[]>>(`${BASE_URL}/onlineCourse/admin/page`, query)

@@ -400,7 +400,7 @@ const getStatusColor = (status: number) => {
     case 5:
       return "orange"; // 已开考
     case 6:
-      return "default"; // 已结束
+      return "gray"; // 已结束
     default:
       return "default";
   }

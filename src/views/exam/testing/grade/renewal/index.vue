@@ -1,7 +1,283 @@
 <template>
   <div class="gi_table_page">
-    <div>成绩管理-换证</div>
+    <GiTable
+      title="成绩管理 - 换证"
+      row-key="id"
+      :data="dataList"
+      :columns="columns"
+      :loading="loading"
+      :scroll="{ x: '100%', y: '100%', minWidth: 1000 }"
+      :pagination="pagination"
+      :disabled-tools="['size']"
+      :disabled-column-keys="['name']"
+      @refresh="search"
+    >
+      <template #toolbar-left>
+        <a-input-search
+          v-model="queryForm.title"
+          placeholder="请输入通知内容"
+          allow-clear
+          @search="search"
+        />
+        <a-select
+          v-model="queryForm.status"
+          placeholder="通知状态"
+          allow-clear
+          class="search-input ml-2"
+          @change="search"
+          style="margin-left: 8px"
+        >
+          <a-option value="4">报名已结束</a-option>
+          <a-option value="5">已开考</a-option>
+          <a-option value="6">已结束</a-option>
+        </a-select>
+        <a-select
+          v-model="queryForm.gradeReleaseStatus"
+          placeholder="成绩发布状态"
+          allow-clear
+          class="search-input ml-2"
+          @change="search"
+          style="margin-left: 8px"
+        >
+          <a-option value="0">未发布</a-option>
+          <a-option value="1">已发布</a-option>
+        </a-select>
+        <a-select
+          v-model="queryForm.examLevel"
+          placeholder="考试等级"
+          allow-clear
+          class="search-input ml-2"
+          @change="search"
+          style="margin-left: 8px"
+        >
+          <a-option value="1">Ⅰ级</a-option>
+          <a-option value="2">Ⅱ级</a-option>
+        </a-select>
+
+        <a-button @click="reset">
+          <template #icon><icon-refresh /></template>
+          <template #default>重置</template>
+        </a-button>
+      </template>
+      <template #status="{ record }">
+        <a-tag :color="getStatusColor(record.status)" bordered>
+          {{ getStatusText(record.status) }}
+        </a-tag>
+      </template>
+      <template #examLevel="{ record }">
+        <a-tag :color="getExamLevelColor(record.examLevel)" bordered>
+          {{ getExamLevelText(record.examLevel) }}
+        </a-tag>
+      </template>
+      <template #gradeReleaseStatus="{ record }">
+        <a-tag
+          :color="getGradeReleaseStatusColor(record.gradeReleaseStatus)"
+          bordered
+        >
+          {{ getGradeReleaseStatusText(record.gradeReleaseStatus) }}
+        </a-tag>
+      </template>
+      <template #action="{ record }">
+        <a-space>
+          <a-link
+            v-permission="['notice:grade:detail']"
+            title="详情"
+            @click="onDetail(record)"
+            >详情</a-link
+          >
+        </a-space>
+      </template>
+    </GiTable>
+    <GradeDetailModal ref="GradeDetailModalRef" />
   </div>
 </template>
+
 <script setup lang="ts">
+import GradeDetailModal from "../GradeDetailModal.vue";
+import { Message } from "@arco-design/web-vue";
+import {
+  type ExamNoticeResp,
+  type ExamNoticeQuery,
+  deleteExamNotice,
+  exportExamNotice,
+  gradePage,
+  auditExamNotice,
+} from "@/apis/exam/examNotice";
+import type { TableInstanceColumns } from "@/components/GiTable/type";
+import { useDownload, useTable } from "@/hooks";
+import { useDict } from "@/hooks/app";
+import { isMobile } from "@/utils";
+import has from "@/utils/has";
+
+defineOptions({ name: "ExamNotice" });
+
+const GradeDetailModalRef = ref<InstanceType<typeof GradeDetailModal>>();
+
+// 详情
+const onDetail = (record: ExamNoticeResp) => {
+  GradeDetailModalRef.value?.onOpen(record);
+};
+
+const queryForm = reactive<ExamNoticeQuery>({
+  title: undefined,
+  examLevel: undefined,
+  status: undefined,
+  gradeReleaseStatus: undefined,
+  examType: 2,
+  categoryType: 3,
+});
+
+const {
+  tableData: dataList,
+  loading,
+  pagination,
+  search,
+  handleDelete,
+  selectedKeys,
+  select,
+  selectAll,
+} = useTable((page) => gradePage({ ...queryForm, ...page }), {
+  immediate: true,
+});
+
+const rowSelection = reactive({
+  type: "checkbox",
+  showCheckedAll: true,
+  onlyCurrent: false,
+  selectedRowKeys: selectedKeys,
+  onChange: (keys: string[]) => {
+    selectedKeys.value = keys;
+  },
+});
+
+const columns = ref<TableInstanceColumns[]>([
+  // { title: '主键ID', dataIndex: 'id', slotName: 'id' },
+  { title: "通知内容", dataIndex: "title", slotName: "title" },
+  {
+    title: "报名截止时间",
+    dataIndex: "applyDeadline",
+    slotName: "applyDeadline",
+  },
+  { title: "所属类别", dataIndex: "categoryName", slotName: "categoryName" },
+  { title: "考试项目", dataIndex: "projectCodes", slotName: "projectCodes" },
+  { title: "考试等级", dataIndex: "examLevel", slotName: "examLevel" },
+  { title: "说明", dataIndex: "remark", slotName: "remark" },
+  { title: "状态", dataIndex: "status", slotName: "status" },
+  {
+    title: "成绩发布状态",
+    dataIndex: "gradeReleaseStatus",
+    slotName: "gradeReleaseStatus",
+  },
+  { title: "创建人", dataIndex: "createUserString", slotName: "createUser" },
+  {
+    title: "操作",
+    dataIndex: "action",
+    slotName: "action",
+    width: 160,
+    align: "center",
+    fixed: !isMobile() ? "right" : undefined,
+    show: has.hasPermOr(["notice:grade:detail"]),
+  },
+]);
+
+// 重置
+const reset = () => {
+  queryForm.title = undefined;
+  queryForm.examLevel = undefined;
+  queryForm.status = undefined;
+  queryForm.gradeReleaseStatus = undefined;
+  search();
+};
+
+const getExamLevelColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "green"; // 无
+    case 1:
+      return "blue"; // I级
+    case 2:
+      return "orange"; // II级
+    default:
+      return "default";
+  }
+};
+
+const getExamLevelText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "无";
+    case 1:
+      return "I级";
+    case 2:
+      return "Ⅱ级";
+    default:
+      return "未知等级";
+  }
+};
+
+const getStatusColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue"; // 待审核
+    case 1:
+      return "green"; // 报名中
+    case 2:
+      return "red"; // 审核未通过
+    case 3:
+      return "blue"; // 补报中
+    case 4:
+      return "red"; // 报名结束
+    case 5:
+      return "orange"; // 已开考
+    case 6:
+      return "gray"; // 已结束
+    default:
+      return "default";
+  }
+};
+
+const getGradeReleaseStatusColor = (status: number) => {
+  switch (status) {
+    case 0:
+      return "blue";
+    case 1:
+      return "green";
+    default:
+      return "default";
+  }
+};
+
+const getGradeReleaseStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "未发布";
+    case 1:
+      return "已发布";
+    default:
+      return "未知状态";
+  }
+};
+
+const getStatusText = (status: number) => {
+  switch (status) {
+    case 0:
+      return "待审";
+    case 1:
+      return "报名中";
+    case 2:
+      return "已驳回";
+    case 3:
+      return "补报中";
+    case 4:
+      return "报名已结束";
+    case 5:
+      return "考试中";
+    case 6:
+      return "已结束";
+    default:
+      return "未知状态";
+  }
+};
 </script>
+
+<style scoped lang="scss"></style>
