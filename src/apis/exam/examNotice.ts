@@ -23,6 +23,7 @@ export interface ExamNoticeResp {
   updateUserString: string
   disabled: boolean
   examType: number
+  gradeReleaseStatus: number
 }
 export interface ExamNoticeDetailResp {
   id: string
@@ -110,6 +111,35 @@ export interface GradeProjectPassCountResp {
 /** @desc 获取成绩每个项目及格人数 */
 export function getGradeProjectPassCount(noticeId: string) {
   return http.get<GradeProjectPassCountResp[]>(`${BASE_URL}/grade/passCount/${noticeId}`)
+}
+
+export interface GradeImportScoreItemResp {
+  rowNum?: number
+  idCard?: string
+  name?: string
+  examNumber?: string
+  projectId?: string | number
+  projectCode?: string
+  assessmentName?: string
+  practicalType?: number
+  scoreId?: string | number
+  score?: number
+  reason?: string
+}
+
+export interface GradeImportParseResp {
+  validList: GradeImportScoreItemResp[]
+  failList: GradeImportScoreItemResp[]
+}
+
+/** @desc 解析成绩导入Excel */
+export function parseGradeImport(noticeId: string, data: FormData) {
+  return http.post<GradeImportParseResp>(`${BASE_URL}/grade/import/parse/${noticeId}`, data)
+}
+
+/** @desc 确认导入成绩 */
+export function confirmGradeImport(noticeId: string, validList: GradeImportScoreItemResp[]) {
+  return http.post<GradeImportParseResp>(`${BASE_URL}/grade/import/confirm/${noticeId}`, { validList })
 }
 
 /** @desc 获取网络课堂通知列表 */
