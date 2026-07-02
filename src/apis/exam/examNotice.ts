@@ -224,7 +224,9 @@ export function auditExamNotice(data: { ids: string[]; status: number }) {
 
 /** @desc 确认考试通知 */
 export function confirmExamNotice(id: string) {
-  return http.post(`${BASE_URL}/confirm/${id}`)
+  return http.post(`${BASE_URL}/confirm/${id}`, {
+    timeout: 300000
+  })
 }
 
 /** @desc 开启/关闭补报 */

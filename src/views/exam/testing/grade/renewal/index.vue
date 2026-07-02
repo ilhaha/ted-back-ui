@@ -86,7 +86,7 @@
             >详情</a-link
           >
           <a-link
-            v-if="record.gradeReleaseStatus === 0"
+            v-if="record.gradeReleaseStatus === 0 && record.status == 6"
             v-permission="['notice:grade:publish']"
             title="发布成绩"
             @click="onPublishGrade(record)"
